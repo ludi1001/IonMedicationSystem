@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="{{STATIC_URL}}style.css" rel="stylesheet" type="text/css">
+  </head> 
+  <body>
+    <h1>Add Patient</h1>
+    <form method="post" action="http://99.20.89.199:8000/">
+      {% csrf_token %}
+        <input type="text" name="name" placeholder="Name" required>
+        <input type="submit" value="Add Patient">
+    </form>
+    <br>
+    <hr>
+    {% for patient in Patients %}
+      <h2> {{ patient.name }} </h2>
+      <p>Creation Time: {{ patient.creationTime }}</p>
+      <p>Medications:</p>
+      <ul>
+      {% for medication in patient.medications %}
+         <li> {{ medication.name }}
+         {% if medication.dispensed %}
+          is dispensed
+         <ul>
+            <li> {{ medication.schedule }}
+            <li> {{ medication.quantity }}
+         </ul>
+         {% endif %}
+      {% endfor %}   
+      </ul>
+      <p>DispenserID: {{ patient.dispenserID }}</p>
+    {% endfor %}
+  </body>
+</html>
