@@ -2,7 +2,7 @@
 <html>
   <head>
     <link href="{{STATIC_URL}}style.css" rel="stylesheet" type="text/css">
-  </head> 
+  </head>
   <body>
     <h1>Add Patient</h1>
     <form method="post" action="../">
@@ -29,7 +29,7 @@
             <li> {{ medication.quantity }}
          </ul>
          {% endif %}
-      {% endfor %}   
+      {% endfor %}
       </ul>
       <p>DispenserID: {{ patient.dispenserID }}</p>
       <form method="get" action="../update">
@@ -39,7 +39,7 @@
         <input type="hidden" name="dispenserID" value="{{ patient.dispenserID }}">
         <input type="submit" name="" value="update">
       </form>
-      
+
       <form method="post" action="../" onSubmit="return confirm('Do you really want to delete this patient?');">
         {% csrf_token %}
         <input type="hidden" name="requestType" value="deletePatient">
@@ -48,4 +48,4 @@
       </form>
     {% endfor %}
   </body>
-</html> 
+</html>

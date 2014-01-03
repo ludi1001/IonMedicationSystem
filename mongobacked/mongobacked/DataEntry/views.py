@@ -11,10 +11,10 @@ def index(request):
          newPatient = patient(name=name)
          newPatient.creationTime = datetime.datetime.now()
          newPatient.save()
-      
+
       if request.POST['requestType'] == 'deletePatient':
          id = eval("request." + request.method + "['id']")
-         patient.objects(id=id)[0].delete() 
+         patient.objects(id=id)[0].delete()
          # don't know if we actually want to give people the ability to delete medical records...
 
    return render_to_response('index.html', {'Patients': patient.objects},

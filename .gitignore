@@ -1,3 +1,5 @@
 #Compiled source files
 *.pyc
-
+.dropbox
+desktop.ini
+.gitignore
