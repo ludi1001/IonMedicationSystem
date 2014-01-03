@@ -8,4 +8,5 @@ class patient(Document):
     medications = DictField()
     dispenserID = StringField(max_length=100)
     creationTime = DateTimeField(required=True)
+    editedTime = DateTimeField()
     dispensed = BooleanField()

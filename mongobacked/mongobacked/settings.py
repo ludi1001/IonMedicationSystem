@@ -30,7 +30,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'DataEntry',
+    'mongobacked.DataEntry',
 )
 
 # Quick-start development settings - unsuitable for production
