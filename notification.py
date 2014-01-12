@@ -5,7 +5,7 @@ class NotificationSystem(object):
     def __init__(self):
         self._notification_queue = []
         self._notification_map = {"*":[]}
-    
+        
     def register(self, processor, *notification_types):
         """Register processor as a handler for notifications of any type listed in notification_types"""
         for notification_type in notification_types:
