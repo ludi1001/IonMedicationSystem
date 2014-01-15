@@ -1,0 +1,73 @@
+---PROJECT GOALS
+
+keep track of inventory - medication inventory page, also use for dispenser inventory
+show medications to be distributed in a given time period - status page
+medical adherence - daily notification about medications missed, and info on patient page
+
+---WEB APP LIST
+
+ADMIN: Add caretakers/dispensers
+   Caretaker data - name/access level (1 - viewer, 2 - caretaker, 3 - admin), notes
+   Dispenser data - notes/location, capacity
+   System-wide notifications
+   Database-linking info
+CARETAKER PORTAL:
+   # need mobile handling
+   PATIENT INFO 
+      - viewers can view some patients' info including demographics, past/current prescriptions, medication adherence and scheduled distributions
+      - caretakers can view patient info and also edit certain information on patients they're responsible for (notes, update medications)
+         notes/comments
+         medications 
+            - self-administered or caretaker administered
+            - time period to take/frequency (1 - morning, 2 - midday, 3 - afternoon, 4 - evening)
+               each with own notification time and range of valid times to take medication
+         primary dispenser
+   NOTIFICATIONS/PERSONAL
+      - caretakers can access their own info/notifications
+         daily notification about medications missed
+         prescriptions need to be refilled, drugs expire
+         daily notification about medications to administer that day
+   TOOLS
+      - medication info lookup?
+      - dispenser overview
+      - search, data aggregation reports etc. jqplots?
+      
+DISPENSER MANAGEMENT (not exactly a web application, just a sidenote):
+   - Scan info (lot, rxuid from ndcfrom barcode/RFID tag), create barcode/RFID for compartment
+   - Load into dispenser, scans compartment identifier/RFID tag
+   - Database updates w/ info and dispenserID and container ID, container is placed in open slot
+   - Can empty/recall specific containers w/ manual typing of info from dispenser screen (and admin access?)
+   
+PATIENT PORTAL:
+   # need mobile handling
+   - patients get access to their own info/notifications
+      new prescription entered
+      prescription expired/renewed
+      medication missed
+      
+      patient info includes
+         - medication list and dispenser information/inventory
+
+---OTHER CONCERNS
+
+SECURITY:
+   data encryption
+   
+INTERFACE:
+   Simple, clean, intuitive (cross-cultural/not language based)
+
+---NOTES
+ask dad about nursing home treatment
+talk to nursing home about procedures and paperwork with medication dispensing
+infrasctructure
+
+(band, fidelity/battery)
+(device, fidelity/robustness, notify database when patient takes medication, screen for med info/selection of patient for caretakers, feedback like 'wrong dispenser', water)
+(infrastructure, wireless, data backups/restoration)
+(notification cron jobs)
+   - take medications (morning, midday, afternoon, evening)
+   - expirations
+   - refills
+   - dispenser maintainence
+   
+(easy way to set up database, .exe)
