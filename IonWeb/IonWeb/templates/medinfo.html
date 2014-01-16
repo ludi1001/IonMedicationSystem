@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="{{STATIC_URL}}style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+   <h1>Medication Info</h1>
+   <form method="get" action="">
+     <input type="hidden" name="requestType" value="getNameSuggestions">
+     <input type="text" name="medName" placeholder="Name of Medication" required>
+     <input type="submit" value="Find medications">
+   </form>
+   {% if nameSuggestions %}
+      <h3>Results for {{ nameSuggestions.suggestionGroup.name }}</h3>
+      <ul>
+      {% for suggestion in nameSuggestions.suggestionGroup.suggestionList.suggestion %}       
+         {% with '?requestType=getMedSuggestions&medName='|add:suggestion as url %}
+           <li> <a href = {{url}}> {{ suggestion }} </a>
+         {% endwith %}
+      {% endfor %}
+      </ul>
+      
+   {% elif medSuggestions %}
+      <h3>Results for {{ medSuggestions.drugGroup.name }}</h3>
+      <ul>
+      {% for group in medSuggestions.drugGroup.conceptGroup %} 
+          {% for property in group.conceptProperties %}
+            {% with '?requestType=getMedicationInfo&medID='|add:property.rxcui as url %}
+              <li> <a href = {{url}}> {{ property.name }} </a>
+            {% endwith %}
+         {% endfor %}
+         
+      {% endfor %}
+      </ul>
+      
+   {% elif names %}
+   <h3>Results for {{ names.propConceptGroup.propConcept.0.propValue }} (RxNorm attributes)</h3>
+      <pre>{{ attributes }}</pre>
+
+      NDC: {{ ndc }}
+   {% endif %}
+  </body>
+</html>

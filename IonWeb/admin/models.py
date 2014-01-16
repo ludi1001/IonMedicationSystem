@@ -1,3 +1,4 @@
-from django.db import models
+from mongoengine import *
+from IonWeb.settings import DBNAME
 
-# Create your models here.
+connect(DBNAME)

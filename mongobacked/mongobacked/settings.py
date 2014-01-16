@@ -13,14 +13,13 @@ import os
 from mongoengine import connect
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-APP_DIR = os.path.dirname( globals()['__file__'] )
 
 DBNAME = 'ionsystem'
 
 MONGODB = connect(DBNAME)
 
 TEMPLATE_DIRS = (
-    os.path.join( APP_DIR, 'templates' )
+    os.path.join( BASE_DIR, 'templates' )
 )
 
 INSTALLED_APPS = (

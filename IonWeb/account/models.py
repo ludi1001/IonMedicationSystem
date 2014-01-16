@@ -2,6 +2,8 @@ from mongoengine import *
 from IonWeb.settings import DBNAME
 import re
 
+connect(DBNAME)
+
 class HashField(StringField):
     """Represents SHA-2 hash output"""
     

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="{{STATIC_URL}}style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+    <h1>Add Patient</h1>
+    <form method="post" action="../">
+      {% csrf_token %}
+      <input type="hidden" name="requestType" value="newPatient">
+      <input type="text" name="name" placeholder="Name" required>
+
+      <input type="submit" value="Add Patient">
+    </form>
+    <br>
+    <hr>
+    {% for patient in Patients %}
+      <h2> {{ patient.name }} </h2>
+      <p>Creation Time: {{ patient.creationTime }}</p>
+      <p>Last Edited: {{ patient.editedTime }} </p>
+      <p>Medications:</p>
+      <ul>
+      {% for medication in patient.medications %}
+         <li> {{ medication.name }}
+         {% if medication.dispensed %}
+          is dispensed
+         <ul>
+            <li> {{ medication.schedule }}
+            <li> {{ medication.quantity }}
+         </ul>
+         {% endif %}
+      {% endfor %}
+      </ul>
+      <p>DispenserID: {{ patient.dispenserID }}</p>
+      <form method="get" action="../update">
+        <input type="hidden" name="id" value="{{ patient.id }}">
+        <input type="hidden" name="name" value="{{ patient.name }}">
+        <input type="hidden" name="medications" value="{{ patient.medications }}">
+        <input type="hidden" name="dispenserID" value="{{ patient.dispenserID }}">
+        <input type="submit" name="" value="update">
+      </form>
+
+      <form method="post" action="../" onSubmit="return confirm('Do you really want to delete this patient?');">
+        {% csrf_token %}
+        <input type="hidden" name="requestType" value="deletePatient">
+        <input type="hidden" name="id" value="{{patient.id}}">
+        <input type="submit" value="delete">
+      </form>
+    {% endfor %}
+  </body>
+</html>
