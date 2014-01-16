@@ -15,7 +15,7 @@ def index(request):
          newPatient.save()
 
       if request.POST['requestType'] == 'deletePatient':
-         id = eval("request." + request.method + "['id']")
+         id = request.POST['id'] #TEST THIS eval("request." + request.method + "['id']")
          patient.objects(id=id)[0].delete()
          # don't know if we actually want to give people the ability to delete medical records...
 

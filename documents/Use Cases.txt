@@ -1,0 +1,9 @@
+Dispensing
+1. User scans RFID tag
+2. Dispenser fetches medication data. Gives feedback if not right time, not right machine, etc.
+3. Fetch compartment locations.
+4. Look at location 1. Start motor.
+5. When pill detected, kill motor.
+6. Weigh pills.
+7. Repeat step 4 until we have required number of pills.
+8. Dispense pills if weight correct. 
