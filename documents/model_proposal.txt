@@ -1,18 +1,12 @@
-Drug: {
-    id,
-    NDC,
-    dosage
-}
-
-Dispenser: {
-    id,
-    drugs: [DrugCompartment: {
-        Drug id,
-        location (in dispenser),
-        quantity,
-        expiration date,
-        lot number
-    }],
+Compartments: [{
+    compartment ID,
+    (implicit status: empty, open, cleared
+    rxuid,
+    quantity,
+    expiration date,
+    lot number
+}],
+    
     access history: [DispenserAccess: {
         accessor: id (either caretaker id or patient id),
         on behalf of: id (caretaker or patient, can be same as accessor),
@@ -24,7 +18,8 @@ Dispenser: {
             expiration date, //duplication because drugcompartment entries are free to change over time
             lot number
         }]
-    }]
+    }],
+    location
 }
 
 Patient: {
@@ -32,6 +27,7 @@ Patient: {
     name,
     dispenser id,
     caretaker id(s?),
+    MAC address (body pack)
     able to fetch medication?,
     medications: [MedicationRegimenEntry: {
         medication: Drug id,
@@ -52,14 +48,16 @@ Patient: {
         }],
         result: missed | dispensed (include DispenserAccess id)
     }]
+    notes: {}
 }
 
 Caretaker: {
-    id,
-    name
+    Name
 }
 
-Bodypack: {
-    person id,
-    ip address
+User: {
+   id,
+   username,
+   password (SHA-2 hashed),
+   user type (enum) (patient, caretaker, admin, dispenser)
 }
