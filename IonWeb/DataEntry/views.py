@@ -6,7 +6,7 @@ import urllib2
 import json
 
 # a lot of this was taken from a sample 'blongo' project
-def index(request):
+def patientinfo(request):
    if request.method == 'POST':
       if request.POST['requestType'] == 'newPatient':
          name = request.POST['name']
@@ -15,11 +15,11 @@ def index(request):
          newPatient.save()
 
       if request.POST['requestType'] == 'deletePatient':
-         id = eval("request." + request.method + "['id']")
+         id = request.POST['id']
          patient.objects(id=id)[0].delete()
          # don't know if we actually want to give people the ability to delete medical records...
 
-   return render_to_response('index.html', {'Patients': patient.objects},
+   return render_to_response('patientinfo.html', {'Patients': patient.objects},
                               context_instance=RequestContext(request))
 
 def update(request):
