@@ -1,7 +1,4 @@
 from mongoengine import *
-from IonWeb.settings import DBNAME
-
-connect(DBNAME)
 
 class patient(Document):
    name = StringField(max_length=120, required=True)

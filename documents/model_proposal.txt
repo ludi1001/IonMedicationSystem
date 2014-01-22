@@ -1,62 +1,47 @@
 Compartments: [{
-    compartment ID,
+    (ID)
     (implicit status: empty, open, cleared
     rxuid,
     quantity,
     expiration date,
-    lot number
+    lot number,
+    dispenserID
 }],
     
-    access history: [DispenserAccess: {
-        accessor: id (either caretaker id or patient id),
-        on behalf of: id (caretaker or patient, can be same as accessor),
-        time,
-        drugs dispensed: [DispenserAccessEntry: {
-            id,
-            Drug id,
-            quantity,
-            expiration date, //duplication because drugcompartment entries are free to change over time
-            lot number
-        }]
-    }],
+Dispenser:[{  
+    (ID)
     location
-}
+}]
 
 Patient: {
-    id,
-    name,
-    dispenser id,
-    caretaker id(s?),
-    MAC address (body pack)
-    able to fetch medication?,
+    (ID)
+    UserID:
+    primary dispenser id,
+    primary caretaker id,
+    MAC address (body pack),
+    mobile?,
     medications: [MedicationRegimenEntry: {
-        medication: Drug id,
-        quantity (of pills),
-        scheduled time (alert time),
-        repetition time (time until next scheduled time), //idea is that scheduled time is updated to be scheduled time + repetition time if scheduled_time < current time)
-        allow range (when medication allowed to be taken)
-    }],
-    history: [MedicationRegimenEntry: {
-        medication: Drug id,
+        medication: rxuid,
         quantity,
-        scheduled time,
-        reptition time,
-        allowed range,
-        notifications: [Notification: {
-            id to whom notification was issued,
-            time
-        }],
-        result: missed | dispensed (include DispenserAccess id)
+        scheduled times [] (1-4)
+    }],
+    history: [MedicationTaken: {
+        medication: rxuid,
+        quantity,
+        time,
+        dispenserID
+    },
+    MedicationMissed: {
+        medication: rxuid,
+        quantity,
+        time (1-4)
     }]
     notes: {}
 }
 
-Caretaker: {
-    Name
-}
-
 User: {
-   id,
+   (ID)
+   name,
    username,
    password (SHA-2 hashed),
    user type (enum) (patient, caretaker, admin, dispenser)

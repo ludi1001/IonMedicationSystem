@@ -1,8 +1,7 @@
 from mongoengine import *
-from IonWeb.settings import DBNAME
 import re
 
-connect(DBNAME)
+#connect(DBNAME)
 
 class Sha256HashField(StringField):
     """Represents SHA-2 hash output"""
@@ -18,3 +17,8 @@ class User(Document):
     username = StringField(max_length=120, required=True)
     password = Sha256HashField(required=True)
     user_type = StringField(required=True)
+    
+import mongoengine.django.mongo_auth.models
+import mongoengine.django.auth as auth
+class BetterUser(auth.User):
+    group = StringField()
