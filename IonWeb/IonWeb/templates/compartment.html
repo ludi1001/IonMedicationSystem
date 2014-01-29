@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Compartment Manager</title>
+   {% load staticfiles %}
+    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
+    <style type="text/css">
+      body {
+         text-align:center;
+      }
+      ul {
+         list-style-type: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Update Compartment Info</h1>
+
+    <form method="post" action = "../compartment/">
+      {% csrf_token %}
+
+      <input type = "hidden" name ="requestType" value="newCompartment">
+      <input type = "submit" value = "Get new compartment ID">
+    </form>
+    {{ newID }}
+    <form method="post" action = "../compartment/">
+      {% csrf_token %}
+
+      <input type = "hidden" name ="requestType" value="updateCompartment">
+      COMPT: <input type = "text" name = "id" value="Compartment ID"><br>
+      RXUID: <input type = "number" name ="rxuid" value="rxuid"><br>
+      LOT #: <input type = "number" name ="lot" value="lot"><br>
+      EXPIR: <input type = "date" name ="expiration" value="expiration"><br>
+      <input type = "submit" value = "Update Compartment">
+    </form>
+  </body>
+</html>

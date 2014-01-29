@@ -1,16 +1,16 @@
 Compartments: [{
     (ID)
-    (implicit status: empty, open, cleared
+    (implicit status: empty, open, cleared)
     rxuid,
     quantity,
     expiration date,
-    lot number,
-    dispenserID
+    lot number
 }],
     
 Dispenser:[{  
     (ID)
     location
+    slots: [ compartmentIDs ]
 }]
 
 Patient: {

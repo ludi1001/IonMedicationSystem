@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dispenser Management</title>
+   {% load staticfiles %}
+    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
+    <style type="text/css">
+      body {
+         text-align:center;
+      }
+      ul {
+         list-style-type: none;
+      }
+    </style>
+    <script type="text/javascript">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+      e.style.display = ((e.style.display!='none') ? 'none' : 'block');
+    }
+//-->
+    </script>
+  </head>
+  <body>
+    <h1>My Dispensers</h1>
+
+    <a href="#" onclick="toggle_visibility('add');">(add dispenser)</a>
+    <div id="add" style="display:none;">
+    <form method="post" action="../dispenser/">
+      {% csrf_token %}
+      <input type="hidden" name="requestType" value="newDispenser">
+      <input type="text" name="location" placeholder="Location" required>
+      <input type="number" name="numSlots" placeholder="Number of slots" required>
+
+      <input type="submit" value="Add Dispenser">
+    </form>
+    </div>
+    {% for dispenser in dispensers %}
+      <h2>Dispenser</h2>
+      ID: {{ dispenser.id }} <br>
+      Location: {{ dispenser.location }} <br>
+      <form method="post" action="../dispenser/" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+        {% csrf_token %}
+        <input type="hidden" name="requestType" value="deleteDispenser">
+        <input type="hidden" name="id" value="{{dispenser.id}}">
+        <input type="submit" value="delete">
+      </form>
+
+      <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');">(click to expand medication list)</a>
+      <div id = "{{ dispenser.id }}" style="display:none;">
+      <ul>
+      {% for compartment in dispenser.slots %}
+         <li> Compartment {{ forloop.counter0 }} :
+         {% if compartment %}
+            {{ compartment }}
+         {% else %}
+            OPEN
+         {% endif %}
+      {% endfor %}
+      </ul>
+      </div>
+    {% endfor %}
+
+  </body>
+</html>
