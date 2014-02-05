@@ -3,14 +3,18 @@ from django.http import HttpResponse
 from django.template import RequestContext
 from django.contrib.auth import authenticate
 import django.contrib.auth as auth
-
-from mongoengine import django
 import mongoengine.django.mongo_auth.models
 from mongoengine.django.auth import User
+from mongoengine import django
 
 from models import IonUser
 from privilege_tests import is_in_group
 
+def index(request):
+   return render_to_response('index.html', {},
+      context_instance=RequestContext(request))
+
+      
 def create(request):
     user = User.create_user('j', 'password', 'lennon@thebeatles.com')
     user.groups = ['patient']
