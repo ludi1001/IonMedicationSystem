@@ -17,7 +17,7 @@
     <hr>
     {% for patient in Patients %}
       <h2> {{ patient.name }} </h2>
-      <p>Creation Time: {{ patient.creationTime }}</p>
+      <p>Creation Time: {{ patient.id.generation_time }}</p>
       <p>Last Edited: {{ patient.editedTime }} </p>
       <p>Medications:</p>
       <ul>

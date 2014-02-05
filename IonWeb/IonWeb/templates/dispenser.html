@@ -3,6 +3,7 @@
   <head>
     <title>Dispenser Management</title>
    {% load staticfiles %}
+   {% load dispenser_tags %}
     <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
     <style type="text/css">
       body {
@@ -52,7 +53,10 @@
       {% for compartment in dispenser.slots %}
          <li> Compartment {{ forloop.counter0 }} :
          {% if compartment %}
-            {{ compartment }}
+            {% with comp=compartment|get_compartment %}
+               {{ comp.rxuid }}
+               <!-- TODO: add filter that takes rxuid and gives medication name -->
+            {% endwith %}
          {% else %}
             OPEN
          {% endif %}

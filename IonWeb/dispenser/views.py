@@ -1,8 +1,9 @@
-from django.shortcuts import render_to_response
-from django.template import RequestContext
 import datetime
+from helper import RxNorm
 from models import dispenser
 from models import compartment
+from django.template import RequestContext
+from django.shortcuts import render_to_response
 
 def management(request):
    if request.method == 'POST':
@@ -15,7 +16,7 @@ def management(request):
       if request.POST['requestType'] == 'deleteDispenser':
          id = request.POST['id']
          dispenser.objects(id=id)[0].delete()
-   return render_to_response('dispenser.html', {'dispensers': dispenser.objects}, context_instance=RequestContext(request))
+   return render_to_response('dispenser.html', {'dispensers': dispenser.objects, 'compartments': compartment.objects}, context_instance=RequestContext(request))
 
 def compartments(request):
    newID = ""
@@ -27,6 +28,7 @@ def compartments(request):
       if request.POST['requestType'] == 'updateCompartment':
          toEdit = compartment.objects(id=request.POST['id'])[0]
          toEdit.rxuid = int(request.POST['rxuid'])
+         toEdit.medName = RxNorm.getName(request.POST['rxuid'])
          toEdit.lot = int(request.POST['lot'])
          toEdit.expiration = request.POST['expiration']
          toEdit.save()
