@@ -35,11 +35,23 @@ TEMPLATE_DIRS = (
 DBNAME = 'ionsystem'
 
 MONGODB = connect(DBNAME)
+
+AUTHENTICATION_BACKENDS = (
+    'mongoengine.django.auth.MongoEngineBackend',
+)
+
+SESSION_ENGINE = 'mongoengine.django.sessions'
+
+LOGIN_URL = '/account/login/'
+
+#MONGOENGINE_USER_DOCUMENT = 'account.models.BetterUser'
+
 # Application definition
 
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
+    'mongoengine.django.mongo_auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -59,7 +71,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'IonWeb.urls'
 
 WSGI_APPLICATION = 'IonWeb.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
