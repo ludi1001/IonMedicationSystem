@@ -17,7 +17,7 @@ def index(request):
       
 def create(request):
     user = User.create_user('j', 'password', 'lennon@thebeatles.com')
-    user.groups = ['patient']
+    #user.groups = ['patient']
     user.save()
     ion_user = IonUser(user=user, group='patient')
     ion_user.save()
