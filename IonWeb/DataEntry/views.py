@@ -63,7 +63,7 @@ def medinfo(request):
          ndc = ndcs['ndcGroup']['ndcList']['ndc'][0]
          name = RxNorm.getName(medID);
          # dailymed = RxNorm.getJSON(''.join(['http://dailymed.nlm.nih.gov/dailymed/services/v1/ndc/', ndc, '/imprintdata.json']))
-         return render_to_response('medinfo.html', {'attributes': json.dumps(attributes, indent=3), 'names': names, 'ndc': ndc, 'rxuid': medID}, 
+         return render_to_response('medinfo.html', {'attributes': json.dumps(attributes, indent=3), 'names': names, 'ndc': ndc, 'rxuid': medID, 'name' : name}, 
          context_instance=RequestContext(request))
    
    return render_to_response('medinfo.html', {}, context_instance=RequestContext(request))

@@ -36,6 +36,9 @@
       <input type="submit" value="Add Dispenser">
     </form>
     </div>
+    <p>
+    <a href = "../compartment"> Add/Update Compartments </a><br>
+    <a href = "../loadcompartment"> Load compartment into dispenser </a></p>
     {% for dispenser in dispensers %}
       <h2>Dispenser</h2>
       ID: {{ dispenser.id }} <br>
@@ -54,7 +57,9 @@
          <li> Compartment {{ forloop.counter0 }} :
          {% if compartment %}
             {% with comp=compartment|get_compartment %}
-               {{ comp.rxuid }}
+               {% with medName=comp.rxuid|get_medName %}
+                  {{ medName }}
+               {% endwith %}
                <!-- TODO: add filter that takes rxuid and gives medication name -->
             {% endwith %}
          {% else %}

@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     url(r'^dispenser/', 'dispenser.views.management'),
     url(r'^compartment/', 'dispenser.views.compartments'),
     url(r'^loadcompartment', 'dispenser.views.loadcompartment'),
+    url(r'^updatecompartment', 'dispenser.views.updatecompartment')
 )

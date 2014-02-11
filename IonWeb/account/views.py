@@ -13,8 +13,7 @@ from privilege_tests import is_in_group
 def index(request):
    return render_to_response('index.html', {},
       context_instance=RequestContext(request))
-
-      
+ 
 def create(request):
     user = User.create_user('j', 'password', 'lennon@thebeatles.com')
     user.groups = ['patient']
