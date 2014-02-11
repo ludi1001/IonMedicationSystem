@@ -6,18 +6,33 @@ import datetime
 import urllib2
 import json
 
-# a lot of this was taken from a sample 'blongo' project
 def patientinfo(request):
    if request.method == 'POST':
       if request.POST['requestType'] == 'newPatient':
-         name = request.POST['name']
-         newPatient = patient(name=name)
+         firstName = request.POST['firstName']
+         lastName = request.POST['lastName']
+         newPatient = patient(firstName=firstName, lastName=lastName)
          newPatient.save()
 
       if request.POST['requestType'] == 'deletePatient':
          id = request.POST['id']
          patient.objects(id=id)[0].delete()
          # don't know if we actually want to give people the ability to delete medical records...
+
+      if request.POST['requestType'] == 'addMedication':
+         id = request.POST['id']
+         Patient = patient.objects(id=id)[0]
+         rxuid = request.POST['rxuid']
+         quantity = request.POST['numPills']
+         dispensed = 'dispensable' in request.POST
+         # create start notifications for startdate if that date is today
+         # startDate can't be in the past
+         startDate = request.POST['startDate']
+         times = request.POST.getlist('times')
+         repeatDays = request.POST.get('repeatDays', -1)
+         
+         Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays})
+         Patient.save()
 
    return render_to_response('patientinfo.html', {'Patients': patient.objects},
                               context_instance=RequestContext(request))
@@ -60,7 +75,10 @@ def medinfo(request):
          attributes = RxNorm.getJSON(''.join([url, '/allProperties?prop=attributes']))
          names = RxNorm.getJSON(''.join([url, '/allProperties?prop=names']))
          ndcs = RxNorm.getJSON(''.join([url, '/ndcs']))
-         ndc = ndcs['ndcGroup']['ndcList']['ndc'][0]
+         if ndcs['ndcGroup']['ndcList']:
+            ndc = ndcs['ndcGroup']['ndcList']['ndc'][0]
+         else:
+            ndc = 0
          name = RxNorm.getName(medID);
          # dailymed = RxNorm.getJSON(''.join(['http://dailymed.nlm.nih.gov/dailymed/services/v1/ndc/', ndc, '/imprintdata.json']))
          return render_to_response('medinfo.html', {'attributes': json.dumps(attributes, indent=3), 'names': names, 'ndc': ndc, 'rxuid': medID, 'name' : name}, 

@@ -34,6 +34,7 @@ def compartments(request):
          toEdit.lot = int(request.POST['lot'])
          toEdit.expiration = request.POST['expiration']
          toEdit.save()
+         # TODO: implement lastupdatetime
       if request.POST['requestType'] == 'deleteCompartment':
       # TODO: Implement this?
          id = request.POST['id']
@@ -80,6 +81,7 @@ def updatecompartment(request):
             toEdit.expiration = expiration
             toEdit.save()
             message = "Save successful!"
+            # TODO: implement lastupdatetime
          else:
             message = "Compartment not found"
          return render_to_response('updatecompartment.html', {'message': message}, context_instance=RequestContext(request))
