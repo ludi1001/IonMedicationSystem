@@ -4,15 +4,25 @@ body {
 }
 
 #search {
-	float:right;
-	padding-bottom:10px;
+	float:left;
+	padding-bottom:0;
+  margin-bottom:0;
+  margin-right:10px;
 }
 
 #search-box{
 	background-image:url('../images/search.png');
 	background-position:right;
 	background-repeat:no-repeat;
-	background-size:20px
+	background-size:20px;
+  border-radius:8px;
+}
+
+#notification-icon {
+  float:right;
+	height:30px;
+	position:relative;
+	top:-2px;
 }
 
 header {
@@ -28,8 +38,7 @@ header nav {
 }
 header nav ul {
 	font-family: "Century Gothic", sans-serif;
-	position:absolute;
-	left:0;
+	float:right;
 	margin:0;
 	padding:0;
 	list-style:none;
@@ -49,51 +58,80 @@ header nav ul li a, header nav ul li a:visited {
 	opacity:.5;
 	transition:color 200ms;
 	-moz-transition: color 200ms;
-    -webkit-transition: color 200ms;
-    -o-transition: color 200ms;
+  -webkit-transition: color 200ms;
+  -o-transition: color 200ms;
 }
 header nav ul li a:hover {
 	color:#f60;
 	text-decoration:none;
 }
-article {
-	padding:10px;
-	margin-bottom:20px;
+
+#menu-icon {
+  display:none;
 }
-article p {
-	margin-bottom:0;
+
+@media only screen and (max-width: 767px) {
+  header nav {
+    overflow-y:visible;
+    height:auto;
+    position:relative;
+  }
+  header nav ul {
+    clear:both;
+    float:initial;
+    display:none;
+    position:absolute;
+    top:100%;
+    background:#eee;
+    border-bottom-right-radius:8px;
+    border-bottom-left-radius:8px;
+    z-index:10;
+  }
+  header nav ul li{
+    float:initial;
+    padding-left:5px;
+    padding-top:12px;
+    border-top:solid gray 1px;
+  }
+  #search {
+    /*display:none;*/
+    float:initial;
+  }
+  #menu-icon {
+    display:inline;
+    height:30px;
+    width:40px;
+  }
+  #notification-icon {
+    float:right;
+  }
 }
-article div.img-preview {
-	margin-right:24px;
-	float:left;
+
+ul.action-list li {
+	display:block;
+	margin:0;
+	padding:6px 5px 6px 5px;
+	font-size:16px;
+	border: solid #393 1px;
+	margin-bottom:10px;
+	text-align:center;
+	border-radius:8px;
 	width:200px;
-	height:200px;
-	overflow:hidden;
-	border:2px outset #fa0;
 }
-article div.img-preview img {
-	position:relative;
+
+ul.action-list li:hover {
+	background:#efe;
+	cursor:pointer;
 }
-article header h1 {
-	margin-bottom:0;
-	font-size:35px;
+
+ul.action-list li a {
+	color:#666;
 }
-article header h1 a {
-	color:#f50;
+
+ul.action-list li a:hover {
+	text-decoration:none;
 }
-article header h1 a:hover {
-	color:#fc8;
-}
-article header time {
-	color:#999;
-	font-size:smaller;
-}
-article div.body {
-	float:left;
-	width:380px;
-	color:#555;
-	line-height:1.75em;
-}
+
 footer {
 	color:#666;
 	padding:10px;

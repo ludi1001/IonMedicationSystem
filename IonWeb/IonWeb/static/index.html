@@ -6,35 +6,61 @@
 	<link rel="stylesheet" href="stylesheets/base.css">
 	<link rel="stylesheet" href="stylesheets/skeleton.css">
 	<link rel="stylesheet" href="stylesheets/layout.css">
-	
 	<link rel="stylesheet" href="stylesheets/style.css">
+  <meta name="viewport" content="initial-scale=1">
+  <script type="text/javascript" src="scripts/jquery-2.1.0.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $("#menu-icon").click(function() {
+        $("#main-menu").toggle();
+      });
+    });
+    $(window).resize(function() {
+      if($("#menu-icon").is(":visible")) {
+        $("#main-menu").hide();
+      }
+      else {
+        $("#main-menu").show();
+      }
+    });
+  </script>
 </head>
 <body>
+  <div style="width:100%;background-color:#eee">
 	<div class="container">
-	<header>
-		<div class="two-thirds column">
+	<div class="row">
+		<header>
 			<nav>
-				<ul>
+        <div id="main-menu-icons">
+          <a href="#"><img id="menu-icon" src="images/menu6.png"></a>
+          <a href="#"><img id="notification-icon" src="images/mail2.png"></a>
+        </div>
+
+				<ul id="main-menu">
+        <li>        <form id="search">
+					<input id="search-box" type="text">
+				</form></li>
 					<li><a href="#">Users</a></li>
 					<li><a href="#">Dispensers</a></li>
 					<li><a href="#">Medication</a></li>
 					<li><a href="#">Account</a></li>
 					<li><a href="#">Logout</a></li>
+					<!--<li><a href="#"><img id="notification-icon" src="images/mail2.png"></a></li>-->
 				</ul>
+
 			</nav>
-		</div>
-		<div class="one-third column">
-			<form id="search">
-				<input id="search-box" type="text">
-			</form>
-		</div>
-	</header>
+		</header>
 	</div>
-	<div class="container">
-	<h1>Admin Portal</h1>
+  </div>
+  </div>
+  <div class="container">
+	<div class="row">
+		<h1>Admin Portal</h1>
+	</div>
+	<hr>
 	<div class="one-third column">
 		<h2>Common Tasks</h2>
-		<ul>
+		<ul class="action-list">
 			<li><a href="#">Add new user</li>
 			<li><a href="#">Edit user</a></li>
 			<li><a href="#">Add dispenser</a></li>
@@ -43,20 +69,20 @@
 	</div>
 	<div class="one-third column">
 		<h2>Tools</h2>
+		<ul>
+			<li>User has logged on.</li>
+			<li>Medication was added into Dispenser.</li>
+		</ul>
 	</div>
 	<div class="one-third column">
-		<h2>Recent Activity</h2>
+		<h2>Notifications</h2>
+		<ul>
+			<li>No notifications</li>
+		</ul>
 	</div>
 	<div class="sixteen columns">
 		<footer class="span-24">
 			&copy; 2014 Team Ion
-			<nav>
-				<ul>
-					<li><a href="#">about</a></li>
-					<li><a href="#">contact</a></li>
-					<li><a href="#">donate</a></li>
-				</ul>
-			</nav>
 		</footer>
 	</div>
 </body>
