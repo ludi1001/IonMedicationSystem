@@ -31,6 +31,7 @@ CARETAKER PORTAL:
       - medication info lookup?
       - dispenser overview
       - search, data aggregation reports etc. jqplots?
+      - bodypack ownership search
       
 DISPENSER MANAGEMENT (not exactly a web application, just a sidenote):
    - Scan info (lot, rxuid from ndcfrom barcode/RFID tag), create barcode/RFID for compartment

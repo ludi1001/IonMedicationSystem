@@ -8,12 +8,19 @@ def getJSON(url):
    response.close()
    return ret
    
+def getRXUID(ndc):
+   json = getJSON(''.join(['http://rxnav.nlm.nih.gov/REST/rxcui?idtype=ndc&id=', str(ndc)]))
+   if(json['idGroup']['rxnormId']):
+      return json['idGroup']['rxnormId'][0]
+   return 0
+   
 def getName(rxuid):
    #url = ''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', rxuid])
    
    #attributes = RxNorm.getJSON(''.join([url, '/allProperties?prop=attributes']))
    #ndcs = RxNorm.getJSON(''.join([url, '/ndcs']))
    #ndc = ndcs['ndcGroup']['ndcList']['ndc'][0]
-   names = getJSON(''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', rxuid, '/allProperties?prop=names']))
-   name = names[propConceptGroup][propConcept][0][propValue]
+   names = getJSON(''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', str(rxuid), '/allProperties?prop=names']))
+   name = names['propConceptGroup']['propConcept'][0]['propValue']
    return name
+ #  return names['propConceptGroup']['propConcept'][0]['propValue']

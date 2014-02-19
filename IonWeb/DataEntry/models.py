@@ -1,8 +1,9 @@
 from mongoengine import *
 
 class patient(Document):
-   name = StringField(max_length=120, required=True)
-   medications = DictField()
+   firstName = StringField(max_length=120, required=True)
+   lastName = StringField(max_length=120, required=True)
+   medications = ListField()
    dispenserID = StringField(max_length=100)
    editedTime = DateTimeField()
    dispensed = BooleanField()
