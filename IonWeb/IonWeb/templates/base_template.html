@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Ion Medication System - {% block page_title %}{% endblock %}</title>
+	<link rel="stylesheet" href="/static/stylesheets/base.css">
+	<link rel="stylesheet" href="/static/stylesheets/skeleton.css">
+	<link rel="stylesheet" href="/static/stylesheets/layout.css">
+	<link rel="stylesheet" href="/static/stylesheets/style.css">
+  <meta name="viewport" content="initial-scale=1">
+  <script type="text/javascript" src="/static/scripts/jquery-2.1.0.min.js"></script>
+  <script type="text/javascript" src="/static/scripts/ion.js"></script>
+</head>
+<body>
+  <div id="header-wrapper">
+	<div id="menu-container" class="container">
+	<div class="row">
+    {% block menubar %}
+		<header>
+			<nav>
+        <div id="main-menu-icons">
+          <a href="#"><img id="menu-icon" src="/static/images/menu6.png"></a>
+          <a href="#"><img id="notification-icon" src="/static/images/mail2.png"></a>
+        </div>
+        <form id="search">
+					<input id="search-box" type="text">
+				</form>
+				<ul id="main-menu">
+					<li><a href="#">Users</a></li>
+					<li><a href="#">Dispensers</a></li>
+					<li><a href="#">Medication</a></li>
+					<li><a href="#">Account</a></li>
+					<li><a href="#">Logout</a></li>
+				</ul>
+			</nav>
+		</header>
+    <ul id="notifications">
+    </ul>
+    {% endblock %}
+	</div>
+  </div>
+  </div>
+  <div id="content-container" class="container">
+  	<div class="row">
+		<h1>{% block header_title %}{% endblock %}</h1>
+    </div>
+    <hr>
+    {% block content %}{% endblock %}
+	</div>
+	<div class="sixteen columns">
+		<footer>
+			&copy; 2014 Team Ion
+		</footer>
+	</div>
+</body>
+</html>

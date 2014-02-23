@@ -1,5 +1,5 @@
-from django.conf.urls import patterns, include, url
-
+from django.conf.urls import patterns, include, url 
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 admin.autodiscover()
 
@@ -13,5 +13,7 @@ urlpatterns = patterns('',
     url(r'^dispenser/', 'dispenser.views.management'),
     url(r'^compartment/', 'dispenser.views.compartments'),
     url(r'^loadcompartment', 'dispenser.views.loadcompartment'),
-    url(r'^updatecompartment', 'dispenser.views.updatecompartment')
-)
+    url(r'^updatecompartment', 'dispenser.views.updatecompartment'),
+) 
+urlpatterns += staticfiles_urlpatterns()
+

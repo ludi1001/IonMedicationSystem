@@ -1,3 +1,18 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Compartment Manager
+{% endblock %}
+
+{% block header_title %}
+
+{% endblock %}
+{% block content %}
+   <ul>
+      <li> <a href = "../patientinfo">Patient Info</a>
+      <li> <a href = "../medinfo">Medication Info Lookup</a>
+      <li> <a href = "../dispenser">Dispenser Admin</a>
+    </ul>
+{% endblock %} 
 <!DOCTYPE html>
 <html>
   <head>
@@ -16,10 +31,5 @@
   <body>
     <h1>Information Management</h1>
 
-    <ul>
-      <li> <a href = "../patientinfo">Patient Info</a>
-      <li> <a href = "../medinfo">Medication Info Lookup</a>
-      <li> <a href = "../dispenser">Dispenser Admin</a>
-    </ul>
-  </body>
+      </body>
 </html>
