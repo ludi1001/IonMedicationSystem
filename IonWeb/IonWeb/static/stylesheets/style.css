@@ -98,8 +98,9 @@ header nav ul li a:hover {
 
 time:before {
   content:"";
-  display: block;
-  height: 10px;
+  display:block;
+  height:10px;
+  clear:both;
 }
 time {
   font-style:oblique;
