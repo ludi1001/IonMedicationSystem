@@ -3,6 +3,11 @@ body {
   font-family: "Helvetica Neue", Helvetica;
 }
 
+#header-wrapper {
+  width:100%;
+  background-color:#eee;
+}
+
 #search {
 	float:right;
 	padding-bottom:0;
@@ -73,6 +78,33 @@ header nav ul li a:hover {
   padding-left:10px;
 }
 
+#notifications {
+  position:absolute;
+  top:100%;
+  right:0;
+  width:500px;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+  z-index:8;
+  background:#e2e2e2;
+  display:none;
+}
+
+#notifications li {
+  padding:5px;
+  border-top:solid gray 1px;
+  margin:0;
+}
+
+time:before {
+  content:"";
+  display: block;
+  height: 10px;
+}
+time {
+  font-style:oblique;
+}
+
 @media only screen and (max-width: 767px) {
   header nav {
     overflow-y:visible;
@@ -80,7 +112,6 @@ header nav ul li a:hover {
     position:relative;
   }
   header nav ul {
-    clear:both;
     float:initial;
     display:none;
     position:absolute;
@@ -90,7 +121,6 @@ header nav ul li a:hover {
     border-bottom-left-radius:8px;
     z-index:10;
     width:100%;
-    /*height:100%;*/
   }
   header nav ul li{
     float:initial;
@@ -109,6 +139,9 @@ header nav ul li a:hover {
     padding-left:10px;
   }
   #menu-container {
+    width:100%;
+  }
+  #notifications {
     width:100%;
   }
 }
