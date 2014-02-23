@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>Ion Medication System</title>
+	<title>Ion Medication System - {% block title %}{% endblock %}</title>
 	<link rel="stylesheet" href="stylesheets/base.css">
 	<link rel="stylesheet" href="stylesheets/skeleton.css">
 	<link rel="stylesheet" href="stylesheets/layout.css">
@@ -15,6 +15,7 @@
   <div id="header-wrapper">
 	<div id="menu-container" class="container">
 	<div class="row">
+    {% block menubar %}
 		<header>
 			<nav>
         <div id="main-menu-icons">
@@ -34,38 +35,17 @@
 			</nav>
 		</header>
     <ul id="notifications">
-    <li>efefe <time>6:04 pm 7/12/13</time></li>
-    <li>Blah blah blah <time>4:23 pm 9/13/14</time></li>
     </ul>
+    {% endblock %}
 	</div>
   </div>
   </div>
   <div id="content-container" class="container">
-	<div class="row">
-		<h1>Admin Portal</h1>
-	</div>
-	<hr>
-	<div class="one-third column">
-		<h2>Common Tasks</h2>
-		<ul class="action-list">
-			<li><a href="#">Add new user</li>
-			<li><a href="#">Edit user</a></li>
-			<li><a href="#">Add dispenser</a></li>
-			<li><a href="#">Edit dispenser</a></li>
-		</ul>
-	</div>
-	<div class="one-third column">
-		<h2>Tools</h2>
-		<ul>
-			<li>User has logged on.</li>
-			<li>Medication was added into Dispenser.</li>
-		</ul>
-	</div>
-	<div class="one-third column">
-		<h2>Notifications</h2>
-		<ul>
-			<li>No notifications</li>
-		</ul>
+  	<div class="row">
+		<h1>{% block title %}{% endblock %}</h1>
+    </div>
+    <hr>
+    {% block content %}{% endblock %}
 	</div>
 	<div class="sixteen columns">
 		<footer>
