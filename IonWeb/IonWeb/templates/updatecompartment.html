@@ -14,8 +14,6 @@
     </style>
   </head>
   <body>
-    <h1>Update Compartment Info</h1>
-
     <form method="post" action = "../updatecompartment/">
       {% csrf_token %}
       <input type = "hidden" name = "compID" value = {{ compID }}>

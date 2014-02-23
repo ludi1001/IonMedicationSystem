@@ -2,6 +2,7 @@
 <html>
   <head>
    {% load staticfiles %}
+   {% load dispenser_tags %}
     <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
   
     <script type="text/javascript">
@@ -62,7 +63,7 @@
       <input type="hidden" name="id" value="{{ patient.id }}">
       <b>RXUID: </b><input type="number" name="rxuid">
       <a href="../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID Lookup</a><br>
-      <input type="number" name="numPills" placeholder="Number of pills" required><br>
+      <input type="number" name="numPills" placeholder="Number of pills"><br>
       <input type="checkbox" name="dispensable" checked>Dispensable?<br><br>
      
      <b>Start:</b><br> 
@@ -101,15 +102,20 @@
       Every <input type="number" id="repeatDays" name="repeatDays"> days
       <br><br>
       
-      <input type="submit" value="Add Medications">
+      <input type="submit" value="Add Medication">
     </form>
     </div>
       <ul>
       {% for medication in patient.medications %}
-         <li> {{ medication.rxuid }}
-         {% if medication.dispensed %}
-          is dispensed
+         <b>{{ medication.rxuid }}</b>
          <ul>
+         {% if medication.dispensed %}
+          <li> is dispensed
+            <li> {{ medication.quantity }} pills
+         {% else %}
+         <li> is not dispensed
+         {% endif %}
+         
             <li> {{ medication.times }}
             <li>
             {% if medication.repeatDays > 0 %}
@@ -117,9 +123,7 @@
             {% else %}
             Not repeated
             {% endif %}
-            <li> {{ medication.quantity }} pills
          </ul>
-         {% endif %}
       {% endfor %}
       </ul>
       <p>DispenserID: {{ patient.dispenserID }}</p>
