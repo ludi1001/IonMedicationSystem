@@ -20,7 +20,7 @@ class NotificationSystem(object):
             if notification_type not in self._notification_map:
                 raise NotificationSystemException("No such notification type exists: " + notification_type)
             if processor not in self._notification_map[notification_type]:
-                raise NotificationSystemException("Processor doesnot handle notification type " + notification_type)
+                raise NotificationSystemException("Processor does not handle notification type " + notification_type)
             self._notification_map[notification_type].remove(processor)
             
     def add_notification(self, notification, notification_type):
