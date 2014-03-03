@@ -10,6 +10,7 @@
   <meta name="viewport" content="initial-scale=1">
   <script type="text/javascript" src="/static/scripts/jquery-2.1.0.min.js"></script>
   <script type="text/javascript" src="/static/scripts/ion.js"></script>
+  {% block head %}{% endblock %}
 </head>
 <body>
   <div id="header-wrapper">
@@ -26,9 +27,9 @@
 					<input id="search-box" type="text">
 				</form>
 				<ul id="main-menu">
-					<li><a href="#">Users</a></li>
-					<li><a href="#">Dispensers</a></li>
-					<li><a href="#">Medication</a></li>
+					<li><a href="./patientinfo">Users</a></li>
+					<li><a href="./dispenser">Dispensers</a></li>
+					<li><a href="./medinfo">Medication</a></li>
 					<li><a href="#">Account</a></li>
 					<li><a href="#">Logout</a></li>
 				</ul>

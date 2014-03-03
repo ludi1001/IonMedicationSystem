@@ -1,22 +1,12 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Compartment Manager</title>
-   {% load staticfiles %}
-    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
-    <style type="text/css">
-      body {
-         text-align:center;
-      }
-      ul {
-         list-style-type: none;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Update Compartment Info</h1>
-
-    <form method="post" action = "../compartment/">
+{% extends "base_template.html" %}
+{% block page_title %}
+Compartment Manager
+{% endblock %}
+{% block header_title %}
+Update Compartment Info
+{% endblock %}
+{% block content %}
+   <form method="post" action = "../compartment/">
       {% csrf_token %}
 
       <input type = "hidden" name ="requestType" value="newCompartment">
@@ -35,5 +25,4 @@
       <br><br>
       <a href="../updatecompartment" onclick="javascript:void window.open('../updatecompartment','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Update Compartment with Barcodes</a>
     </form>
-  </body>
-</html>
+{% endblock %} 

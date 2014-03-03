@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Dispenser Management</title>
-   {% load staticfiles %}
-   {% load dispenser_tags %}
-    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
-    <style type="text/css">
-      body {
-         text-align:center;
-      }
-      ul {
-         list-style-type: none;
-      }
-    </style>
+{% extends "base_template.html" %}
+{% block page_title %}
+Dispenser Management
+{% endblock %}
+{% block header_title %}
+My Dispensers
+{% endblock %}
+{% block head %}
     <script type="text/javascript">
 <!--
     function toggle_visibility(id) {
@@ -21,10 +14,9 @@
     }
 //-->
     </script>
-  </head>
-  <body>
-    <h1>My Dispensers</h1>
-
+{% endblock %}
+{% block content %}
+   {% load dispenser_tags %}
     <a href="#" onclick="toggle_visibility('add');">(add dispenser)</a>
     <div id="add" style="display:none;">
     <form method="post" action="../dispenser/">
@@ -69,6 +61,4 @@
       </ul>
       </div>
     {% endfor %}
-
-  </body>
-</html>
+{% endblock %} 

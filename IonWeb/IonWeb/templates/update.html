@@ -1,11 +1,12 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <link href="{{STATIC_URL}}style.css" rel="stylesheet" type="text/css">
-  </head>
-  <body>
-    <h1>Update Patient</h1>
-    <form method="post" action="../update/">
+{% extends "base_template.html" %}
+{% block page_title %}
+Patient Management
+{% endblock %}
+{% block header_title %}
+Update Patient
+{% endblock %}
+{% block content %}
+   <form method="post" action="../update/">
       {% csrf_token %}
 
         <p><input type="hidden" name="id" value="{{patient.id}}"></p>
@@ -14,5 +15,4 @@
         </p>
         <input type="submit" value="Save Changes">
     </form>
-  </body>
-</html>
+{% endblock %} 

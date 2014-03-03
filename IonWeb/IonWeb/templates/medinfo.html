@@ -1,12 +1,12 @@
-<!DOCTYPE html>
-<html>
-  <head>
-  
-    <link href="{{STATIC_URL}}style.css" rel="stylesheet" type="text/css">
-  </head>
-  <body>
-   <h1>Medication Info</h1>
-   <form method="get" action="">
+{% extends "base_template.html" %}
+{% block page_title %}
+Medication Info
+{% endblock %}
+{% block header_title %}
+Medication Info
+{% endblock %}
+{% block content %}
+    <form method="get" action="">
      <input type="hidden" name="requestType" value="getNameSuggestions">
      <input type="text" name="medName" placeholder="Name of Medication" required>
      <input type="submit" value="Find medications">
@@ -40,5 +40,4 @@
       NDC: {{ ndc }}
       <pre>{{ attributes }}</pre>
    {% endif %}
-  </body>
-</html>
+{% endblock %} 

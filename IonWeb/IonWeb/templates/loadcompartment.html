@@ -1,21 +1,11 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Compartment Manager</title>
-   {% load staticfiles %}
-    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
-    <style type="text/css">
-      body {
-         text-align:center;
-      }
-      ul {
-         list-style-type: none;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Update Compartment Info</h1>
-
+{% extends "base_template.html" %}
+{% block page_title %}
+Compartment Manager
+{% endblock %}
+{% block header_title %}
+Update Compartment Info
+{% endblock %}
+{% block content %}
     <form method="post" action = "../loadcompartment/">
       {% csrf_token %}
 
@@ -25,5 +15,4 @@
       SLOT #: <input type = "number" name = "slotNum" value="0"><br>
       <input type = "submit" value = "Load Compartment">
     </form>
-  </body>
-</html>
+{% endblock %} 

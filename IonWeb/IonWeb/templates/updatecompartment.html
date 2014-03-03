@@ -1,19 +1,11 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Compartment Manager</title>
-   {% load staticfiles %}
-    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
-    <style type="text/css">
-      body {
-         text-align:center;
-      }
-      ul {
-         list-style-type: none;
-      }
-    </style>
-  </head>
-  <body>
+{% extends "base_template.html" %}
+{% block page_title %}
+Compartment Manager
+{% endblock %}
+{% block header_title %}
+Update Compartment
+{% endblock %}
+{% block content %}
     <form method="post" action = "../updatecompartment/">
       {% csrf_token %}
       <input type = "hidden" name = "compID" value = {{ compID }}>
@@ -47,6 +39,5 @@
       <br><br>
       <input type = "submit" value = "next">
     </form>
+{% endblock %} 
 
-  </body>
-</html>

@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html>
-  <head>
-   {% load staticfiles %}
+{% extends "base_template.html" %}
+{% block page_title %}
+Patient Management
+{% endblock %}
+{% block header_title %}
+Patient Management
+{% endblock %}
+{% block head %}
    {% load dispenser_tags %}
-    <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
   
     <script type="text/javascript">
 <!--
@@ -12,7 +15,6 @@
       e.style.display = ((e.style.display!='none') ? 'none' : 'block');
     }
 //-->
-
 
     function disable_enable()
     {
@@ -36,10 +38,10 @@
          width: 350px;
       }
     </style>
-    </head>
-  <body>
-    <h1>Add Patient</h1>
-    <form method="post" action="./">
+
+{% endblock %}
+{% block content %}
+   <form method="post" action="./">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="newPatient">
       <input type="text" name="firstName" placeholder="First Name" required>
@@ -142,5 +144,4 @@
         <input type="submit" value="delete">
       </form>
     {% endfor %}
-  </body>
-</html>
+{% endblock %} 
