@@ -5,5 +5,5 @@ urlpatterns = patterns('',
     url(r'^create$', 'account.views.create'),
     url(r'^test$','account.views.test'),
     url(r'^restricted$','account.views.restricted'),
-    url(r'^logout$','account.views.logout')
+    url(r'^logout$','django.contrib.auth.views.logout_then_login')
 )
