@@ -7,6 +7,7 @@ CARETAKER = 'caretaker'
 PATIENT = 'patient'
 ADMIN = 'admin'
 DISPENSER = 'dispenser'
+ALL = [CARETAKER, PATIENT, ADMIN, DISPENSER]
 
 def is_in_group(*group):
     def test_membership(user):
