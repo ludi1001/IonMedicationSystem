@@ -1,0 +1,50 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Notification Generator
+{% endblock %}
+{% block header_title %}
+Notification Generator
+{% endblock %}
+{% block head %}
+   
+    <script type="text/javascript">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+      e.style.display = ((e.style.display!='none') ? 'none' : 'block');
+    }
+//-->
+
+    </script>
+    
+    <style = "text/css">
+      div.addMed {
+         background-color: #909090;
+         padding-left: 10px;
+         padding-bottom: 10px;
+         width: 350px;
+      }
+    </style>
+
+{% endblock %}
+{% block content %}
+   <form method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="requestType" value="newNotification">
+      <input type="text" name="notificationType" placeholder="notificationType" required>
+      <input type="text" name="userID" placeholder="userID" required>
+
+      <input type="submit" value="Add Notification">
+    </form>
+    <br>
+    <hr>
+   
+   {% for notification in Notifications %}
+      Generation Time: {{ notification.id.generation_time }} <br>
+      Notification Type: {{ notification.type }} <br>
+      For: {{ notification.target.user.email }} <br>
+      Group: {{ notification.target.group }} <br>
+      
+   {% endfor %}
+
+{% endblock %} 

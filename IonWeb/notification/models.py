@@ -1,9 +1,9 @@
 from mongoengine import *
 import datetime
 
-class Notification(Document):
+class notification(Document):
   generator = StringField(required=True)
-  creation_date = DateTimeField()
+  creation_date = DateTimeField
   modified_date = DateTimeField()
   
   target =  ReferenceField('IonUser', required=True)
