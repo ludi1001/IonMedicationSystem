@@ -1,7 +1,7 @@
 from mongoengine import *
 import datetime
 
-class Notification(Document):
+class notification(Document):
   generator = StringField(required=True)
   modified_date = DateTimeField()
   

@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^compartment$', 'dispenser.views.compartments'),
     url(r'^loadcompartment$', 'dispenser.views.loadcompartment'),
     url(r'^updatecompartment$', 'dispenser.views.updatecompartment'),
+    url(r'^notifications$', 'notification.views.notifications'),   
 ) 
 urlpatterns += staticfiles_urlpatterns()
 

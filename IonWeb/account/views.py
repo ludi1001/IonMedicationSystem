@@ -6,6 +6,7 @@ import django.contrib.auth as auth
 import mongoengine.django.mongo_auth.models
 from mongoengine.django.auth import User
 from mongoengine import django
+import datetime
 
 from models import IonUser
 from privilege_tests import is_in_group
@@ -16,10 +17,10 @@ def index(request):
 
 @is_in_group('admin')      
 def create(request):
-    user = User.create_user('j', 'password', 'lennon@thebeatles.com')
+    user = User.create_user('iveel', 'password', 'solix@trewq.com')
     #user.groups = ['patient']
     user.save()
-    ion_user = IonUser(user=user, group='patient')
+    ion_user = IonUser(user=user, group='admin', birthdate=datetime.datetime.now())
     ion_user.save()
     return HttpResponse("Account create successful")
     

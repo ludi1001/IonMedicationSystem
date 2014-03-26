@@ -6,4 +6,5 @@ class patient(Document):
    medications = ListField()
    dispenserID = StringField(max_length=100)
    editedTime = DateTimeField()
-   dispensed = BooleanField()
+   user = ReferenceField('IonUser') # required = True
+  
