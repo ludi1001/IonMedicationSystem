@@ -1,8 +1,8 @@
 from django.shortcuts import render, render_to_response
 from django.http import HttpResponse
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 
-from models import Notification
 from account.privilege_tests import *
 
 from DataEntry.models import patient
@@ -11,6 +11,8 @@ from account.models import IonUser
 
 import json
 from datetime import datetime
+
+
 
 #temporary function
 def generate_notification(request):
@@ -36,7 +38,8 @@ def get_dummy_notifications(request):
   DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
   json_list = [{'id':101, 'generator':"TestGenerator", 'last_modified':datetime.now().strftime(DATE_STRING_FORMAT)}]
   return HttpResponse(json.dumps(json_list),mimetype='application/json')
-  
+
+@csrf_exempt  
 @is_in_group(ALL)
 def get_notifications(request):
   """Expects JSON request in the form
@@ -49,6 +52,7 @@ def get_notifications(request):
   """
   DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
   try:
+    print request.body
     obj = json.loads(request.body)
     user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
     
@@ -57,6 +61,7 @@ def get_notifications(request):
     
     #query notifications
     notifications = Notification.objects(target=user,id__generation_time__gte=earliest,id__generation_time__lte=latest)
+    print notifications
     json_list = [{'id':n.id,
                   'generator':n.generator, 
                   'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 

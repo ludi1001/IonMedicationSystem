@@ -44,7 +44,7 @@ def login(request):
                 params['message'] = "Missing password"
     return render_to_response('login.html', params, context_instance=RequestContext(request))
         
-@is_in_group('caretaker')
+@is_in_group(['caretaker', 'admin'])
 def restricted(request):
     return HttpResponse("Hai")
 

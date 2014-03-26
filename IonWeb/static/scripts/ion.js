@@ -28,9 +28,18 @@ var notification = (function() {
   var my = {};
   var notification_list = [];
   
-  function serializeTime(time) {
-    
-  }
+  function serializeTime(date) {
+   var d = date.getDate();
+   var m = date.getMonth() + 1;
+   var y = date.getFullYear();
+   var H = date.getHours();
+   var M = date.getMinutes();
+   var S = date.getSeconds();
+   return '' + (m<=9 ? '0' + m : m) + '/' + (d <= 9 ? '0' + d : d) + '/' + y + ' ' + 
+      (H <= 9 ? '0' + H : H) + ':' + (M <= 9 ? '0' + M : M) + ':' + (S <= 9 ? '0' + S : S);
+   }  
+   
+  my.serialize = serializeTime;
   
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
@@ -66,7 +75,7 @@ var notification = (function() {
   
   my.initialize = function() {
     //request all notifications
-    request = 
+    var request = {"earliest":serializeTime(new Date(2013,1,1)),"latest":serializeTime(new Date())};
     $.ajax({
       url:URL,
       type: 'POST',
