@@ -10,7 +10,7 @@ from models import notification
 from account.models import IonUser
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 
@@ -36,7 +36,7 @@ def get_all_notifications(request):
 #temporary
 def get_dummy_notifications(request):
   DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
-  json_list = [{'id':101, 'generator':"TestGenerator", 'last_modified':datetime.now().strftime(DATE_STRING_FORMAT)}]
+  json_list = [{'id':101, 'generator':"TestGenerator", 'last_modified':datetime.now().strftime(DATE_STRING_FORMAT)},{'id':102, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(hours=2)).strftime(DATE_STRING_FORMAT)},{'id':103, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(minutes=3)).strftime(DATE_STRING_FORMAT)}]
   return HttpResponse(json.dumps(json_list),mimetype='application/json')
 
 @csrf_exempt  
