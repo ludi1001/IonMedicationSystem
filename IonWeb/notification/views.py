@@ -39,7 +39,6 @@ def get_dummy_notifications(request):
   json_list = [{'id':101, 'generator':"TestGenerator", 'last_modified':datetime.now().strftime(DATE_STRING_FORMAT)},{'id':102, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(hours=2)).strftime(DATE_STRING_FORMAT)},{'id':103, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(minutes=3)).strftime(DATE_STRING_FORMAT)}]
   return HttpResponse(json.dumps(json_list),mimetype='application/json')
 
-@csrf_exempt  
 @is_in_group(ALL)
 def get_notifications(request):
   """Expects JSON request in the form

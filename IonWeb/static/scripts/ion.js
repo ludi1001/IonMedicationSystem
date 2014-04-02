@@ -59,7 +59,7 @@ $(window).resize(function() {
 
 //notification manager
 var notification = (function() {
-  var URL = "/notification/get_test";
+  var URL = "/notification/get";
   var my = {};
   var notification_list = [];
   
