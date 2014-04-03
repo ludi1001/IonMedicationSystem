@@ -15,7 +15,11 @@ def index(request):
    return render_to_response('index.html', {},
       context_instance=RequestContext(request))
 
-@is_in_group('admin')      
+def get_info(request):
+  ion_user = IonUser.objects(user=request.user)[0]
+  return HttpResponse(ion_user.id)
+      
+#@is_in_group('admin')      
 def create(request):
     user = User.create_user('iveel', 'password', 'solix@trewq.com')
     #user.groups = ['patient']

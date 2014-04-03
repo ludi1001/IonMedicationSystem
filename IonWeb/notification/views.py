@@ -57,22 +57,23 @@ def get_notifications(request):
     
     earliest = datetime.strptime(obj['earliest'], DATE_STRING_FORMAT)
     latest = datetime.strptime(obj['latest'], DATE_STRING_FORMAT)
-    
+
     #query notifications
-    notifications = Notification.objects(target=user,id__generation_time__gte=earliest,id__generation_time__lte=latest)
-    print notifications
-    json_list = [{'id':n.id,
+    notifications = notification.objects(target=user,creation_date__gte=earliest,creation_date__lte=latest)
+
+    json_list = [{'id':str(n.id),
                   'generator':n.generator, 
+                  'creation_date':n.creation_date.strftime(DATE_STRING_FORMAT),
                   'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 
                   'type':n.type} for n in notifications]
-    
+
     #mark that notifications have been read
     for n in notifications:
       n.mark_read()
-    
-    return HttpResponse(json.dumps(json_list),mimetype='application/json')
+      
+    return HttpResponse(json.dumps(json_list),content_type='application/json')
   except ValueError:
-    return HttpResponse('{"error":"Malformed JSON"}',mimetype='application/json')
+    return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
   
   
 def notifications(request):

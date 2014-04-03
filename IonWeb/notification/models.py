@@ -3,6 +3,7 @@ import datetime
 
 class notification(Document):
   generator = StringField(required=True)
+  creation_date = DateTimeField()
   modified_date = DateTimeField()
   
   target =  ReferenceField('IonUser', required=True)
@@ -11,8 +12,14 @@ class notification(Document):
   
   meta = {'allow_inheritance': True}
   
-  def clean(self):
-    self.modified_date = datetime.datetime.now()
+  def save(self, *args, **kwargs):
+        if not self.creation_date:
+            self.creation_date = datetime.datetime.now()
+        self.modified_date = datetime.datetime.now()
+        return super(notification, self).save(*args, **kwargs)
+        
+  #def clean(self):
+  #  self.modified_date = datetime.datetime.now()
 
   def mark_read(self):
     self.viewed_date = datetime.datetime.now()

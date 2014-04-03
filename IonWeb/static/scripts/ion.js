@@ -105,13 +105,14 @@ var notification = (function() {
     //performs any pre-processing on the received list before appending to notification list
     list.forEach(function(n) {
       n.last_modified = new Date(n.last_modified);
+      n.creation_date = new Date(n.creation_date);
     });
     return list;
   }
   
   my.initialize = function() {
     //request all notifications
-    var request = {"earliest":serializeTime(new Date(2013,1,1)),"latest":serializeTime(new Date())};
+    var request = {"earliest":serializeTime(new Date(2014,3,3,1,0,0)),"latest":serializeTime(new Date())};
     $.ajax({
       url:URL,
       type: 'POST',
