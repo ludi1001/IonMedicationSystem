@@ -116,18 +116,14 @@ var notification = (function() {
     });
     return list;
   }
+  var IDEAL_NUM_NOTIFICATIONS = 10;
   
   my.initialize = function() {
-    //request all notifications
-    var today = new Date();
-    today.setHours(0);
-    today.setMinutes(0);
-    today.setSeconds(0);
-    today.setMilliseconds(0);
-    var request = {"earliest":serializeTime(today),"latest":serializeTime(new Date())};
-    this.fetch(request);
+    //request notifications day by day until we have at least 10 notifications
+    my.fetch({"recent":IDEAL_NUM_NOTIFICATIONS});
   }
   my.fetch = function(request) {
+    console.log(request);
     $.ajax({
       url:URL,
       type: 'POST',
@@ -147,7 +143,7 @@ var notification = (function() {
     var unread = false;
     var count = 0;
     for(var i = 0; i < notification_list.length; ++i, ++count) {
-      if(count > 10) break;
+      if(count > IDEAL_NUM_NOTIFICATIONS) break;
       var n = notification_list[i];  
       var html = [];
       html.push("<li>");
@@ -168,7 +164,7 @@ var notification = (function() {
       $("#notification-icon").attr("src", "/static/images/mail2.png");
     }
     else {
-      $("#notification-icon").attr("src", "/static/images/mail1.png");
+      $("#notification-icon").attr("src", "/static/images/mail.png");
     }
   }
   my.printNotifications = function() {
