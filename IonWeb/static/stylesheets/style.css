@@ -96,6 +96,10 @@ header nav ul li a:hover {
   margin:0;
 }
 
+#notifications li.unread {
+  background:red;
+}
+
 time:before {
   content:"";
   display:block;

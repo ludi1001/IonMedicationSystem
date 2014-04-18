@@ -51,30 +51,62 @@ def get_notifications(request):
   """
   DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
   try:
-    print request.body
     obj = json.loads(request.body)
     user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
     
-    earliest = datetime.strptime(obj['earliest'], DATE_STRING_FORMAT)
-    latest = datetime.strptime(obj['latest'], DATE_STRING_FORMAT)
+    notifications = None
+    #setup the filtering
+    filter = {'target':user}
+    if 'earliest' in obj: #notifications since earliest
+      earliest = datetime.strptime(obj['earliest'], DATE_STRING_FORMAT)
+      filter['creation_date__gte'] = earliest
+    if 'latest' in obj: #notifications before latest
+      latest = datetime.strptime(obj['latest'], DATE_STRING_FORMAT)
+      filter['creation_date__lte'] = latest
+    if 'unread' in obj and obj['unread']: #not viewed yet
+      filter['viewed_date'] = None
 
     #query notifications
-    notifications = notification.objects(target=user,creation_date__gte=earliest,creation_date__lte=latest)
+    notifications = notification.objects(**filter)
 
     json_list = [{'id':str(n.id),
                   'generator':n.generator, 
                   'creation_date':n.creation_date.strftime(DATE_STRING_FORMAT),
                   'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 
+                  'unread': True if n.viewed_date is None else False,
                   'type':n.type} for n in notifications]
 
     #mark that notifications have been read
-    for n in notifications:
-      n.mark_read()
+    #for n in notifications:
+    #  n.mark_read()
       
     return HttpResponse(json.dumps(json_list),content_type='application/json')
   except ValueError:
     return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
-  
+
+@is_in_group(ALL)
+def mark_notification_read(request):
+  """Expects JSON request in the form
+  {
+  id:id
+  }
+  Marks notification with id id as read
+  """
+  try:
+    obj = json.loads(request.body)
+    if 'id' not in obj:
+      return HttpResponse('{"error":"No id"}',content_type='application/json')
+      
+    user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
+    notifications = notification.objects(id=obj["id"])
+    if len(notifications) == 0:
+      return HttpResponse('{"error":"Invalid id"}',content_type='application/json')
+      
+    notifications[0].mark_read()
+    
+    return HttpResponse('{"success":"success"}',content_type='application/json')
+  except ValueError:
+    return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
   
 def notifications(request):
    if request.method == 'POST':

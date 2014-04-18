@@ -45,16 +45,20 @@ $(document).ready(function() {
     $("#notifications").slideToggle("fast");
   });
   
+  $(window).resize(function() {
+    if($("#menu-icon").is(":visible")) {
+      $("#main-menu").hide();
+    }
+    else {
+      $("#main-menu").show();
+    }
+    $("#content-container").fadeTo("fast",1);
+  });
+  
   setupAjax();
-});
-$(window).resize(function() {
-  if($("#menu-icon").is(":visible")) {
-    $("#main-menu").hide();
-  }
-  else {
-    $("#main-menu").show();
-  }
-  $("#content-container").fadeTo("fast",1);
+  
+  notification.initialize();
+  
 });
 
 //notification manager
@@ -73,8 +77,10 @@ var notification = (function() {
    return '' + (m<=9 ? '0' + m : m) + '/' + (d <= 9 ? '0' + d : d) + '/' + y + ' ' + 
       (H <= 9 ? '0' + H : H) + ':' + (M <= 9 ? '0' + M : M) + ':' + (S <= 9 ? '0' + S : S);
    }  
-   
-  my.serialize = serializeTime;
+  
+  function refreshView() {
+    
+  }
   
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
@@ -95,10 +101,11 @@ var notification = (function() {
     }
     //resort list by time
     notification_list.sort(function(a,b) {
-      var x = a.last_modified;
-      var y = b.last_modified;
+      var x = a.creation_date; //sort by creation date because reading the notification results in a change in last_modified
+      var y = b.creation_date;
       return (x > y ? -1 : (x < y ? 1 : 0));
     });
+    
   }
   
   function cleanNotifications(list) {
@@ -112,7 +119,15 @@ var notification = (function() {
   
   my.initialize = function() {
     //request all notifications
-    var request = {"earliest":serializeTime(new Date(2014,3,3,1,0,0)),"latest":serializeTime(new Date())};
+    var today = new Date();
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
+    var request = {"earliest":serializeTime(today),"latest":serializeTime(new Date())};
+    this.fetch(request);
+  }
+  my.fetch = function(request) {
     $.ajax({
       url:URL,
       type: 'POST',
@@ -123,6 +138,38 @@ var notification = (function() {
     }).done(function(data) {
       appendNotifications(cleanNotifications(data));
     });
+    
+    this.refreshView();
+  }  
+  my.serialize = serializeTime;
+  my.refreshView = function() {
+    $("#notifications").empty();
+    var unread = false;
+    var count = 0;
+    for(var i = 0; i < notification_list.length; ++i, ++count) {
+      if(count > 10) break;
+      var n = notification_list[i];  
+      var html = [];
+      html.push("<li>");
+      html.push("<time>");
+      html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
+      html.push("</time>");
+      html.push("Test");
+      html.push("<a>Dismiss</a>");
+      html.push("</li>");
+      var li = $(html.join(" "));
+      if(n.unread)
+        li.addClass("unread");
+      $("#notifications").append(li);
+      
+      unread |= n.unread;
+    }
+    if(unread) {
+      $("#notification-icon").attr("src", "/static/images/mail2.png");
+    }
+    else {
+      $("#notification-icon").attr("src", "/static/images/mail1.png");
+    }
   }
   my.printNotifications = function() {
     console.log(notification_list);
