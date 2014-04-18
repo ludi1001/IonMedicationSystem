@@ -39,11 +39,28 @@ $(document).ready(function() {
     else {
       $("#content-container").fadeTo("fast",1);
     }
+    //hide notifications if it is open
+    if(!$("#main-menu").is(":visible"))
+      $("#notifications").hide();
+    
     $("#main-menu").slideToggle("fast");
   });
   $("#notification-icon").click(function() {
     $(this).attr("src","/static/images/mail.png");
+    //hide main menu if necessary
+    if(!$("#notifications").is(":visible") && $("#menu-icon").is(":visible"))
+      $("#main-menu").hide();
+
+    //gray out background content
+    if($("#notifications").is(":hidden")) {
+      $("#content-container").fadeTo("fast",.2);
+    }
+    else {
+      $("#content-container").fadeTo("fast",1);
+    }
+    
     $("#notifications").slideToggle("fast");
+    
   });
   
   $(window).resize(function() {
@@ -54,6 +71,7 @@ $(document).ready(function() {
       $("#main-menu").show();
     }
     $("#content-container").fadeTo("fast",1);
+    $("#notifications").hide();
   });
   
   setupAjax();
@@ -139,6 +157,9 @@ var notification = (function() {
   my.serialize = serializeTime;
   my.refreshView = function() {
     $("#notifications").empty();
+    var li = $("<li class='all-notifications'><div><a>See all notifications</a></div></li>");
+    $("#notifications").append(li);
+    
     var unread = false;
     var count = 0;
     for(var i = 0; i < notification_list.length; ++i, ++count) {
@@ -146,12 +167,14 @@ var notification = (function() {
       var n = notification_list[i];  
       var html = [];
       html.push("<li>");
+      html.push("<div class='header'>");
       html.push("<time>");
       html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
       html.push("</time>");
-      html.push("Test");
+      html.push("</div>");
+      html.push("Test asdfjaksdfl  ");
       html.push("</li>");
-      var li = $(html.join(" "));
+      var li = $(html.join(""));
       if(n.unread) {
         li.addClass("unread");
         li.data("index",i);
@@ -160,7 +183,7 @@ var notification = (function() {
       
       unread |= n.unread;
     }
-    $("#notifications li.unread").filter('.unread').append('<a class="dismiss">Dismiss</a>');
+    $("#notifications li.unread div.header").append('<a class="dismiss">Dismiss</a>');
     $("#notifications li a.dismiss").click(function() {
       var li = $(this).parent();
       //mark as read
