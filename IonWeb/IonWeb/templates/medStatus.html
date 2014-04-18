@@ -1,0 +1,23 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Notification Status
+{% endblock %}
+{% block header_title %}
+Notification Status Page
+{% endblock %}
+{% block content %}
+<h2> Patients that can take their medication, {{ time }}</h2>
+   {% for patient, medications in ActivePatients.iteritems %}
+      {{ patient.lastName }}, {{ patient.firstName }}<br>
+      
+      {% for medication in medications %} <br>
+         {{ medication.rxuid }}
+         <form method="post" action = "../notification/medStatus">
+            {% csrf_token %}
+            <input type = "hidden" name ="requestType" value="takeMed">
+            <input type = "submit" value = "take medication {{ medication.rxuid }} ">
+         </form>
+       
+      {% endfor %}
+   {% endfor %}
+{% endblock %} 

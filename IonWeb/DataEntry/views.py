@@ -11,7 +11,7 @@ def patientinfo(request):
       if request.POST['requestType'] == 'newPatient':
          firstName = request.POST['firstName']
          lastName = request.POST['lastName']
-         newPatient = patient(firstName=firstName, lastName=lastName)
+         newPatient = patient(firstName=firstName, lastName=lastName, activeMeds = [])
          newPatient.save()
 
       if request.POST['requestType'] == 'deletePatient':

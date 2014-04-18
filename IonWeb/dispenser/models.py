@@ -9,3 +9,4 @@ class compartment(Document):
    lot = IntField();
    quantity = IntField();
    expiration = DateTimeField();
+   rfid = StringField();

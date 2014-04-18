@@ -56,7 +56,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'dispenser'
+    'dispenser',
+    'notification'
 )
 
 MIDDLEWARE_CLASSES = (
