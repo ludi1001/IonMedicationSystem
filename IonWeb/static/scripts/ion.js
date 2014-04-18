@@ -42,6 +42,7 @@ $(document).ready(function() {
     $("#main-menu").slideToggle("fast");
   });
   $("#notification-icon").click(function() {
+    $(this).attr("src","/static/images/mail.png");
     $("#notifications").slideToggle("fast");
   });
   
@@ -63,7 +64,10 @@ $(document).ready(function() {
 
 //notification manager
 var notification = (function() {
-  var URL = "/notification/get";
+  var URL_REQUEST = "/notification/get";
+  var URL_READ = "/notification/read";
+  var IDEAL_NUM_NOTIFICATIONS = 10;
+  
   var my = {};
   var notification_list = [];
   
@@ -77,10 +81,6 @@ var notification = (function() {
    return '' + (m<=9 ? '0' + m : m) + '/' + (d <= 9 ? '0' + d : d) + '/' + y + ' ' + 
       (H <= 9 ? '0' + H : H) + ':' + (M <= 9 ? '0' + M : M) + ':' + (S <= 9 ? '0' + S : S);
    }  
-  
-  function refreshView() {
-    
-  }
   
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
@@ -116,7 +116,6 @@ var notification = (function() {
     });
     return list;
   }
-  var IDEAL_NUM_NOTIFICATIONS = 10;
   
   my.initialize = function() {
     //request notifications day by day until we have at least 10 notifications
@@ -125,7 +124,7 @@ var notification = (function() {
   my.fetch = function(request) {
     console.log(request);
     $.ajax({
-      url:URL,
+      url:URL_REQUEST,
       type: 'POST',
       data: JSON.stringify(request),
       contentType: 'application/json; charset=utf-8',
@@ -151,15 +150,35 @@ var notification = (function() {
       html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
       html.push("</time>");
       html.push("Test");
-      html.push("<a>Dismiss</a>");
       html.push("</li>");
       var li = $(html.join(" "));
-      if(n.unread)
+      if(n.unread) {
         li.addClass("unread");
+        li.data("index",i);
+      }
       $("#notifications").append(li);
       
       unread |= n.unread;
     }
+    $("#notifications li.unread").filter('.unread').append('<a class="dismiss">Dismiss</a>');
+    $("#notifications li a.dismiss").click(function() {
+      var li = $(this).parent();
+      //mark as read
+      var request = {"id":notification_list[li.data("index")].id};
+      console.log(request);
+      $.ajax({
+        url:URL_READ,
+        type: 'POST',
+        data: JSON.stringify(request),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        async: false
+      }).done(function(data) {
+        //get read of unread and dismiss button
+        li.removeClass("unread");
+        li.children("a.dismiss").remove();
+      });
+    });
     if(unread) {
       $("#notification-icon").attr("src", "/static/images/mail2.png");
     }

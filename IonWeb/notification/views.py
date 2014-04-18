@@ -102,7 +102,7 @@ def mark_notification_read(request):
       return HttpResponse('{"error":"No id"}',content_type='application/json')
       
     user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
-    notifications = notification.objects(id=obj["id"])
+    notifications = notification.objects(id=obj["id"],target=user) #make sure only target user can mark notification as read
     if len(notifications) == 0:
       return HttpResponse('{"error":"Invalid id"}',content_type='application/json')
       
