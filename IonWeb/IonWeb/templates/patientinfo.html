@@ -41,7 +41,7 @@ Patient Management
 
 {% endblock %}
 {% block content %}
-   <form method="post" action="./">
+   <form method="post" action="../patientinfo">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="newPatient">
       <input type="text" name="firstName" placeholder="First Name" required>
@@ -59,7 +59,7 @@ Patient Management
       <p>Medications:</p>
       <a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a>
     <div class="addMed" id="{{ patient.id }}" style="display:none;">
-    <form method="post" action="../patientinfo/">
+    <form method="post" action="../patientinfo">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="addMedication"><br>
       <input type="hidden" name="id" value="{{ patient.id }}">
@@ -72,27 +72,27 @@ Patient Management
       
       <select multiple name = "times" size = "3">
          <option> 12:00am
-         <option> 1:00am
-         <option> 2:00am
-         <option> 3:00am
-         <option> 4:00am
-         <option> 5:00am
-         <option> 6:00am
-         <option> 7:00am
-         <option> 8:00am
-         <option selected> 9:00am
+         <option> 01:00am
+         <option> 02:00am
+         <option> 03:00am
+         <option> 04:00am
+         <option> 05:00am
+         <option> 06:00am
+         <option> 07:00am
+         <option> 08:00am
+         <option selected> 09:00am
          <option> 10:00am
          <option> 11:00am
          <option> 12:00pm
-         <option> 1:00pm
-         <option> 2:00pm
-         <option> 3:00pm
-         <option> 4:00pm
-         <option> 5:00pm
-         <option> 6:00pm
-         <option> 7:00pm
-         <option> 8:00pm
-         <option> 9:00pm
+         <option> 01:00pm
+         <option> 02:00pm
+         <option> 03:00pm
+         <option> 04:00pm
+         <option> 05:00pm
+         <option> 06:00pm
+         <option> 07:00pm
+         <option> 08:00pm
+         <option> 09:00pm
          <option> 10:00pm
          <option> 11:00pm
       </select>

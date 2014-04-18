@@ -1,0 +1,22 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Scan RFID
+{% endblock %}
+{% block header_title %}
+Scan RFID
+{% endblock %}
+{% block content %}
+    <form method="post" action = "../rfid/">
+      {% csrf_token %}
+      
+      <b> Scan RFID tag </b><br><br>
+      <input type = "hidden" name ="requestType" value="rfid">
+      <input type = "textbox" name="rfid" autofocus="autofocus">
+      
+      {{ compData }}
+      
+      <br><br>
+      <input type = "submit" value = "update">
+    </form>
+{% endblock %} 
+

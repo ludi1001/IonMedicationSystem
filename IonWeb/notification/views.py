@@ -10,7 +10,7 @@ from models import notification
 from account.models import IonUser
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 
 
@@ -74,7 +74,45 @@ def get_notifications(request):
   except ValueError:
     return HttpResponse('{"error":"Malformed JSON"}',mimetype='application/json')
   
-  
+
+def medication_status(request):
+   minusone = datetime.now()-timedelta(hours=1)
+   now = datetime.now()
+   plusone = datetime.now()+timedelta(hours=1)
+   
+   timeset = [ minusone.strftime("%I:00%p").lower(), now.strftime("%I:00%p").lower(), plusone.strftime("%I:00%p").lower() ]
+   
+   ActivePatients = active_medications(timeset)
+   
+   return render_to_response('medStatus.html', {'ActivePatients': ActivePatients, 'time' : datetime.now().strftime("%I:00%p")}, context_instance=RequestContext(request))
+
+   # if int flag is 0, return all valid and set flag to 1
+   # if int flag is 1, return all valid with medflag still one
+   # if int flag is 2, return all valid with medflag still one and set flag to 0
+   
+   # Returns patients with a medication that falls within a timeset range, whose start date is before or equal to today
+   
+def active_medications(timeset): 
+   # medflag is set in cron script.
+
+   # elemMatch ensures the matched elements occur in the same medication instance   
+   ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } }})
+   
+   medDict = {};
+   
+   # check medication taken history
+   for active_patient in ActivePatients:
+      medications = [];
+      for medication in active_patient.medications:
+         for time in medication['times']:
+            if time in timeset:
+               print medication['rxuid']
+               medications.append(medication);
+         
+      medDict[active_patient] = medications;
+
+   return medDict
+
 def notifications(request):
    if request.method == 'POST':
       if request.POST['requestType'] == 'newNotification':
@@ -86,5 +124,4 @@ def notifications(request):
          newNotification = notification(target=target, type=notificationType, generator = "ONLINE")
          newNotification.save()
          
-   return render_to_response('notifications.html', {'Notifications': notification.objects},
-                              context_instance=RequestContext(request))
+   return render_to_response('notifications.html', {'Notifications': notification.objects}, context_instance=RequestContext(request))

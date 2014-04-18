@@ -7,4 +7,7 @@ class patient(Document):
    dispenserID = StringField(max_length=100)
    editedTime = DateTimeField()
    user = ReferenceField('IonUser') # required = True
+   medHistory = ListField();
+   activeMeds = ListField();
+   
   

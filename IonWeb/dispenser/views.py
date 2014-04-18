@@ -89,3 +89,13 @@ def updatecompartment(request):
       return render_to_response('updatecompartment.html', {'compID': compID, 'ndc': ndc, 'lot': lot, 'expiration': expiration, 'nextType': nextType, 'message': message}, context_instance=RequestContext(request))      
       
    return render_to_response('updatecompartment.html', {}, context_instance=RequestContext(request))
+   
+def updateRFID(request):
+   compData = ""
+   
+   if request.method == 'POST':
+      RFID = request.POST['rfid']
+      compData = compartment.objects(rfid = RFID)[0]
+
+   return render_to_response('scanrfid.html', {'compData': compData}, context_instance=RequestContext(request))
+
