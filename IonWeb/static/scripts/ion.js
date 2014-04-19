@@ -39,10 +39,28 @@ $(document).ready(function() {
     else {
       $("#content-container").fadeTo("fast",1);
     }
+    //hide notifications if it is open
+    if(!$("#main-menu").is(":visible"))
+      $("#notifications").hide();
+    
     $("#main-menu").slideToggle("fast");
   });
   $("#notification-icon").click(function() {
+    $(this).attr("src","/static/images/mail.png");
+    //hide main menu if necessary
+    if(!$("#notifications").is(":visible") && $("#menu-icon").is(":visible"))
+      $("#main-menu").hide();
+
+    //gray out background content
+    if($("#notifications").is(":hidden")) {
+      $("#content-container").fadeTo("fast",.2);
+    }
+    else {
+      $("#content-container").fadeTo("fast",1);
+    }
+    
     $("#notifications").slideToggle("fast");
+    
   });
   
   $(window).resize(function() {
@@ -53,6 +71,7 @@ $(document).ready(function() {
       $("#main-menu").show();
     }
     $("#content-container").fadeTo("fast",1);
+    $("#notifications").hide();
   });
   
   setupAjax();
@@ -63,7 +82,10 @@ $(document).ready(function() {
 
 //notification manager
 var notification = (function() {
-  var URL = "/notification/get";
+  var URL_REQUEST = "/notification/get";
+  var URL_READ = "/notification/read";
+  var IDEAL_NUM_NOTIFICATIONS = 10;
+  
   var my = {};
   var notification_list = [];
   
@@ -77,10 +99,6 @@ var notification = (function() {
    return '' + (m<=9 ? '0' + m : m) + '/' + (d <= 9 ? '0' + d : d) + '/' + y + ' ' + 
       (H <= 9 ? '0' + H : H) + ':' + (M <= 9 ? '0' + M : M) + ':' + (S <= 9 ? '0' + S : S);
    }  
-  
-  function refreshView() {
-    
-  }
   
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
@@ -118,18 +136,13 @@ var notification = (function() {
   }
   
   my.initialize = function() {
-    //request all notifications
-    var today = new Date();
-    today.setHours(0);
-    today.setMinutes(0);
-    today.setSeconds(0);
-    today.setMilliseconds(0);
-    var request = {"earliest":serializeTime(today),"latest":serializeTime(new Date())};
-    this.fetch(request);
+    //request notifications day by day until we have at least 10 notifications
+    my.fetch({"recent":IDEAL_NUM_NOTIFICATIONS});
   }
   my.fetch = function(request) {
+    console.log(request);
     $.ajax({
-      url:URL,
+      url:URL_REQUEST,
       type: 'POST',
       data: JSON.stringify(request),
       contentType: 'application/json; charset=utf-8',
@@ -144,31 +157,56 @@ var notification = (function() {
   my.serialize = serializeTime;
   my.refreshView = function() {
     $("#notifications").empty();
+    var li = $("<li class='all-notifications'><div><a>See all notifications</a></div></li>");
+    $("#notifications").append(li);
+    
     var unread = false;
     var count = 0;
     for(var i = 0; i < notification_list.length; ++i, ++count) {
-      if(count > 10) break;
+      if(count > IDEAL_NUM_NOTIFICATIONS) break;
       var n = notification_list[i];  
       var html = [];
       html.push("<li>");
+      html.push("<div class='header'>");
       html.push("<time>");
       html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
       html.push("</time>");
-      html.push("Test");
-      html.push("<a>Dismiss</a>");
+      html.push("</div>");
+      html.push("Test asdfjaksdfl  ");
       html.push("</li>");
-      var li = $(html.join(" "));
-      if(n.unread)
+      var li = $(html.join(""));
+      if(n.unread) {
         li.addClass("unread");
+        li.data("index",i);
+      }
       $("#notifications").append(li);
       
       unread |= n.unread;
     }
+    $("#notifications li.unread div.header").append('<a class="dismiss">Dismiss</a>');
+    $("#notifications li a.dismiss").click(function() {
+      var li = $(this).parent();
+      //mark as read
+      var request = {"id":notification_list[li.data("index")].id};
+      console.log(request);
+      $.ajax({
+        url:URL_READ,
+        type: 'POST',
+        data: JSON.stringify(request),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        async: false
+      }).done(function(data) {
+        //get read of unread and dismiss button
+        li.removeClass("unread");
+        li.children("a.dismiss").remove();
+      });
+    });
     if(unread) {
       $("#notification-icon").attr("src", "/static/images/mail2.png");
     }
     else {
-      $("#notification-icon").attr("src", "/static/images/mail1.png");
+      $("#notification-icon").attr("src", "/static/images/mail.png");
     }
   }
   my.printNotifications = function() {

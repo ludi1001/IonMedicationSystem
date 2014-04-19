@@ -97,15 +97,30 @@ header nav ul li a:hover {
 }
 
 #notifications li.unread {
-  background:red;
+  background:#fff;
 }
 
-time:before {
-  content:"";
-  display:block;
-  height:10px;
-  clear:both;
+#notifications li a{
+  cursor:pointer;
 }
+
+#notifications li a.dismiss {
+  float:right;
+}
+
+#notifications li div.header {
+  margin:0;
+  padding-bottom: 5px;
+}
+
+#notifications li.all-notifications {
+  background:#f8f8f8;
+}
+
+#notifications li.all-notifications div{
+  text-align:center;
+}
+
 time {
   font-style:oblique;
 }

@@ -44,7 +44,8 @@ def get_notifications(request):
   """Expects JSON request in the form
   {
   earliest:time,
-  latest:time
+  latest:time,
+  recent:number
   }
   
   Returns JSON list of notifications
@@ -63,11 +64,14 @@ def get_notifications(request):
     if 'latest' in obj: #notifications before latest
       latest = datetime.strptime(obj['latest'], DATE_STRING_FORMAT)
       filter['creation_date__lte'] = latest
-    if 'unread' in obj and obj['unread']: #not viewed yet
-      filter['viewed_date'] = None
+    if 'recent' in obj: #find the most recent ones
+      recent = obj['recent']
 
     #query notifications
-    notifications = notification.objects(**filter)
+    if 'recent' not in obj:
+      notifications = notification.objects(**filter)
+    else:
+      notifications = notification.objects(**filter).order_by('-creation_date')[:recent]
 
     json_list = [{'id':str(n.id),
                   'generator':n.generator, 
@@ -98,7 +102,7 @@ def mark_notification_read(request):
       return HttpResponse('{"error":"No id"}',content_type='application/json')
       
     user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
-    notifications = notification.objects(id=obj["id"])
+    notifications = notification.objects(id=obj["id"],target=user) #make sure only target user can mark notification as read
     if len(notifications) == 0:
       return HttpResponse('{"error":"Invalid id"}',content_type='application/json')
       
