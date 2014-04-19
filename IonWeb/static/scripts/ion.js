@@ -85,6 +85,7 @@ var notification = (function() {
   var URL_REQUEST = "/notification/get";
   var URL_READ = "/notification/read";
   var IDEAL_NUM_NOTIFICATIONS = 10;
+  var REFRESH_TIME = 1000; //fast refresh time to sync between actions on different devices
   
   var my = {};
   var notification_list = [];
@@ -139,6 +140,14 @@ var notification = (function() {
     //request notifications day by day until we have at least 10 notifications
     my.fetch({"recent":IDEAL_NUM_NOTIFICATIONS});
   }
+  my.fetchNextNotifications = function(n) { //fetches (approximately) next n notifications following the last notification
+    var time = new Date();
+    if(notification_list.length > 0) {
+      time = notification_list[notification_list.length - 1].creation_date;
+      time = new Date(time.getTime() + 1000); //this is why it is approximate
+    }
+    my.fetch({"latest":serializeTime(time),"recent":n});
+  }
   my.fetch = function(request) {
     console.log(request);
     $.ajax({
@@ -149,12 +158,29 @@ var notification = (function() {
       dataType: 'json',
       async: false
     }).done(function(data) {
-      appendNotifications(cleanNotifications(data));
+      my.insertNotifications(data);
     });
     
     this.refreshView();
-  }  
+  }
+  my.insertNotifications = function(data) {
+    appendNotifications(cleanNotifications(data));
+  }
   my.serialize = serializeTime;
+  my.markRead = function(id, callback) { //mark notification with id as read
+    var request = {"id":id};
+    console.log(request);
+    $.ajax({
+      url:URL_READ,
+      type: 'POST',
+      data: JSON.stringify(request),
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json',
+      async: false
+    }).done(function(data) {
+      if(callback) callback(data);
+    });
+  }
   my.refreshView = function() {
     
     $("#notifications").empty();
@@ -188,19 +214,11 @@ var notification = (function() {
     $("#notifications li div.header a.dismiss").click(function() {
       var li = $(this).parent().parent();
       //mark as read
-      var request = {"id":notification_list[li.data("index")].id};
-      console.log(request);
-      $.ajax({
-        url:URL_READ,
-        type: 'POST',
-        data: JSON.stringify(request),
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        async: false
-      }).done(function(data) {
+      my.markRead(notification_list[li.data("index")].id, function(data) {
         //get read of unread and dismiss button
         li.removeClass("unread");
         li.children("div.header").children("a.dismiss").remove();
+        notification_list[li.data("index")].unread = false; //assume it went through, we'll get an updated copy later
       });
     });
     if(unread) {
@@ -216,5 +234,20 @@ var notification = (function() {
   my.printNotifications = function() {
     console.log(notification_list);
   }
+  
+  //periodically check for updates
+  setInterval(function() {
+    var time = new Date(0); //Jan 1, 1970
+    if(notification_list.length > 0) {
+      time = notification_list[0].creation_date; //we assume the list is sorted
+      time = new Date(time.getTime() - 1000); //push time back a little earlier just in case that there's a new notification at exactly the same time
+    }
+    my.fetch({'earliest':serializeTime(time)});
+  }, REFRESH_TIME);
+  
+  var lastUpdateTime = new Date();
+  setInterval(function() {
+    
+  }, REFRESH_TIME);
   return my;
 })();

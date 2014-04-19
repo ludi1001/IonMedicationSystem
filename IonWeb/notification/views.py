@@ -75,6 +75,8 @@ def get_notifications(request):
       filter['creation_date__lte'] = latest
     if 'recent' in obj: #find the most recent ones
       recent = obj['recent']
+    if 'updated_since' in obj: #notifications that have been updated
+      filter['modified_date__gte'] = datetime.strptime(obj['updated_since'], DATE_STRING_FORMAT)
 
     #query notifications
     if 'recent' not in obj:
@@ -113,11 +115,10 @@ def mark_notification_read(request):
 
 @is_in_group(ALL)
 def list_all_notifications(request):
-  #find first 10 notifications for user
-  #user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
-  #notifications = notification.objects(target=user).order_by('-creation_date')[:20]
-  return render_to_response('list_all_notifications.html')
-  #return render_to_response('list_all_notifications.html', {'notifications':notifications})
+  #find first 20 notifications for user
+  user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
+  notifications = notification.objects(target=user).order_by('-creation_date')[:20]
+  return render_to_response('list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
 
 def medication_status(request):
    minusone = datetime.now()-timedelta(hours=1)

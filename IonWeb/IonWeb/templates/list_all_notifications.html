@@ -39,11 +39,11 @@ $(document).ready(function() {
   });
   
   var numNotifications = 0;
+  //refresh notifications list
   function refreshNotifications() {
     var notifications_list = notification.getNotifications();
     var ul = $("<ul id='notification-list'></ul>");
-
-    for(var i = 0; i < numNotifications; ++i) {
+    for(var i = 0; i < notifications_list.length; ++i) {
       var n = notifications_list[i];
       //filter if necessary
       var good = true;
@@ -71,8 +71,22 @@ $(document).ready(function() {
       }
       ul.append(li);
     }
+    ul.find("li.unread div.header").append('<a class="dismiss">Dismiss</a>');
+    ul.find("li div.header a.dismiss").click(function() {
+      var li = $(this).parent().parent();
+      //mark as read
+      notification.markRead(notification.getNotifications()[li.data("index")].id, function(data) {
+        //get read of unread and dismiss button
+        li.removeClass("unread");
+        li.children("div.header").children("a.dismiss").remove();
+        notification.getNotifications()[li.data("index")].unread = false; //assume it went through, let notification updater figure it out
+        notification.refreshView();
+      });
+    });
     $("#notification-list").replaceWith(ul);
   }
+  
+  //periodically check for updates
   setInterval(function() {
     //check to see if notification list has been updated based on array length
     var notifications_list = notification.getNotifications();
@@ -80,6 +94,21 @@ $(document).ready(function() {
     numNotifications = notifications_list.length;
     refreshNotifications();
   }, 1000);
+  
+  //check if user scrolled to bottom of list
+  $(window).scroll(function() {
+    if(window.innerHeight + document.body.scrollTop >= document.body.offsetHeight) {
+      //at the bottom of the page
+      console.log("bottom");
+      notification.fetchNextNotifications(10);
+    }
+  });
+  
+  //immediately populate with notifications
+  {% autoescape off %}
+  notification.insertNotifications({{ notifications_json }});
+  {% endautoescape %}
+  refreshNotifications(); //immediately display the notifications
 });
 </script>
    <div class="one-third column">
