@@ -150,7 +150,7 @@ var notification = (function() {
     my.fetch({"latest":serializeTime(time),"recent":n});
   }
   my.fetch = function(request) {
-    console.log(request);
+    //console.log(request);
     $.ajax({
       url:URL_REQUEST,
       type: 'POST',
