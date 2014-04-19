@@ -156,8 +156,9 @@ var notification = (function() {
   }  
   my.serialize = serializeTime;
   my.refreshView = function() {
+    
     $("#notifications").empty();
-    var li = $("<li class='all-notifications'><div><a>See all notifications</a></div></li>");
+    var li = $("<li class='all-notifications'><div><a href='/notification/'>See all notifications</a></div></li>");
     $("#notifications").append(li);
     
     var unread = false;
@@ -184,8 +185,8 @@ var notification = (function() {
       unread |= n.unread;
     }
     $("#notifications li.unread div.header").append('<a class="dismiss">Dismiss</a>');
-    $("#notifications li a.dismiss").click(function() {
-      var li = $(this).parent();
+    $("#notifications li div.header a.dismiss").click(function() {
+      var li = $(this).parent().parent();
       //mark as read
       var request = {"id":notification_list[li.data("index")].id};
       console.log(request);
@@ -199,7 +200,7 @@ var notification = (function() {
       }).done(function(data) {
         //get read of unread and dismiss button
         li.removeClass("unread");
-        li.children("a.dismiss").remove();
+        li.children("div.header").children("a.dismiss").remove();
       });
     });
     if(unread) {
@@ -208,6 +209,9 @@ var notification = (function() {
     else {
       $("#notification-icon").attr("src", "/static/images/mail.png");
     }
+  }
+  my.getNotifications = function() {
+    return notification_list;
   }
   my.printNotifications = function() {
     console.log(notification_list);

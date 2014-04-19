@@ -39,6 +39,16 @@ def get_dummy_notifications(request):
   json_list = [{'id':101, 'generator':"TestGenerator", 'last_modified':datetime.now().strftime(DATE_STRING_FORMAT)},{'id':102, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(hours=2)).strftime(DATE_STRING_FORMAT)},{'id':103, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(minutes=3)).strftime(DATE_STRING_FORMAT)}]
   return HttpResponse(json.dumps(json_list),mimetype='application/json')
 
+DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
+def create_json_notifications(notifications):
+  json_list = [{'id':str(n.id),
+              'generator':n.generator, 
+              'creation_date':n.creation_date.strftime(DATE_STRING_FORMAT),
+              'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 
+              'unread': True if n.viewed_date is None else False,
+              'type':n.type} for n in notifications]
+  return json_list
+  
 @is_in_group(ALL)
 def get_notifications(request):
   """Expects JSON request in the form
@@ -50,7 +60,6 @@ def get_notifications(request):
   
   Returns JSON list of notifications
   """
-  DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
   try:
     obj = json.loads(request.body)
     user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
@@ -72,19 +81,8 @@ def get_notifications(request):
       notifications = notification.objects(**filter)
     else:
       notifications = notification.objects(**filter).order_by('-creation_date')[:recent]
-
-    json_list = [{'id':str(n.id),
-                  'generator':n.generator, 
-                  'creation_date':n.creation_date.strftime(DATE_STRING_FORMAT),
-                  'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 
-                  'unread': True if n.viewed_date is None else False,
-                  'type':n.type} for n in notifications]
-
-    #mark that notifications have been read
-    #for n in notifications:
-    #  n.mark_read()
       
-    return HttpResponse(json.dumps(json_list),content_type='application/json')
+    return HttpResponse(json.dumps(create_json_notifications(notifications)),content_type='application/json')
   except ValueError:
     return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
 
@@ -111,7 +109,15 @@ def mark_notification_read(request):
     return HttpResponse('{"success":"success"}',content_type='application/json')
   except ValueError:
     return HttpResponse('{"error":"Malformed JSON"}',mimetype='application/json')
-  
+
+
+@is_in_group(ALL)
+def list_all_notifications(request):
+  #find first 10 notifications for user
+  #user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
+  #notifications = notification.objects(target=user).order_by('-creation_date')[:20]
+  return render_to_response('list_all_notifications.html')
+  #return render_to_response('list_all_notifications.html', {'notifications':notifications})
 
 def medication_status(request):
    minusone = datetime.now()-timedelta(hours=1)
