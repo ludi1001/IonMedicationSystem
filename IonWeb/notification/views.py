@@ -112,7 +112,6 @@ def mark_notification_read(request):
   except ValueError:
     return HttpResponse('{"error":"Malformed JSON"}',mimetype='application/json')
 
-
 @is_in_group(ALL)
 def list_all_notifications(request):
   #find first 20 notifications for user
@@ -120,44 +119,63 @@ def list_all_notifications(request):
   notifications = notification.objects(target=user).order_by('-creation_date')[:20]
   return render_to_response('list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
 
+
 def medication_status(request):
+   message = ''
+   if request.method == 'POST':
+      if request.POST['requestType'] == 'takeMed':
+         rxuid = request.POST['rxuid']
+         quantity = request.POST['quantity']
+         patientID = request.POST['patientID']
+         message = take_medication(patient.objects(id=patientID)[0], rxuid, quantity, "ONLINE")
+         
    minusone = datetime.now()-timedelta(hours=1)
    now = datetime.now()
    plusone = datetime.now()+timedelta(hours=1)
    
    timeset = [ minusone.strftime("%I:00%p").lower(), now.strftime("%I:00%p").lower(), plusone.strftime("%I:00%p").lower() ]
    
-   ActivePatients = active_medications(timeset)
-   
-   return render_to_response('medStatus.html', {'ActivePatients': ActivePatients, 'time' : datetime.now().strftime("%I:00%p")}, context_instance=RequestContext(request))
-
-   # if int flag is 0, return all valid and set flag to 1
-   # if int flag is 1, return all valid with medflag still one
-   # if int flag is 2, return all valid with medflag still one and set flag to 0
-   
-   # Returns patients with a medication that falls within a timeset range, whose start date is before or equal to today
-   
-def active_medications(timeset): 
-   # medflag is set in cron script.
-
-   # elemMatch ensures the matched elements occur in the same medication instance   
-   ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } }})
-   
-   medDict = {};
+   ActivePatients = active_medications(timeset, 1)
+   print ActivePatients
+   medDict = {}
    
    # check medication taken history
    for active_patient in ActivePatients:
-      medications = [];
+      medications = []
       for medication in active_patient.medications:
-         for time in medication['times']:
-            if time in timeset:
-               print medication['rxuid']
-               medications.append(medication);
-         
-      medDict[active_patient] = medications;
+         if medication['rxuid'] in active_patient.activeMeds:
+            medications.append(medication)
+            
+      if medications:
+         medDict[active_patient] = medications;
+   
+   print ActivePatients
+   return render_to_response('medStatus.html', {'medDict': medDict, 'time' : datetime.now().strftime("%I:00%p"), 'message' : message}, context_instance=RequestContext(request))
 
-   return medDict
+   # Returns patients with a medication that falls within a timeset range, whose start date is before or equal to today. If mode is 0, return all valid, if mode is 1 return all valid that haven't taken their medication yet
+def active_medications(timeset, mode): 
+   # elemMatch ensures the matched elements occur in the same medication instance  
+   if mode == 1:
+      ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } }, 'activeMeds' : { '$not': {'$size': 0}}})
+   elif mode == 0:
+      ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } } })
+      # TODO: check if last medication taken time was # days ago
+      
+   return ActivePatients
 
+def take_medication(Patient, rxuid, quantity, dispenserID):
+   medEntry = {}
+   medEntry['rxuid'] = rxuid
+   medEntry['quantity'] = quantity
+   medEntry['timestamp'] = datetime.now()
+   medEntry['dispenserID'] = dispenserID;
+   
+   Patient.medHistory.append({ 'MedicationTaken' : medEntry })
+   Patient.activeMeds.remove( rxuid )
+   Patient.save()
+   # TODO: remove flag
+   return Patient.firstName + " " + Patient.lastName + " took medication " + rxuid 
+   
 def notifications(request):
    if request.method == 'POST':
       if request.POST['requestType'] == 'newNotification':

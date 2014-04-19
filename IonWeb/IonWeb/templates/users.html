@@ -1,0 +1,38 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Users
+{% endblock %}
+{% block header_title %}
+Search patients by name
+{% endblock %}
+{% block content %}
+
+{% if requestType == patientInfo %}
+   <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
+   <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
+   <h5>ActiveMeds</h5> {{ patient.activeMeds }}<br><br>
+   <h5>medHistory</h5> {{ patient.medHistory }} <br><br>
+   <h5>medications</h5> {{ patient.medications }} <br><br>
+   <h5>dispenserID</h5> {{ patient.dispenserID }} <br><br>
+   <h5>user</h5> {{ patient.user }}
+   
+   
+   
+{% else %}
+   <i>*Leave blank for entire patient list</i><br>
+   <form method="get" action="../users">
+     
+      <input type="hidden" name="requestType" value="searchPatients">
+      <input type="text" name="search" placeholder="name">
+
+      <input type="submit" value="Search Database">
+    </form>
+    
+   {% for patient in patientlist %}
+         - <a href = ../users?requestType=patientInfo&id={{ patient.id }}>{{ patient.lastName }}, {{ patient.firstName }} </a><br>
+    
+   {% endfor %}
+{% endif %}   
+   
+   
+{% endblock %} 

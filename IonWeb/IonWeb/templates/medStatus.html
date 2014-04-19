@@ -6,18 +6,21 @@ Notification Status
 Notification Status Page
 {% endblock %}
 {% block content %}
-<h2> Patients that can take their medication, {{ time }}</h2>
-   {% for patient, medications in ActivePatients.iteritems %}
-      {{ patient.lastName }}, {{ patient.firstName }}<br>
+<h2> Patients that can take their medication, {{ time }}</h2><br>
+<b>{{ message }}</b><br>
+   {% for patient, medications in medDict.iteritems %}
+      <h3>{{ patient.lastName }}, {{ patient.firstName }}</h3>
       
-      {% for medication in medications %} <br>
-         {{ medication.rxuid }}
+      {% for medication in medications %}
          <form method="post" action = "../notification/medStatus">
             {% csrf_token %}
-            <input type = "hidden" name ="requestType" value="takeMed">
-            <input type = "submit" value = "take medication {{ medication.rxuid }} ">
+            <input type = "hidden" name = "requestType" value = "takeMed">
+            <input type = "hidden" name = "rxuid" value = "{{ medication.rxuid }}">
+            <input type = "hidden" name = "quantity" value = "{{ medication.quantity }}">
+            <input type = "hidden" name = "patientID" value = "{{ patient.id }}">
+            
+            <input type = "submit" value = "take medication {{ medication.rxuid }} ( {{ medication.times }} )">
          </form>
-       
       {% endfor %}
    {% endfor %}
 {% endblock %} 

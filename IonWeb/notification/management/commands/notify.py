@@ -1,6 +1,9 @@
 from django.core.management.base import BaseCommand, CommandError
+#from django.contrib.auth.models import User
 from DataEntry.models import patient
 from notification.models import notification
+#from account.models import IonUser
+
 #from notification.views import active_medications
 from datetime import datetime, timedelta, date
 
@@ -14,8 +17,6 @@ class Command(BaseCommand):
       now = datetime.now()
       plusone = datetime.now()+timedelta(hours=1)
       
-      
-   
       # set the flag for the newly active
       timeset = [plusone.strftime("%I:00%p").lower()]
       SetFlagPatients = active_medications(timeset, 0)
@@ -35,15 +36,15 @@ class Command(BaseCommand):
          for medication in Patient.medications:
             for time in medication['times']:
                if time in timeset:
-                  # newNotification = notification(target=Patient, type="medReminder", generator = "CRON")
-                  # newNotification.save()
+                  #newNotification = notification(target=Patient, type="medReminder", generator = "CRON")
+                  #newNotification.save()
                   print "notify " + medication['rxuid']
    
       timeset = [missed.strftime("%I:00%p").lower()]
       MissedPatients = active_medications(timeset, 1)
       
       # remove from activeMeds and mark them as medication missed
-      for Patient in NotificationPatients:
+      for Patient in MissedPatients:
          for medication in Patient.medications:
             for time in medication['times']:
                if time in timeset:
@@ -65,21 +66,6 @@ def active_medications(timeset, mode):
       ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } }, 'activeMeds' : { '$not': {'$size': 0}}})
    elif mode == 0:
       ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } } })
-   
-   return ActivePatients
-   
-   # medDict = {};
-   
-   # # TODO: check medication taken history?
-   # for active_patient in ActivePatients:
-      # medications = [];
-      # for medication in active_patient.medications:
-         # for time in medication['times']:
-            # if time in timeset:
-               # print "search for " + medication['rxuid']
-               # medications.append(medication);
-         
-      # medDict[active_patient] = medications;
-
-   # return medDict
+      # TODO: if last medication taken time was # days ago
       
+   return ActivePatients

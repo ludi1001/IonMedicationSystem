@@ -31,6 +31,7 @@ def patientinfo(request):
          times = request.POST.getlist('times')
          repeatDays = request.POST.get('repeatDays', -1)
          
+         # TODO: if rxuid is already in the patient's medication, don't append and throw an error
          Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays})
          Patient.save()
 
@@ -86,3 +87,21 @@ def medinfo(request):
    
    return render_to_response('medinfo.html', {}, context_instance=RequestContext(request))
 
+def users(request):
+   params = {}
+
+   if request.GET.get('requestType') == 'searchPatients':
+      patientlist = patient.objects(__raw__={ '$or' : [{'firstName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}, { 'lastName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}]})
+      params = { 'patientlist' : patientlist }
+      
+   if request.GET.get('requestType') == 'patientInfo':
+      id = request.GET.get('id')
+      Patient = patient.objects(id=id)[0]
+      params = {'patient':Patient}
+
+   return render_to_response("users.html", params, context_instance=RequestContext(request))
+   
+def find(request):
+
+   return render_to_response(template, params, context_instance=RequestContext(request))
+   
