@@ -85,7 +85,8 @@ var notification = (function() {
   var URL_REQUEST = "/notification/get";
   var URL_READ = "/notification/read";
   var IDEAL_NUM_NOTIFICATIONS = 10;
-  var REFRESH_TIME = 1000; //fast refresh time to sync between actions on different devices
+  var REFRESH_TIME = 5000;
+  var REFRESH_TIME_UPDATE = 5000;
   
   var my = {};
   var notification_list = [];
@@ -247,7 +248,8 @@ var notification = (function() {
   
   var lastUpdateTime = new Date();
   setInterval(function() {
-    
-  }, REFRESH_TIME);
+    my.fetch({"updated_since":serializeTime(lastUpdateTime)});
+    lastUpdateTime = new Date();
+  }, REFRESH_TIME_UPDATE);
   return my;
 })();

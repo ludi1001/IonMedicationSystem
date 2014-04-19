@@ -8,8 +8,20 @@ Notifications
 {% block head %}
 <style type="text/css">
 #notification-list li {
-  border-bottom: solid 1px #ccc;
-  padding-bottom: 10px;
+  padding:5px 10px 5px 10px;
+  border-top:solid gray 1px;
+  margin:0;
+}
+#notification-list li.unread {
+  background:#e2e2e2;
+}
+
+#notification-list li a{
+  cursor:pointer;
+}
+
+#notification-list li a.dismiss {
+  float:right;
 }
 </style>
 {% endblock %}
@@ -89,9 +101,9 @@ $(document).ready(function() {
   //periodically check for updates
   setInterval(function() {
     //check to see if notification list has been updated based on array length
-    var notifications_list = notification.getNotifications();
-    if(notifications_list.length == numNotifications) return;
-    numNotifications = notifications_list.length;
+    //var notifications_list = notification.getNotifications();
+    //if(notifications_list.length == numNotifications) return;
+    //numNotifications = notifications_list.length;
     refreshNotifications();
   }, 1000);
   
