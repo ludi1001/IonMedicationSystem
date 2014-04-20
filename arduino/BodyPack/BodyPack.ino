@@ -13,6 +13,13 @@
 #define CONNECTED_CURL_COUNT      40//1200 //number of cycles to wait before checking for notifications if connected to server (5 min)
 #define DISCONNECTED_CURL_COUNT   8//240 //number of cycles to wait before checking for notifications if disconnected (1 min)
 #define DISMISS_CYCLES            4
+String HOST = "10.190.87.162";
+String ID = "533cc8a285ce7a3cb40203a5";
+
+String protocol = "http://"
+String URL_get = protocol + HOST + "/pack/get?id=" + ID;
+String URL_confirm = protocol + HOST + "/pack/confirm?id=" + ID;
+
 
 void setup() {
   // Initialize Bridge
@@ -76,6 +83,7 @@ void stopNotify() {
   digitalWrite(PIN_MOTOR, LOW);
   digitalWrite(PIN_SPEAKER, LOW);
   digitalWrite(13, LOW);
+  confirmReceivedNotification();
 }
 
 void dismiss() {
@@ -114,7 +122,6 @@ void runCurl() {
     if(c == '1') {
       //we have a notification!
       disconnected = false;
-      confirmReceivedNotification();
       notify();
     }
     else if(c == '0') {
@@ -134,6 +141,8 @@ void confirmReceivedNotification() {
   Process p;
   p.begin("curl");
   p.addParameter("http://10.190.87.162/notification/pack/confirm");
+  p.addParameter("--connect-timeout");
+  p.addParameter("5"); //5 second timeout
   p.run();
 }
 /*===========================================================================*/

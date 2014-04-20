@@ -1,4 +1,4 @@
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render, render_to_response, redirect
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt
@@ -11,33 +11,6 @@ from account.models import IonUser
 
 import json
 from datetime import datetime, timedelta, date
-
-
-
-#temporary function
-def generate_notification(request):
-  obj = json.loads(request.body)
-  return HttpResponse("hi")
-  # return render_to_response('index.html', {},
-  #  context_instance=RequestContext(request))
-
-#temporary  
-def get_all_notifications(request):
-  data = []
-  for n in notification.objects:
-    data.append({"generator": str(n.generator),
-      "creation_date": str(n.creation_date),
-      "modified_date": str(n.modified_date),
-      "target": str(n.target.__id),
-      "type": str(n.type)
-    })
-  return HttpResponse(json.dumps(data),mimetype='application/json')
-
-#temporary
-def get_dummy_notifications(request):
-  DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
-  json_list = [{'id':101, 'generator':"TestGenerator", 'last_modified':datetime.now().strftime(DATE_STRING_FORMAT)},{'id':102, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(hours=2)).strftime(DATE_STRING_FORMAT)},{'id':103, 'generator':"TestGenerator", 'last_modified':(datetime.now()+timedelta(minutes=3)).strftime(DATE_STRING_FORMAT)}]
-  return HttpResponse(json.dumps(json_list),mimetype='application/json')
 
 DATE_STRING_FORMAT = '%m/%d/%Y %H:%M:%S'
 def create_json_notifications(notifications):
@@ -84,6 +57,9 @@ def get_notifications(request):
     else:
       notifications = notification.objects(**filter).order_by('-creation_date')[:recent]
       
+    for n in notifications:
+      n.mark_retrieved()
+      
     return HttpResponse(json.dumps(create_json_notifications(notifications)),content_type='application/json')
   except ValueError:
     return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
@@ -119,6 +95,26 @@ def list_all_notifications(request):
   notifications = notification.objects(target=user).order_by('-creation_date')[:20]
   return render_to_response('list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
 
+def pack_check(request):
+  if 'id' not in request.GET:
+    return redirect('/')
+  #see if there are any pending notifications
+  user = IonUser.objects(id=request.GET['id'])[0]
+  notifications = notification.objects(target=user,retrieval_date=None)
+  
+  if len(notifications) > 0:
+    return HttpResponse('1')
+  return HttpResponse('0')
+
+def pack_confirm(request):
+  if 'id' not in request.GET:
+    return redirect('/')
+  
+  user = IonUser.objects(id=request.GET['id'])[0]
+  notifications = notification.objects(target=user,retrieval_date=None)
+  for n in notifications:
+    n.mark_retrieved()
+  return redirect('/')
 
 def medication_status(request):
    message = ''
