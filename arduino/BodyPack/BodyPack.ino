@@ -1,24 +1,23 @@
 #include <Process.h>
 
 #define PIN_BATTERY_LOW  8
-#define PIN_DISCONNECTED 13
+#define PIN_DISCONNECTED 7
 #define PIN_MOTOR        9
 #define PIN_SPEAKER      10
 
-#define PIN_DISMISS       7
-#define INTERRUPT_DISMISS 4
+#define PIN_DISMISS       3
+#define INTERRUPT_DISMISS 0
 
 #define CYCLE_TIME                250 //run loop every 250 ms
 #define LOW_BATTERY_VCC           4600 //low battery indicator
-#define CONNECTED_CURL_COUNT      1200 //number of cycles to wait before checking for notifications if connected to server
-#define DISCONNECTED_CURL_COUNT   240 //number of cycles to wait before checking for notifications if disconnected
+#define CONNECTED_CURL_COUNT      40//1200 //number of cycles to wait before checking for notifications if connected to server (5 min)
+#define DISCONNECTED_CURL_COUNT   8//240 //number of cycles to wait before checking for notifications if disconnected (1 min)
+#define DISMISS_CYCLES            4
 
 void setup() {
   // Initialize Bridge
   Bridge.begin();
-  
-  Serial.begin(9600);
-  
+
   pinMode(PIN_DISMISS, INPUT_PULLUP);
   attachInterrupt(INTERRUPT_DISMISS, dismiss, LOW);
   
@@ -41,48 +40,53 @@ void loop() {
 }
 
 /*==========================================================================*/
-bool notification_on = false;
-bool speaker_on = false;
+volatile bool notification_on = false;
+volatile bool try_disable_notification = false;
+int dismiss_cycles = 0;
 void notifySetup() {
   pinMode(PIN_MOTOR, OUTPUT);
   pinMode(PIN_SPEAKER, OUTPUT);
+  pinMode(13, OUTPUT);
 }
 
 void notify() {
+  if(notification_on) return; //notifications already on, no need to bother turning them on again
   notification_on = true;
-  speaker_on = true;
   digitalWrite(PIN_MOTOR, HIGH);
   digitalWrite(PIN_SPEAKER, HIGH);
+  digitalWrite(13, HIGH);
 }
 
 void notifyLoop() {
   if(!notification_on) return;
-  
-  //turn sound on and off
-  speaker_on = !speaker_on;
-  if(speaker_on) digitalWrite(PIN_SPEAKER, HIGH);
-  else digitalWrite(PIN_SPEAKER, LOW);
+  if(try_disable_notification) {
+    ++dismiss_cycles;
+    if(dismiss_cycles >= DISMISS_CYCLES) {
+      if(digitalRead(PIN_DISMISS) == LOW) {
+        stopNotify();
+      }
+      try_disable_notification = false;
+      dismiss_cycles = 0;
+    }
+  }
 }
 
 void stopNotify() {
   notification_on = false;
-  speaker_on = false;
   digitalWrite(PIN_MOTOR, LOW);
   digitalWrite(PIN_SPEAKER, LOW);
+  digitalWrite(13, LOW);
 }
 
 void dismiss() {
-  delay(800);
-  if(digitalRead(PIN_DISMISS) == LOW) {
-    //real dismissal
-    stopNotify();
-  }
+   try_disable_notification = true;
 }
 /*==============================================================================*/
 int curl_loop_count = 0;
 bool disconnected = false;
 void curlLoop() {
   int count = disconnected ? DISCONNECTED_CURL_COUNT : CONNECTED_CURL_COUNT;
+  ++curl_loop_count;
   if(curl_loop_count >= count) {
     runCurl();
     curl_loop_count = 0;
@@ -100,7 +104,7 @@ void runCurl() {
   p.begin("curl");  // Process that launch the "curl" command
   p.addParameter("http://10.190.87.162/notification/pack/check"); // Add the URL parameter to "curl"
   p.addParameter("--connect-timeout");
-  p.addParameter("5");
+  p.addParameter("5"); //5 second timeout
   p.run();      // Run the process and wait for its termination
 
   // Print arduino logo over the Serial
