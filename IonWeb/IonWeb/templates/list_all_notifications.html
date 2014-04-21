@@ -1,0 +1,151 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Notifications
+{% endblock %}
+{% block header_title %}
+Notifications
+{% endblock %}
+{% block head %}
+<style type="text/css">
+#notification-list li {
+  padding:5px 10px 5px 10px;
+  border-top:solid gray 1px;
+  margin:0;
+}
+#notification-list li.unread {
+  background:#e2e2e2;
+}
+
+#notification-list li a{
+  cursor:pointer;
+}
+
+#notification-list li a.dismiss {
+  float:right;
+}
+</style>
+{% endblock %}
+{% block content %}
+<script type="text/javascript">
+$(document).ready(function() {
+  //setup filters
+  
+  //map of filters, function returns true if notification is to be kept in the list
+  var filters = {
+    "start-date":function(notification) {
+      return false;
+    },
+    "unread":function(notification) {
+      return notification.unread;
+    }
+  };
+  //disable all filters initially
+  $("#filters .filter .value input").attr("disabled", "disabled");
+  //checkbox enables filters
+  $("#filters .filter :checkbox").change(function() {
+    var el = $(this).parents(".filter").children(".value").children("input");
+    if($(this).is(":checked")) el.removeAttr("disabled");
+    else el.attr("disabled", "disabled");
+    
+    refreshNotifications();
+  });
+  
+  var numNotifications = 0;
+  //refresh notifications list
+  function refreshNotifications() {
+    var notifications_list = notification.getNotifications();
+    var ul = $("<ul id='notification-list'></ul>");
+    for(var i = 0; i < notifications_list.length; ++i) {
+      var n = notifications_list[i];
+      //filter if necessary
+      var good = true;
+      for(var filter in filters) {
+        if($("#"+filter).find(":checkbox").is(":checked") && !filters[filter](n)) {
+          good = false;
+          break;
+        }
+      }
+      if(!good) continue;
+      
+      var html = [];
+      html.push("<li>");
+      html.push("<div class='header'>");
+      html.push("<time>");
+      html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
+      html.push("</time>");
+      html.push("</div>");
+      html.push("Test asdfjaksdfl  ");
+      html.push("</li>");
+      var li = $(html.join(""));
+      if(n.unread) {
+        li.addClass("unread");
+        li.data("index",i);
+      }
+      ul.append(li);
+    }
+    ul.find("li.unread div.header").append('<a class="dismiss">Dismiss</a>');
+    ul.find("li div.header a.dismiss").click(function() {
+      var li = $(this).parent().parent();
+      //mark as read
+      notification.markRead(notification.getNotifications()[li.data("index")].id, function(data) {
+        //get read of unread and dismiss button
+        li.removeClass("unread");
+        li.children("div.header").children("a.dismiss").remove();
+        notification.getNotifications()[li.data("index")].unread = false; //assume it went through, let notification updater figure it out
+        notification.refreshView();
+      });
+    });
+    $("#notification-list").replaceWith(ul);
+  }
+  
+  //periodically check for updates
+  setInterval(function() {
+    //check to see if notification list has been updated based on array length
+    //var notifications_list = notification.getNotifications();
+    //if(notifications_list.length == numNotifications) return;
+    //numNotifications = notifications_list.length;
+    refreshNotifications();
+  }, 1000);
+  
+  //check if user scrolled to bottom of list
+  $(window).scroll(function() {
+    if(window.innerHeight + document.body.scrollTop >= document.body.offsetHeight) {
+      //at the bottom of the page
+      console.log("bottom");
+      notification.fetchNextNotifications(20);
+    }
+  });
+  
+  //immediately populate with notifications
+  {% autoescape off %}
+  notification.insertNotifications({{ notifications_json }});
+  {% endautoescape %}
+  refreshNotifications(); //immediately display the notifications
+});
+</script>
+   <div class="one-third column">
+		<h2>Filters</h2>
+    <form id="filters">
+    <table>
+    <tr id="start-date" class="filter"><td class="checkbox"><input type="checkbox"></td><td class="text">Start Date</td><td class="value"><input type="date"></td></tr>
+    <tr id="end-date" class="filter"><td class="checkbox"><input type="checkbox"></td><td class="text">End Date</td><td class="value"><input type="date"></td></tr>
+    <tr id="unread" class="filter"><td class="checkbox"><input type="checkbox"></td><td class="text">Unread</td><td class="value"></td></tr>
+    </table>
+    </form>
+	</div>
+	<div class="two-thirds column">
+    <ul id="notification-list">
+      
+    </ul>
+		  <!--{% for notification in notifications %}
+        <div>
+          <time>{{ notification.creation_time }}</time>
+        </div>
+        Blah Blah blah
+     {% endfor %}-->
+	</div>
+    <hr>
+   
+
+
+{% endblock %} 

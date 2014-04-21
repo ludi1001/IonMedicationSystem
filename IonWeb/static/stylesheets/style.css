@@ -86,7 +86,7 @@ header nav ul li a:hover {
   border-bottom-left-radius:8px;
   border-bottom-right-radius:8px;
   z-index:8;
-  background:#e2e2e2;
+  background:#fafafa;
   display:none;
 }
 
@@ -97,7 +97,7 @@ header nav ul li a:hover {
 }
 
 #notifications li.unread {
-  background:#fff;
+  background:#e2e2e2;
 }
 
 #notifications li a{
@@ -119,6 +119,14 @@ header nav ul li a:hover {
 
 #notifications li.all-notifications div{
   text-align:center;
+}
+
+#filters table tr:first-child {
+  text-align:right;
+}
+
+#filters table tr td {
+  padding:5px;
 }
 
 time {
