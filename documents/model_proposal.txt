@@ -1,5 +1,6 @@
 Compartments: [{
     (ID)
+    * PatientID
     (implicit status: empty, open, cleared)
     rxuid,
     quantity,

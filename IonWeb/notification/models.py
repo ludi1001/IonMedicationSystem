@@ -25,3 +25,7 @@ class notification(Document):
     self.viewed_date = datetime.datetime.now()
     self.save()
   
+class medNotification(notification):
+   rxuid = IntField()
+   patientName = StringField()
+   time = StringField()

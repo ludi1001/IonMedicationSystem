@@ -8,6 +8,8 @@ from account.privilege_tests import *
 from DataEntry.models import patient
 from models import notification
 from account.models import IonUser
+from helper import RxNorm, helper
+from notify import runNotify
 
 import json
 from datetime import datetime, timedelta, date
@@ -127,15 +129,15 @@ def medication_status(request):
    
    timeset = [ minusone.strftime("%I:00%p").lower(), now.strftime("%I:00%p").lower(), plusone.strftime("%I:00%p").lower() ]
    
-   ActivePatients = active_medications(timeset, 1)
+   ActivePatients = helper.active_medications(timeset, 1)
    print ActivePatients
    medDict = {}
    
-   # check medication taken history
+   # TODO: recheck medication taken history
    for active_patient in ActivePatients:
       medications = []
       for medication in active_patient.medications:
-         if medication['rxuid'] in active_patient.activeMeds:
+         if medication['rxuid'] in active_patient.activeMeds and any((True for x in medication['times'] if x in timeset)):
             medications.append(medication)
             
       if medications:
@@ -143,17 +145,6 @@ def medication_status(request):
    
    print ActivePatients
    return render_to_response('medStatus.html', {'medDict': medDict, 'time' : datetime.now().strftime("%I:00%p"), 'message' : message}, context_instance=RequestContext(request))
-
-   # Returns patients with a medication that falls within a timeset range, whose start date is before or equal to today. If mode is 0, return all valid, if mode is 1 return all valid that haven't taken their medication yet
-def active_medications(timeset, mode): 
-   # elemMatch ensures the matched elements occur in the same medication instance  
-   if mode == 1:
-      ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } }, 'activeMeds' : { '$not': {'$size': 0}}})
-   elif mode == 0:
-      ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } } })
-      # TODO: check if last medication taken time was # days ago
-      
-   return ActivePatients
 
 def take_medication(Patient, rxuid, quantity, dispenserID):
    medEntry = {}
@@ -180,3 +171,23 @@ def notifications(request):
          newNotification.save()
          
    return render_to_response('notifications.html', {'Notifications': notification.objects}, context_instance=RequestContext(request))
+
+def notify(request):
+   runNotify()
+
+   return render_to_response('notifications.html', {'Notifications': notification.objects}, context_instance=RequestContext(request))
+
+def notificationMessage(notein):
+   if notein.type == 'reminder':
+      patientName = notein.patientName
+      medName = RxNorm.getName(notein.rxuid)
+      time = notein.time
+      return "Reminder for " + patientName + ": Take medication " + medName + " (" + time + ")"
+   
+   if notein.type == 'missed':
+      patientName = notein.patientName
+      name = RxNorm.getName(notein.rxuid)
+      time = notein.time
+      return patientName + " missed medication " + medName + " (" + time + ")"
+   
+   return "unknown notification type"

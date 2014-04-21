@@ -1,9 +1,9 @@
 {% extends "base_template.html" %}
 {% block page_title %}
-Patient Management
+Add Patient
 {% endblock %}
 {% block header_title %}
-Patient Management
+Add Patient
 {% endblock %}
 {% block head %}
    {% load dispenser_tags %}
@@ -46,6 +46,7 @@ Patient Management
       <input type="hidden" name="requestType" value="newPatient">
       <input type="text" name="firstName" placeholder="First Name" required>
       <input type="text" name="lastName" placeholder="Last Name" required>
+      Birth date: <input type="date" name="birthDate" placeholder="" required><br><br>
 
       <input type="submit" value="Add Patient">
     </form>
@@ -137,7 +138,7 @@ Patient Management
         <input type="submit" name="" value="update">
       </form>
 
-      <form method="post" action="./" onSubmit="return confirm('Do you really want to delete this patient?');">
+      <form method="post" action="./patientinfo" onSubmit="return confirm('Do you really want to delete this patient?');">
         {% csrf_token %}
         <input type="hidden" name="requestType" value="deletePatient">
         <input type="hidden" name="id" value="{{patient.id}}">

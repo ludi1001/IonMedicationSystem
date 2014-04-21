@@ -50,7 +50,10 @@ My Dispensers
          {% if compartment %}
             {% with comp=compartment|get_compartment %}
                {% with medName=comp.rxuid|get_medName %}
-                  {{ medName }}
+               <br>
+                  Medication: {{ medName }} <br>
+                  Expiration: {{ comp.expiration }} <br>
+                  Lot Number: {{ comp.lot }}
                {% endwith %}
                <!-- TODO: add filter that takes rxuid and gives medication name -->
             {% endwith %}

@@ -7,7 +7,7 @@ Search patients by name
 {% endblock %}
 {% block content %}
 
-{% if requestType == patientInfo %}
+{% if requestType == 'patientInfo' %}
    <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
    <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
    <h5>ActiveMeds</h5> {{ patient.activeMeds }}<br><br>
@@ -16,9 +16,8 @@ Search patients by name
    <h5>dispenserID</h5> {{ patient.dispenserID }} <br><br>
    <h5>user</h5> {{ patient.user }}
    
-   
-   
 {% else %}
+
    <i>*Leave blank for entire patient list</i><br>
    <form method="get" action="../users">
      

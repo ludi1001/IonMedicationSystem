@@ -1,5 +1,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from mongoengine.django.auth import User
+from account.models import IonUser
 from models import patient
 from helper import RxNorm
 import datetime
@@ -11,7 +13,16 @@ def patientinfo(request):
       if request.POST['requestType'] == 'newPatient':
          firstName = request.POST['firstName']
          lastName = request.POST['lastName']
-         newPatient = patient(firstName=firstName, lastName=lastName, activeMeds = [])
+         birthDate = request.POST['birthDate']
+         username = firstName + lastName         
+         userNum = len(User.objects(__raw__={'username':{'$regex': '^' + username, '$options' : 'i'}}))
+
+         user = User.create_user(username + str(userNum), 'password')
+         user.save()
+         ion_user = IonUser(user=user, group='patient', birthdate=birthDate)
+         ion_user.save()
+    
+         newPatient = patient(firstName=firstName, lastName=lastName, activeMeds = [], user=ion_user)
          newPatient.save()
 
       if request.POST['requestType'] == 'deletePatient':
@@ -32,8 +43,10 @@ def patientinfo(request):
          repeatDays = request.POST.get('repeatDays', -1)
          
          # TODO: if rxuid is already in the patient's medication, don't append and throw an error
-         Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays})
+         Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays, 'active': 'true'})
          Patient.save()
+         
+      # TODO: add ability to deactivate medication. record deactivation time.
 
    return render_to_response('patientinfo.html', {'Patients': patient.objects},
                               context_instance=RequestContext(request))
@@ -97,11 +110,7 @@ def users(request):
    if request.GET.get('requestType') == 'patientInfo':
       id = request.GET.get('id')
       Patient = patient.objects(id=id)[0]
-      params = {'patient':Patient}
+      params = {'requestType' : 'patientInfo', 'patient':Patient}
 
    return render_to_response("users.html", params, context_instance=RequestContext(request))
-   
-def find(request):
-
-   return render_to_response(template, params, context_instance=RequestContext(request))
    
