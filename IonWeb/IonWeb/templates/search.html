@@ -1,0 +1,187 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Users
+{% endblock %}
+{% block header_title %}
+Search patients by name
+{% endblock %}
+{% block head %}
+   {% load dispenser_tags %}
+  
+    <script type="text/javascript">
+<!--
+    function toggle_visibility(id) {
+       var e = document.getElementById(id);
+      e.style.display = ((e.style.display!='none') ? 'none' : 'block');
+    }
+//-->
+
+    function disable_enable()
+    {
+        if(document.getElementById("repeat").checked != 1)
+        {
+            document.getElementById("repeatDays").setAttribute("disabled","disabled");  
+        }
+        else
+        {
+            document.getElementById("repeatDays").removeAttribute("disabled");
+        }
+    }
+
+    </script>
+    
+    <style = "text/css">
+      div.addMed {
+         background-color: #D0D0D0;
+         padding-left: 20px;
+         padding-bottom: 0px;
+         width: 290px;
+      }
+    </style>
+
+{% endblock %}
+{% block content %}
+
+{% if requestType == 'patientInfo' %}
+   <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
+   <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
+   <h5>Active Medications</h5>
+   {% for rxuid in patient.activeMeds %}
+         {% with medName=rxuid|get_medName %}
+         <li>{{ medName }}<br>
+         {% endwith %}
+   {% endfor %}
+   <br>
+   <h5>Medication History</h5> 
+   
+   {% for medEntry in patient.medHistory %}
+         {% if medEntry.MedicationMissed %}
+            {% with medName=medEntry.MedicationMissed.rxuid|get_medName %}
+            {{ medEntry.MedicationMissed.timestamp }} - Patient missed taking {{ medEntry.MedicationMissed.quantity }} pills of {{ medName }} ({{ medEntry.MedicationMissed.time }})
+            {% endwith %}
+         {% elif medEntry.MedicationTaken %}
+            {% with medName=medEntry.MedicationTaken.rxuid|get_medName %}
+            {{ medEntry.MedicationTaken.timestamp }} - Patient took {{ medEntry.MedicationTaken.quantity }} pills of {{ medName }}
+            {% endwith %}
+         {% endif %}
+         <br>
+   {% endfor %}
+   <br>
+   <h5>dispenserID</h5> {{ patient.dispenserID }} <br><br>
+   <h5>Birthdate</h5>
+   {{ patient.user.birthdate|date:"m/d/Y"}}
+   <br><br>
+   <h5>Group</h5>
+   {{ patient.user.group }}<br><br>
+   
+   Username: {{ patient.user.user.username }}<br>
+   Email: {{ patient.user.user.username }}
+     <hr>
+      <h3>Active Medications</h3>
+      {% for medication in patient.medications %}
+         {% with medName=medication.rxuid|get_medName %}
+         <h4> {{ medName }} </h4>
+         {% endwith %}
+         <ul>
+         
+         Rxuid: {{ medication.rxuid }}
+         {% if medication.dispensed %}
+            <li> {{ medication.quantity }} pills are dispensed at
+            {% for time in medication.times %}
+               {{ time }}, 
+            {% endfor %}
+            
+         {% if medication.repeatDays > 0 %}
+            every {{ medication.repeatDays }} days
+            {% else %}
+            only once
+            {% endif %}
+            
+            <br>
+            Start Date: {{ medication.startDate }} 
+            
+         {% else %}
+         <li> Medication is not dispensed.
+         {% endif %}
+         </ul>
+      {% endfor %}
+          
+<a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a>
+    <div class="addMed" id="{{ patient.id }}" style="display:none;">
+    <form method="post" action="../patientinfo">
+      {% csrf_token %}
+      <input type="hidden" name="requestType" value="addMedication"><br>
+      <input type="hidden" name="id" value="{{ patient.id }}">
+      <h5>Medication Info</h5><br>
+      <a href = "../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID:</a><input type="number" name="rxuid"><br>
+      Dosage: <input type="number" name="numPills" placeholder="Number of pills"><br>
+      <input type="checkbox" name="dispensable" checked>Dispensable?<br><br>
+     
+      
+      <h5>Schedule</h5><br>
+      <h6>Start Date</h6>
+      <input type="date" name="startDate"><br><br>
+     
+      <h6>Times</h6>
+      <select multiple name = "times" size = "3">
+         <option> 12:00am
+         <option> 01:00am
+         <option> 02:00am
+         <option> 03:00am
+         <option> 04:00am
+         <option> 05:00am
+         <option> 06:00am
+         <option> 07:00am
+         <option> 08:00am
+         <option selected> 09:00am
+         <option> 10:00am
+         <option> 11:00am
+         <option> 12:00pm
+         <option> 01:00pm
+         <option> 02:00pm
+         <option> 03:00pm
+         <option> 04:00pm
+         <option> 05:00pm
+         <option> 06:00pm
+         <option> 07:00pm
+         <option> 08:00pm
+         <option> 09:00pm
+         <option> 10:00pm
+         <option> 11:00pm
+      </select>
+      
+      <h6>Repeat?</h6>
+      <input type="checkbox" onClick="disable_enable()" id="repeat" name="repeat" checked> 
+      Every <input type="number" id="repeatDays" name="repeatDays"> days
+      <br><br>
+      
+      <input type="submit" value="Add Medication">
+    </form>
+    </div>
+               
+  <!--    <form method="get" action="../update">
+        <input type="hidden" name="id" value="{{ patient.id }}">
+        <input type="hidden" name="name" value="{{ patient.name }}">
+        <input type="hidden" name="medications" value="{{ patient.medications }}">
+        <input type="hidden" name="dispenserID" value="{{ patient.dispenserID }}">
+        <input type="submit" name="" value="update">
+      </form> -->
+      
+{% else %}
+
+   <i>*Leave blank for entire patient list</i><br>
+   <form method="get" action="../search">
+     
+      <input type="hidden" name="requestType" value="searchPatients">
+      <input type="text" name="search" placeholder="name">
+
+      <input type="submit" value="Search Database">
+    </form>
+    
+   {% for patient in patientlist %}
+         > <a href = ../search?requestType=patientInfo&id={{ patient.id }}>{{ patient.lastName }}, {{ patient.firstName }}</a><br>
+   {% endfor %}
+{% endif %}   
+   
+   
+{% endblock %} 

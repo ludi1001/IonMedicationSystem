@@ -160,7 +160,7 @@ def take_medication(Patient, rxuid, quantity, dispenserID):
    Patient.medHistory.append({ 'MedicationTaken' : medEntry })
    Patient.activeMeds.remove( rxuid )
    Patient.save()
-   # TODO: remove flag
+   
    return Patient.firstName + " " + Patient.lastName + " took medication " + rxuid 
    
 def notifications(request):

@@ -36,7 +36,6 @@ def patientinfo(request):
          rxuid = request.POST['rxuid']
          quantity = request.POST['numPills']
          dispensed = 'dispensable' in request.POST
-         # create start notifications for startdate if that date is today
          # startDate can't be in the past
          startDate = request.POST['startDate']
          times = request.POST.getlist('times')
@@ -113,4 +112,18 @@ def users(request):
       params = {'requestType' : 'patientInfo', 'patient':Patient}
 
    return render_to_response("users.html", params, context_instance=RequestContext(request))
+   
+def search(request):
+   params = {}
+
+   if request.GET.get('requestType') == 'searchPatients':
+      patientlist = patient.objects(__raw__={ '$or' : [{'firstName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}, { 'lastName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}]})
+      params = { 'patientlist' : patientlist }
+      
+   if request.GET.get('requestType') == 'patientInfo':
+      id = request.GET.get('id')
+      Patient = patient.objects(id=id)[0]
+      params = {'requestType' : 'patientInfo', 'patient':Patient}
+
+   return render_to_response("search.html", params, context_instance=RequestContext(request))
    

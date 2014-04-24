@@ -1,11 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-#from django.contrib.auth.models import User
-
 from notification.models import medNotification
 from account.models import IonUser
 from helper import helper
 
-#from notification.views import active_medications
 from datetime import datetime, timedelta, date
 
 def runNotify():
@@ -51,6 +48,8 @@ def runNotify():
             missedEntry['rxuid'] = medication['rxuid']
             missedEntry['quantity'] = medication['quantity']
             missedEntry['time'] = missed.strftime("%I:00%p").lower()
+            missedEntry['timestamp'] = now
+            
             Patient.medHistory.append({ 'MedicationMissed' : missedEntry })
             Patient.save()
             if medication['rxuid'] in Patient.activeMeds:
