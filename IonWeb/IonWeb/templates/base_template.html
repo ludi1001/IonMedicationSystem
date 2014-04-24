@@ -23,11 +23,12 @@
           <a href="#"><img id="menu-icon" src="/static/images/menu6.png"></a>
           <a href="#"><img id="notification-icon" src="/static/images/mail2.png"></a>
         </div>
-        <form id="search">
-					<input id="search-box" type="text">
-				</form>
+        <form id="search" method="get" action="../search">
+         <input type="hidden" name="requestType" value="searchPatients">
+         <input id="search-box" type="text" name="search">
+        </form>
 				<ul id="main-menu">
-					<li><a href="/patientinfo">Users</a></li>
+					<li><a href="/users">Users</a></li>
 					<li><a href="/dispenser">Dispensers</a></li>
 					<li><a href="/medinfo">Medication</a></li>
 					<li><a href="#">Account</a></li>

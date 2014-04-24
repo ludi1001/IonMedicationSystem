@@ -22,44 +22,46 @@ class Command(BaseCommand):
       SetFlagPatients = active_medications(timeset, 0)
       for Patient in SetFlagPatients:
          for medication in Patient.medications:
-            for time in medication['times']:
-               if time in timeset:
-                  if medication['rxuid'] not in Patient.activeMeds:
-                     Patient.activeMeds.append(medication['rxuid'])
-                     Patient.save()
-                     print "set flag for " + medication['rxuid']
-      
+            if any(True for x in medication['times'] if x in timeset):
+               if medication['rxuid'] not in Patient.activeMeds:
+                  Patient.activeMeds.append(medication['rxuid'])
+                  Patient.save()
+                  print "set flag for " + medication['rxuid']
+   
       # notify the now and 1 hour ago people
       timeset = [now.strftime("%I:00%p").lower(), minusone.strftime("%I:00%p").lower()]
       NotificationPatients = active_medications(timeset, 1);
       for Patient in NotificationPatients:
          for medication in Patient.medications:
-            for time in medication['times']:
-               if time in timeset:
-                  #newNotification = notification(target=Patient, type="medReminder", generator = "CRON")
-                  #newNotification.save()
-                  print "notify " + medication['rxuid']
+            if any(True for x in medication['times'] if x in timeset):
+               #newNotification = notification(target=Patient, type="medReminder", generator = "CRON")
+               #newNotification.save()
+               # notification message
+               
+               print "notify " + medication['rxuid']
    
       timeset = [missed.strftime("%I:00%p").lower()]
-      MissedPatients = active_medications(timeset, 1)
+      MissedPatients = active_medications(timeset, 1) 
       
       # remove from activeMeds and mark them as medication missed
       for Patient in MissedPatients:
          for medication in Patient.medications:
-            for time in medication['times']:
-               if time in timeset:
-                  missedEntry = {}
-                  missedEntry['rxuid'] = medication['rxuid']
-                  missedEntry['quantity'] = medication['quantity']
-                  missedEntry['time'] = now.strftime("%I:00%p").lower()
-                  Patient.medHistory.append({ 'MedicationMissed' : missedEntry })
-                  Patient.save()
-                  print "patient missed  " + medication['rxuid']
-   
+            if any(True for x in medication['times'] if x in timeset):
+               missedEntry = {}
+               missedEntry['rxuid'] = medication['rxuid']
+               missedEntry['quantity'] = medication['quantity']
+               missedEntry['time'] = now.strftime("%I:00%p").lower()
+               Patient.medHistory.append({ 'MedicationMissed' : missedEntry })
+               Patient.save()
+               if medication['rxuid'] in Patient.activeMeds:
+                  Patient.activeMeds.remove(medication['rxuid'])
+               # TODO: notify caretaker?
+               print "patient missed  " + medication['rxuid']
+
       timeset = [missed.strftime("%I:00%p").lower()]
       MissedPatients = active_medications(timeset, 1)
       
-# LOGAN: This also caused the same/similar error when I tried to use this function by importing from notification.views
+# can't import from notifications.views...
 def active_medications(timeset, mode): 
    # elemMatch ensures the matched elements occur in the same medication instance  
    if mode == 1:

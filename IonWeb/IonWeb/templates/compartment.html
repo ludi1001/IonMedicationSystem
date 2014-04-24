@@ -17,8 +17,9 @@ Update Compartment Info
       {% csrf_token %}
 
       <input type = "hidden" name ="requestType" value="updateCompartment">
-      COMPT: <input type = "text" name = "id" value= {{ newID }}><br>
-      RXUID: <input type = "number" name ="rxuid" value="rxuid"><a href="../medinfo" target="_blank">RXUID LOOKUP</a> <br>
+      Compartment ID: <input type = "text" name = "id" value= {{ newID }}>
+      <a href="../medinfo" target="_blank">RXUID LOOKUP</a><br>
+      RXUID: <input type = "number" name ="rxuid" value="rxuid"> <br>
       LOT #: <input type = "number" name ="lot" value="lot"><br>
       EXPIR: <input type = "date" name ="expiration" value="expiration"><br>
       <input type = "submit" value = "Update Compartment">
