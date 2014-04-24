@@ -44,6 +44,8 @@ SESSION_ENGINE = 'mongoengine.django.sessions'
 
 LOGIN_URL = '/account/login/'
 
+LOGIN_REDIRECT_URL = '/'
+
 #MONGOENGINE_USER_DOCUMENT = 'account.models.BetterUser'
 
 # Application definition

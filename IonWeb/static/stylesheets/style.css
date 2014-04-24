@@ -58,7 +58,7 @@ header nav ul li {
 }
 header nav ul li a, header nav ul li a:visited {
 	color:#444;
-	font-size:24px;
+	font-size:20px;
 	margin-top: 5px;
 	padding-left:5px;
 	padding-right:5px;
@@ -218,4 +218,8 @@ footer nav ul {
 footer nav li {
 	display:inline;
 	padding-right:5px;
+}
+
+form .error {
+  color:red;
 }

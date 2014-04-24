@@ -1,34 +1,18 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <link href="{{STATIC_URL}}stylesheets/style.css" rel="stylesheet" type="text/css">
-  </head>
-  <body>
-  <!--
-    <h1>Login</h1>
-    {{message}}
-    <form method="post" action="./login">
-      {% csrf_token %}
-      <input type="text" name="username" placeholder="Username" required>
-      <input type="password" name="password" required>
-      <input type="submit" value="Login">
-    </form>-->
+{% extends "base_template.html" %}
+{% block page_title %}
+Login
+{% endblock %}
+{% block header_title %}
+Login
+{% endblock %}
+{% block menubar %}
+{% endblock %}
+{% block content %}
     <form method="post" action="{% url 'django.contrib.auth.views.login' %}">
 {% csrf_token %}
-<table>
-<tr>
-    <td>{{ form.username.label_tag }}</td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>{{ form.password.label_tag }}</td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login" />
+<p>{{ form.username.label_tag }} {{ form.username }}</p>
+<p>{{ form.password.label_tag }} {{ form.password }}</p>
+<input type="submit" value="Login" />
 <input type="hidden" name="next" value="{{ next }}" />
 </form>
-
-  </body>
-</html>
+{% endblock %}
