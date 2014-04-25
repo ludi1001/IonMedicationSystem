@@ -1,10 +1,14 @@
 #include <Servo.h>
 
-#define NUM_COMPARTMENTS 6  //number of compartments
-#define MAX_PILLS       10 //maximum number of pills to dispense
-#define MAX_PILL_WEIGHT 1000 //max pill weight in mg
+#define NUM_COMPARTMENTS  6  //number of compartments
+#define MAX_PILLS         10 //maximum number of pills to dispense
+#define MAX_PILL_WEIGHT   1000 //max pill weight in mg
+#define MAX_WAITING_TIME  1000000 //max time (in microseconds) to wait for pill to dispense before concluding it is empty 
+#define MG_PER_MV         2 //mg per mv for tray
+#define NUM_PHOTO_SAMPLES 10 //number of samples to take for phototransistor readings
 
-#define PIN_TRAY 1
+#define PIN_TRAY_SERVO 1
+#define PIN_TRAY       2
 
 /**************************************/
 struct Compartment {
@@ -20,7 +24,13 @@ void setup() {
   Serial.println("Starting up...");
   Serial.setTimeout(500);
   
+  pinMode(PIN_TRAY, INPUT);
+  
   setupCompartments();
+  for(int i = 0; i < NUM_COMPARTMENTS; ++i) {
+    pinMode(compartments[i].diode, OUTPUT);
+    pinMode(compartments[i].detector, INPUT);
+  }
 }
 
 void setupCompartments() {
@@ -84,8 +94,11 @@ void dispense() {
    
         
    //read ambient noise for phototransistor
+   int phototransistor_no_light = readPhototransistor(compartments[index].detector);
    //turn laser diode on
+   digitalWrite(compartments[index].diode, HIGH);
    //read phototransistor value
+   int phototransistor_with_light = readPhototransistor(compartments[index].detector);
    
    int pills_dispensed = 0; //pills dispensed for patient
    int total_pills_dispensed = 0; //pills dispensed in total, including those trashed
@@ -93,15 +106,25 @@ void dispense() {
      
      //weight tray beforehand
      int tray_before = weighTray();
-
      
      //turn servo on
      Servo servo;
      servo.attach(compartments[index].servo);
      
+     unsigned long start_time = micros();
+     
      int pills_dispensed = 0;
      while(pills_dispensed < pill_weight) {
+       if(true /*optical sensor detected something*/) {
+         ++pills_dispensed;
+         start_time = micros();
+       }
        //if after running for awhile and no pills, dispense is empty
+       unsigned long waiting_time = micros() - start_time;
+       if(waiting_time >= MAX_WAITING_TIME) {
+         Serial.println("!empty_compartment");
+         return;
+       }
      }
      
      //stop servo
@@ -122,30 +145,42 @@ void dispense() {
    }
    
    //turn laser off
+   digitalWrite(compartments[index].diode, LOW);
    
    //output dispensing stats
+   Serial.println("!successful_dispense");
    Serial.println(pills_dispensed);
    Serial.println(total_pills_dispensed);
 }
 /*************************************/
+int readPhototransistor(int pin) {
+  int s = 0;
+  for(int i = 0; i < NUM_PHOTO_SAMPLES; ++i) {
+    s += analogRead(pin);
+  }
+  s /= NUM_PHOTO_SAMPLES;
+  return s;
+}
 bool isCupPresent() {
   return true;
 }
 /*************************************/
 Servo tray;
 int weighTray() {
-  
+  int val = analogRead(PIN_TRAY);
+  return val;
 }
 void dumpTrayContentsIntoCup() {
-  tray.attach(PIN_TRAY);
+  tray.attach(PIN_TRAY_SERVO);
   tray.detach();
 }
 void dumpTrayContentsIntoTrash() {
-  tray.attach(PIN_TRAY);
+  tray.attach(PIN_TRAY_SERVO);
   tray.detach();
 }
 int calculatePillsDispensed(int tray_before, int tray_after, int pill_weight) {
   double diff = tray_after - tray_before;
+  diff *= MG_PER_MV * 5000.0 / 1024;
   diff /= pill_weight;
   return round(diff);
 }
