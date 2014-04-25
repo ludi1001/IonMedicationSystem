@@ -125,7 +125,7 @@ def medication_status(request):
          rxuid = request.POST['rxuid']
          quantity = request.POST['quantity']
          patientID = request.POST['patientID']
-         message = take_medication(patient.objects(id=patientID)[0], rxuid, quantity, "ONLINE")
+         message = helper.take_medication(patient.objects(id=patientID)[0], rxuid, quantity, "ONLINE")
          
    minusone = datetime.now()-timedelta(hours=1)
    now = datetime.now()
@@ -150,19 +150,6 @@ def medication_status(request):
    print ActivePatients
    return render_to_response('medStatus.html', {'medDict': medDict, 'time' : datetime.now().strftime("%I:00%p"), 'message' : message}, context_instance=RequestContext(request))
 
-def take_medication(Patient, rxuid, quantity, dispenserID):
-   medEntry = {}
-   medEntry['rxuid'] = rxuid
-   medEntry['quantity'] = quantity
-   medEntry['timestamp'] = datetime.now()
-   medEntry['dispenserID'] = dispenserID;
-   
-   Patient.medHistory.append({ 'MedicationTaken' : medEntry })
-   Patient.activeMeds.remove( rxuid )
-   Patient.save()
-   
-   return Patient.firstName + " " + Patient.lastName + " took medication " + rxuid 
-   
 def notifications(request):
    if request.method == 'POST':
       if request.POST['requestType'] == 'newNotification':

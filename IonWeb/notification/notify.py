@@ -43,7 +43,7 @@ def runNotify():
    # doesn't work if patient is returned anyways and has taken one of their medications
    for Patient in MissedPatients:
       for medication in Patient.medications:
-         if any(True for x in medication['times'] if x in timeset):
+         if any(True for x in medication['times'] if x in timeset) and medication['rxuid'] in Patient.activeMeds:
             missedEntry = {}
             missedEntry['rxuid'] = medication['rxuid']
             missedEntry['quantity'] = medication['quantity']

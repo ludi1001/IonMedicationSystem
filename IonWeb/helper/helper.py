@@ -12,3 +12,17 @@ def active_medications(timeset, mode):
       # TODO: if dispensable = true
       # TODO: if medication.active = true
    return ActivePatients
+   
+def take_medication(Patient, rxuid, quantity, dispenserID):
+   medEntry = {}
+   medEntry['rxuid'] = rxuid
+   medEntry['quantity'] = quantity
+   medEntry['timestamp'] = datetime.now()
+   medEntry['dispenserID'] = dispenserID;
+   
+   Patient.medHistory.append({ 'MedicationTaken' : medEntry })
+   Patient.activeMeds.remove( rxuid )
+   Patient.save()
+   
+   return Patient.firstName + " " + Patient.lastName + " took medication " + rxuid 
+   

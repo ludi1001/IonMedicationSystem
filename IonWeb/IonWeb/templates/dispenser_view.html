@@ -1,0 +1,35 @@
+{% extends "touch_template.html" %}
+{% block page_title %}
+Dispenser View
+{% endblock %}
+{% block header_title %}
+My Portal
+{% endblock %}
+{% block content %}
+   {% load dispenser_tags %}
+   <h4>{{ message }}</h4>
+   
+   {% if validMedications %}
+   <h2>Valid Medications</h2>
+      {% for compartment, rxuid in validMedications.items %}
+         {% with medName=rxuid|get_medName %}
+            <form method="post">
+               {% csrf_token %}
+               <input type="hidden" name="requestType" value="takeMed">
+               <input type="hidden" name="compartment" value="{{ compartment }}">
+               <input type="hidden" name="rxuid" value="{{ rxuid }}">
+               <input type="hidden" name="patientID" value="{{ patientID }}">
+               <input type="submit" value="Take {{ medName}}">
+             </form>
+         {% endwith %}
+      {% endfor %}
+   {% elif dispenser %}
+   <h2>Scan your badge</h2>  
+   <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="requestType" value="scannedID">
+      <input type="text" name="patientID" placeholder="Scan your badge" autofocus="autofocus">
+    </form>
+    
+   {% endif %}
+{% endblock %} 

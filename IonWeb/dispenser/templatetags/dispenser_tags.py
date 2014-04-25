@@ -13,3 +13,7 @@ def get_compartment(id):
 def get_medName(rxuid):
    name = RxNorm.getName(rxuid)
    return name
+
+@register.filter(name='get_range')
+def get_range(i):
+   return range(i)

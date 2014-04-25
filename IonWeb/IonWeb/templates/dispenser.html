@@ -19,7 +19,7 @@ My Dispensers
    {% load dispenser_tags %}
     <a href="#" onclick="toggle_visibility('add');">(add dispenser)</a>
     <div id="add" style="display:none;">
-    <form method="post" action="../dispenser/">
+    <form method="post" action="/dispenser/">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="newDispenser">
       <input type="text" name="location" placeholder="Location" required>
@@ -29,32 +29,29 @@ My Dispensers
     </form>
     </div>
     <p>
-    <a href = "../compartment"> Add/Update Compartments </a><br>
-    <a href = "../loadcompartment"> Load compartment into dispenser </a></p>
+    <a href = "/compartment"> Add/Update Compartments </a><br>
+    <a href = "/loadcompartment"> Load compartment into dispenser </a></p>
     {% for dispenser in dispensers %}
-      <h2>Dispenser</h2>
-      ID: {{ dispenser.id }} <br>
-      Location: {{ dispenser.location }} <br>
-      <form method="post" action="../dispenser/" onSubmit="return confirm('Do you really want to delete this dispenser?');">
-        {% csrf_token %}
-        <input type="hidden" name="requestType" value="deleteDispenser">
-        <input type="hidden" name="id" value="{{dispenser.id}}">
-        <input type="submit" value="delete">
-      </form>
-
-      <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');">(click to expand medication list)</a>
+      <h2>{{ dispenser.location }}</h2>
+      
+      <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');">(click to expand compartment list)</a>
       <div id = "{{ dispenser.id }}" style="display:none;">
       <ul>
       {% for compartment in dispenser.slots %}
          <li> Compartment {{ forloop.counter0 }} :
          {% if compartment %}
-            {% with comp=compartment|get_compartment %}
-               {% with medName=comp.rxuid|get_medName %}
+            {% with medName=compartment.rxuid|get_medName %}
                <br>
                   Medication: {{ medName }} <br>
-                  Expiration: {{ comp.expiration }} <br>
-                  Lot Number: {{ comp.lot }}
-               {% endwith %}
+                  Expiration: {{ compartment.expiration }} <br>
+                  Lot Number: {{ compartment.lot }}<br>
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="requestType" value="removeCompartment">
+                    <input type="hidden" name="dispID" value="{{dispenser.id}}">
+                    <input type="hidden" name="compID" value="{{compartment.id}}">
+                    <input type="submit" value="remove compartment">
+                  </form>
             {% endwith %}
          {% else %}
             OPEN
@@ -62,5 +59,13 @@ My Dispensers
       {% endfor %}
       </ul>
       </div>
+      
+      <form method="post" action="../dispenser/" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+        {% csrf_token %}
+        <input type="hidden" name="requestType" value="deleteDispenser">
+        <input type="hidden" name="id" value="{{dispenser.id}}">
+        <input type="submit" value="delete dispenser">
+      </form>
+
     {% endfor %}
 {% endblock %} 
