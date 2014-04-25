@@ -182,3 +182,7 @@ def notificationMessage(notein):
       return patientName + " missed medication " + medName + " (" + time + ")"
    
    return "unknown notification type"
+   
+def medication(request):
+          
+   return render_to_response('medication.html', {}, context_instance=RequestContext(request))

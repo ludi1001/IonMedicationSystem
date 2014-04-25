@@ -17,17 +17,13 @@ Dispenser Management
 {% endblock %}
 {% block content %}
    {% load dispenser_tags %}
-   
-    <a href = "/compartment"> Update Compartments </a><br>
-    <a href = "/loadcompartment"> Load Compartment into Dispenser </a><br>
-    <a href = "/dispenser/admin">(Dispenser/Compartment Admin)</a><br>
-    <hr>
-    
-    <h2>My Dispensers</h2><br>
-   
+   <div class="two-thirds column">
+     <h2>My Dispensers</h2>
+
    {% for dispenser in dispensers %}
       <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');"><h4>{{ dispenser.location }}</h4></a>
       <div id = "{{ dispenser.id }}" style="display:none;">
+      <a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
       <ul>
       {% for compartment in dispenser.slots %}
          <li> Compartment {{ forloop.counter0 }} :
@@ -52,4 +48,14 @@ Dispenser Management
       </ul>
       </div>
     {% endfor %}
-{% endblock %} 
+   </div>
+   <div class="one-third column">
+     <h2>Tasks</h2>
+     <ul class="action-list">
+      <li><a href = "/compartment">Update Compartments</a>
+      <li><a href = "/loadcompartment">Load Compartment</a>
+      <li><a href = "/dispenser/admin">(Dispenser/Compartment Admin)</a>
+     </ul>
+   </div>
+
+{% endblock %}
