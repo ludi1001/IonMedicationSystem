@@ -1,0 +1,38 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+Profile
+{% endblock %}
+{% block header_title %}
+Account Profile
+{% endblock %}
+{% block head %}
+<style type="text/css">
+#basic-info {
+  margin-bottom:10px;
+}
+#basic-info .label {
+  text-align:right;
+  font-weight:800;
+  padding-right:10px;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="two-thirds column">
+<h2>Basic Info</h2>
+  <table id="basic-info">
+    <tr><td class="label">Ion ID:</td><td>{{ user.id }}</td></tr>
+    <tr><td class="label">Username:</td><td>{{ user.user.username }}</td></tr>
+    <tr><td class="label">First Name:</td><td>{{ user.user.first_name }}</td></tr>
+    <tr><td class="label">Last Name:</td><td>{{ user.user.last_name }}</td></tr>
+    <tr><td class="label">Birthday:</td><td>{{ user.birthdate }}</td></tr>
+    <tr><td class="label">Group:</td><td>{{ user.group }}</td></tr>
+  </table>
+</div>
+<div class="one-third column">
+  <h2>Tasks</h2>
+  <ul class="action-list">
+    <li><a href="/account/password">Change password</a></li>
+  </ul>
+</div>
+{% endblock %} 

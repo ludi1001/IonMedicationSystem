@@ -59,8 +59,8 @@ def get_notifications(request):
     else:
       notifications = notification.objects(**filter).order_by('-creation_date')[:recent]
       
-    for n in notifications:
-      n.mark_retrieved()
+    #for n in notifications:
+    #  n.mark_retrieved()
       
     return HttpResponse(json.dumps(create_json_notifications(notifications)),content_type='application/json')
   except ValueError:

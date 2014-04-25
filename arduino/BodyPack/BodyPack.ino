@@ -1,4 +1,5 @@
 #include <Process.h>
+//#include "Narcoleptic.h"
 
 #define PIN_BATTERY_LOW  8
 #define PIN_DISCONNECTED 7
@@ -16,9 +17,9 @@
 String HOST = "10.190.87.162";
 String ID = "533cc8a285ce7a3cb40203a5";
 
-String protocol = "http://"
-String URL_get = protocol + HOST + "/pack/get?id=" + ID;
-String URL_confirm = protocol + HOST + "/pack/confirm?id=" + ID;
+String protocol = "http://";
+String URL_check = protocol + HOST + "/notification/pack/check?id=" + ID;
+String URL_confirm = protocol + HOST + "/notification/pack/confirm?id=" + ID;
 
 
 void setup() {
@@ -110,7 +111,7 @@ void curlLoop() {
 void runCurl() {
   Process p;        // Create a process and call it "p"
   p.begin("curl");  // Process that launch the "curl" command
-  p.addParameter("http://10.190.87.162/notification/pack/check"); // Add the URL parameter to "curl"
+  p.addParameter(URL_check); // Add the URL parameter to "curl"
   p.addParameter("--connect-timeout");
   p.addParameter("5"); //5 second timeout
   p.run();      // Run the process and wait for its termination
@@ -140,7 +141,7 @@ void runCurl() {
 void confirmReceivedNotification() {
   Process p;
   p.begin("curl");
-  p.addParameter("http://10.190.87.162/notification/pack/confirm");
+  p.addParameter(URL_confirm);
   p.addParameter("--connect-timeout");
   p.addParameter("5"); //5 second timeout
   p.run();
