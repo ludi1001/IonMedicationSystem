@@ -35,7 +35,7 @@ def compartments(request):
          toEdit.expiration = request.POST['expiration']
          toEdit.save()
          # TODO: implement lastupdatetime
-   return render_to_response('compartment.html', {'newID': newID}, context_instance=RequestContext(request))
+   return render_to_response('compartment.html', {}, context_instance=RequestContext(request))
 
 def loadcompartment(request):
    message = ''

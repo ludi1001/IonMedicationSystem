@@ -17,42 +17,41 @@ Dispenser/Compartment Admin
 {% endblock %}
 {% block content %}
 
- <a href="#" onclick="toggle_visibility('add');"><h3> Add new dispenser</h3></a>
+   <a href="#" onclick="toggle_visibility('add');"><h3> Add new dispenser</h3></a>
     <div id="add" style="display:none;">
-    <form method="post" action="/dispenser/admin">
-      {% csrf_token %}
-      <input type="hidden" name="requestType" value="newDispenser">
-      <input type="text" name="location" placeholder="Location" required>
+       <form method="post">
+         {% csrf_token %}
+         <input type="hidden" name="requestType" value="newDispenser">
+         <input type="text" name="location" placeholder="Location" required>
 
-      <input type="submit" value="Add Dispenser">
-    </form>
+         <input type="submit" value="Add Dispenser">
+       </form>
     </div>
     
    <a href="#" onclick="toggle_visibility('removeDisp');"><h3>Remove Dispensers</h3></a>
     <div id="removeDisp" style="display:none;">
  
-    {% for dispenser in dispensers %}
-      <h2>{{ dispenser.location }}</h2>
-      
-      <form method="post" action="/dispenser/" onSubmit="return confirm('Do you really want to delete this dispenser?');">
-        {% csrf_token %}
-        <input type="hidden" name="requestType" value="deleteDispenser">
-        <input type="hidden" name="id" value="{{dispenser.id}}">
-        <input type="submit" value="delete dispenser">
-      </form>
+      {% for dispenser in dispensers %}
+         <h5>{{ dispenser.location }}</h5>
+         
+         <form method="post" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+           {% csrf_token %}
+           <input type="hidden" name="requestType" value="deleteDispenser">
+           <input type="hidden" name="id" value="{{dispenser.id}}">
+           <input type="submit" value="delete dispenser">
+         </form>
 
-    {% endfor %}
+      {% endfor %}
     </div>
    <hr>
    <a href="#" onclick="toggle_visibility('newComp');"><h3>Create New Compartment</h3></a>
     <div id="newComp" style="display:none;">
- 
       <form method="post">
          {% csrf_token %}
 
          <input type = "hidden" name ="requestType" value="newCompartment">
          <input type = "submit" value = "Get new compartment ID">
        </form>
-       {{ newID }}
     </div>
+    {{ newID }}
 {% endblock %} 

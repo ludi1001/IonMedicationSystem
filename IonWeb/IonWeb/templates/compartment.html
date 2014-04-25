@@ -6,12 +6,6 @@ Compartment Manager
 Update Compartment Info
 {% endblock %}
 {% block content %}
-   <form method="post">
-      {% csrf_token %}
-
-      <input type = "hidden" name ="requestType" value="newCompartment">
-      <input type = "submit" value = "Get new compartment ID">
-    </form>
     {{ newID }}
     <form method="post">
       {% csrf_token %}
