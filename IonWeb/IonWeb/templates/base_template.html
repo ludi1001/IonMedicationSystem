@@ -9,7 +9,9 @@
 	<link rel="stylesheet" href="/static/stylesheets/style.css">
   <meta name="viewport" content="initial-scale=1">
   <script type="text/javascript" src="/static/scripts/jquery-2.1.0.min.js"></script>
+  {% if user_group == 'patient' or user_group == 'caretaker' or user_group == 'admin' %}
   <script type="text/javascript" src="/static/scripts/ion.js"></script>
+  {% endif %}
   {% block head %}{% endblock %}
 </head>
 <body>

@@ -13,31 +13,27 @@ from privilege_tests import is_in_group, ALL
 
 @is_in_group(ALL)
 def index(request):
-   return render_to_response('index.html', {},
-      context_instance=RequestContext(request))
+  return render_to_response('index.html', {},
+    context_instance=RequestContext(request))
       
 @is_in_group('admin')      
 def create(request):
-    user = User.create_user('iveel', 'password', 'solix@trewq.com')
-    #user.groups = ['patient']
-    user.save()
-    ion_user = IonUser(user=user, group='admin', birthdate=datetime.datetime.now())
-    ion_user.save()
-    return HttpResponse("Account create successful")
+  user = User.create_user('iveel', 'password', 'solix@trewq.com')
+  #user.groups = ['patient']
+  user.save()
+  ion_user = IonUser(user=user, group='admin', birthdate=datetime.datetime.now())
+  ion_user.save()
+  return HttpResponse("Account create successful")
 
 @is_in_group(ALL)
 def profile(request):
   user = IonUser.objects(user=request.user)[0]
   return render_to_response('profile.html', {'user':user},context_instance=RequestContext(request))
-
-@is_in_group(ALL)
-def edit(request):
-  pass
   
 def temp(request):
   return HttpResponse("authenticated: {0}".format(request.user.is_authenticated()))
   
 @is_in_group(ALL)    
 def logout(request):
-    auth.logout(request)
-    return HttpResponse("Logged out")
+  auth.logout(request)
+  return HttpResponse("Logged out")
