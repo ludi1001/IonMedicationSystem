@@ -29,8 +29,10 @@
         </form>
 				<ul id="main-menu">
           <li><a href="/">ION</a></li>
+          {% if user_group == 'caretaker' or user_group == 'admin' %}
 					<li><a href="/users">Users</a></li>
 					<li><a href="/dispenser">Dispensers</a></li>
+          {% endif %}
 					<li><a href="/medinfo">Medication</a></li>
 					<li><a href="/account">Account</a></li>
 					<li><a href="/account/logout">Logout</a></li>

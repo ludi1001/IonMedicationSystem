@@ -35,10 +35,7 @@ def edit(request):
   pass
   
 def temp(request):
-  request.user.first_name = "Leevi"
-  request.user.last_name = "Gray"
-  request.user.save();
-  return HttpResponse("done")
+  return HttpResponse("authenticated: {0}".format(request.user.is_authenticated()))
   
 @is_in_group(ALL)    
 def logout(request):
