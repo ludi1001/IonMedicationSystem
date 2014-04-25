@@ -3,7 +3,7 @@
 Dispenser Management
 {% endblock %}
 {% block header_title %}
-My Dispensers
+Dispenser Management
 {% endblock %}
 {% block head %}
     <script type="text/javascript">
@@ -17,24 +17,16 @@ My Dispensers
 {% endblock %}
 {% block content %}
    {% load dispenser_tags %}
-    <a href="#" onclick="toggle_visibility('add');">(add dispenser)</a>
-    <div id="add" style="display:none;">
-    <form method="post" action="/dispenser/">
-      {% csrf_token %}
-      <input type="hidden" name="requestType" value="newDispenser">
-      <input type="text" name="location" placeholder="Location" required>
-      <input type="number" name="numSlots" placeholder="Number of slots" required>
-
-      <input type="submit" value="Add Dispenser">
-    </form>
-    </div>
-    <p>
-    <a href = "/compartment"> Add/Update Compartments </a><br>
-    <a href = "/loadcompartment"> Load compartment into dispenser </a></p>
-    {% for dispenser in dispensers %}
-      <h2>{{ dispenser.location }}</h2>
-      
-      <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');">(click to expand compartment list)</a>
+   
+    <a href = "/compartment"> Update Compartments </a><br>
+    <a href = "/loadcompartment"> Load Compartment into Dispenser </a><br>
+    <a href = "/dispenser/admin">(Dispenser/Compartment Admin)</a><br>
+    <hr>
+    
+    <h2>My Dispensers</h2><br>
+   
+   {% for dispenser in dispensers %}
+      <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');"><h4>{{ dispenser.location }}</h4></a>
       <div id = "{{ dispenser.id }}" style="display:none;">
       <ul>
       {% for compartment in dispenser.slots %}
@@ -59,13 +51,5 @@ My Dispensers
       {% endfor %}
       </ul>
       </div>
-      
-      <form method="post" action="../dispenser/" onSubmit="return confirm('Do you really want to delete this dispenser?');">
-        {% csrf_token %}
-        <input type="hidden" name="requestType" value="deleteDispenser">
-        <input type="hidden" name="id" value="{{dispenser.id}}">
-        <input type="submit" value="delete dispenser">
-      </form>
-
     {% endfor %}
 {% endblock %} 

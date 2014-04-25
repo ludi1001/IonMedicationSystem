@@ -8,23 +8,7 @@ from django.shortcuts import render_to_response
 
 def management(request):
    if request.method == 'POST':
-      if request.POST['requestType'] == 'newDispenser':
-         location = request.POST['location']
-         newDispenser = dispenser(location=location)
-         newDispenser.creationTime = datetime.datetime.now()
-         newDispenser.slots = [ None for i in range(int(request.POST['numSlots']))];
-         newDispenser.save()
-      if request.POST['requestType'] == 'deleteDispenser':
-         id = request.POST['id']
-         Dispenser = dispenser.objects(id=id)[0]
-         
-         for Compartment in Dispenser.slots:
-            if Compartment:
-               Compartment.loaded = False
-               Compartment.save()
-               
-         Dispenser.delete()
-         
+      
       if request.POST['requestType'] == 'removeCompartment':
          compID = request.POST['compID']
          dispID = request.POST['dispID']
@@ -41,13 +25,7 @@ def management(request):
    return render_to_response('dispenser.html', {'dispensers': dispenser.objects, 'compartments': compartment.objects}, context_instance=RequestContext(request))
 
 def compartments(request):
-   newID = ""
-   if request.method == 'POST':
-      if request.POST['requestType'] == 'newCompartment':
-         newCompartment = compartment(loaded = False)
-         newCompartment.save()
-         newID = newCompartment.id
-         
+   if request.method == 'POST':      
     #  if request.POST['requestType'] == 'expiration'
       if request.POST['requestType'] == 'updateCompartment':
          toEdit = compartment.objects(id=request.POST['id'])[0]
@@ -57,11 +35,6 @@ def compartments(request):
          toEdit.expiration = request.POST['expiration']
          toEdit.save()
          # TODO: implement lastupdatetime
-      if request.POST['requestType'] == 'deleteCompartment':
-      # TODO: Implement this? Need to remove from dispenser
-         id = request.POST['id']
-         compartment.objects(id=id)[0].delete()
-
    return render_to_response('compartment.html', {'newID': newID}, context_instance=RequestContext(request))
 
 def loadcompartment(request):
@@ -154,13 +127,13 @@ def dispenser_view(request):
             print "Arduino needs to dispense" + toTake['quantity'] + " pills from compartment " + compNum
 
          if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':   
-         validMedications = {}
-         for rxuid in Patient.activeMeds:
-            for index, Compartment in enumerate(Dispenser.slots):
-               if Compartment:
-                  if int(rxuid) == Compartment.rxuid:
-                     validMedications['index'] = rxuid
-                     
+            validMedications = {}
+            for rxuid in Patient.activeMeds:
+               for index, Compartment in enumerate(Dispenser.slots):
+                  if Compartment:
+                     if int(rxuid) == Compartment.rxuid:
+                        validMedications['index'] = rxuid
+                        
          if len(validMedications) == 0:
             params['message'] = "No valid medications at this time"
          params['validMedications'] = validMedications
@@ -170,3 +143,33 @@ def dispenser_view(request):
       params = {'message' : "No dispenser specified"}
       
    return render_to_response('dispenser_view.html', params, context_instance=RequestContext(request))
+
+def dispenser_admin(request):
+   newID = ""
+   if request.method == 'POST':
+      if request.POST['requestType'] == 'newDispenser':
+         location = request.POST['location']
+         newDispenser = dispenser(location=location)
+         newDispenser.creationTime = datetime.datetime.now()
+         newDispenser.slots = [ None for i in range(6)];
+         newDispenser.save()
+      if request.POST['requestType'] == 'deleteDispenser':
+         id = request.POST['id']
+         Dispenser = dispenser.objects(id=id)[0]
+         
+         for Compartment in Dispenser.slots:
+            if Compartment:
+               Compartment.loaded = False
+               Compartment.save()
+               
+         Dispenser.delete()
+      if request.POST['requestType'] == 'newCompartment':
+         newCompartment = compartment(loaded = False)
+         newCompartment.save()
+         newID = newCompartment.id
+      if request.POST['requestType'] == 'deleteCompartment':
+      # TODO: Implement this? Need to remove from dispenser
+         id = request.POST['id']
+         compartment.objects(id=id)[0].delete()
+
+   return render_to_response('dispenser_admin.html', {'compartments' : compartment.objects(), 'dispensers' : dispenser.objects(), 'newID' : newID}, context_instance=RequestContext(request))

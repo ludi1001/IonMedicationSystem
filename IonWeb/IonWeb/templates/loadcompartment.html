@@ -5,7 +5,7 @@ Compartment Manager
 {% block header_title %}
 Load compartment into dispenser
 {% endblock %}
-{% block content %}  
+{% block content %}
    {{ message }}
 
    <form method="post">
@@ -13,21 +13,28 @@ Load compartment into dispenser
       <input type = "hidden" name ="requestType" value="loadCompartment">
          <h3>Compartment ID</h3>
          <select name = "compID">
-            {% for compartment in compartments %} 
-               <option value="{{ compartment.id }}"> {{ compartment.id }}                   
+            {% for compartment in compartments %}
+               <option value="{{ compartment.id }}"> {{ compartment.id }}
             {% endfor %}
          </select>
-         
+
          <h3>Dispenser Location</h3>
          <select name = "dispID">
-            {% for dispenser in dispensers %} 
-               <option value="{{ dispenser.id }}"> {{ dispenser.location }}                   
+            {% for dispenser in dispensers %}
+               <option value="{{ dispenser.id }}"> {{ dispenser.location }}
             {% endfor %}
          </select>
-         
+
          <h3>SLOT #</h3>
-         <input type = "number" name = "slotNum" value="0"><br><br>
+         <select name = "slotNum">
+            <option value="0"> Slot 0
+            <option value="1"> Slot 1
+            <option value="2"> Slot 2
+            <option value="3"> Slot 3
+            <option value="4"> Slot 4
+            <option value="5"> Slot 5
+         </select>
          
          <input type="submit" value="Load Compartment into Dispenser">
    </form>
-{% endblock %} 
+{% endblock %}
