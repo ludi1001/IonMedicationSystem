@@ -6,24 +6,24 @@ Compartment Manager
 Update Compartment Info
 {% endblock %}
 {% block content %}
-   <form method="post" action = "../compartment/">
+   <form method="post">
       {% csrf_token %}
 
       <input type = "hidden" name ="requestType" value="newCompartment">
       <input type = "submit" value = "Get new compartment ID">
     </form>
     {{ newID }}
-    <form method="post" action = "../compartment/">
+    <form method="post">
       {% csrf_token %}
 
       <input type = "hidden" name ="requestType" value="updateCompartment">
       Compartment ID: <input type = "text" name = "id" value= {{ newID }}>
-      <a href="../medinfo" target="_blank">RXUID LOOKUP</a><br>
+      <a href="/medinfo" target="_blank">RXUID LOOKUP</a><br>
       RXUID: <input type = "number" name ="rxuid" value="rxuid"> <br>
       LOT #: <input type = "number" name ="lot" value="lot"><br>
       EXPIR: <input type = "date" name ="expiration" value="expiration"><br>
       <input type = "submit" value = "Update Compartment">
       <br><br>
-      <a href="../updatecompartment" onclick="javascript:void window.open('../updatecompartment','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Update Compartment with Barcodes</a>
+      <a href="/updatecompartment" onclick="javascript:void window.open('/updatecompartment','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Update Compartment with Barcodes</a>
     </form>
 {% endblock %} 

@@ -3,16 +3,31 @@
 Compartment Manager
 {% endblock %}
 {% block header_title %}
-Update Compartment Info
+Load compartment into dispenser
 {% endblock %}
-{% block content %}
-    <form method="post" action = "../loadcompartment/">
-      {% csrf_token %}
+{% block content %}  
+   {{ message }}
 
+   <form method="post">
+      {% csrf_token %}
       <input type = "hidden" name ="requestType" value="loadCompartment">
-      COMPID: <input type = "text" name = "compID" value="Compartment ID"><br>
-      DISPID: <input type = "text" name = "dispID" value="Dispenser ID"><br>
-      SLOT #: <input type = "number" name = "slotNum" value="0"><br>
-      <input type = "submit" value = "Load Compartment">
-    </form>
+         <h3>Compartment ID</h3>
+         <select name = "compID">
+            {% for compartment in compartments %} 
+               <option value="{{ compartment.id }}"> {{ compartment.id }}                   
+            {% endfor %}
+         </select>
+         
+         <h3>Dispenser Location</h3>
+         <select name = "dispID">
+            {% for dispenser in dispensers %} 
+               <option value="{{ dispenser.id }}"> {{ dispenser.location }}                   
+            {% endfor %}
+         </select>
+         
+         <h3>SLOT #</h3>
+         <input type = "number" name = "slotNum" value="0"><br><br>
+         
+         <input type="submit" value="Load Compartment into Dispenser">
+   </form>
 {% endblock %} 

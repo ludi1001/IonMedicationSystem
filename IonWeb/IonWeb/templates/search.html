@@ -67,7 +67,25 @@ Search patients by name
          <br>
    {% endfor %}
    <br>
-   <h5>dispenserID</h5> {{ patient.dispenserID }} <br><br>
+   <h5>Dispenser Location</h5> 
+   {{ patient.dispenser.location }} <br>
+   <a href="#" onclick="toggle_visibility('dispenser'); return false">(update Dispenser)</a>
+      <div class="updateDisp" id="dispenser" style="display:none;">
+         <form method="post">
+            {% csrf_token %}
+      
+            <select name = "newDisp">
+               {% for dispenser in dispensers %} 
+                  <option value="{{ dispenser.id }}"> {{ dispenser.location }}                   
+               {% endfor %}
+            </select>
+            
+            <input type="hidden" name="patientID" value="{{ patient.id }}">
+            <input type="hidden" name="requestType" value="updateDisp">
+            <input type="submit" value="Save Dispenser Choice">
+         </form>
+      </div>
+      <br><br>
    <h5>Birthdate</h5>
    {{ patient.user.birthdate|date:"m/d/Y"}}
    <br><br>
@@ -108,7 +126,7 @@ Search patients by name
           
 <a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a>
     <div class="addMed" id="{{ patient.id }}" style="display:none;">
-    <form method="post" action="../patientinfo">
+    <form method="post">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="addMedication"><br>
       <input type="hidden" name="id" value="{{ patient.id }}">
@@ -170,13 +188,10 @@ Search patients by name
 {% else %}
 
    <i>*Leave blank for entire patient list</i><br>
-   <form method="get" action="../search">
-     
+   <form method="get" action="/search">
       <input type="hidden" name="requestType" value="searchPatients">
       <input type="text" name="search" placeholder="name">
-
-      <input type="submit" value="Search Database">
-    </form>
+   </form>
     
    {% for patient in patientlist %}
          > <a href = ../search?requestType=patientInfo&id={{ patient.id }}>{{ patient.lastName }}, {{ patient.firstName }}</a><br>
