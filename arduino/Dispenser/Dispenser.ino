@@ -21,7 +21,6 @@ Compartment compartments[NUM_COMPARTMENTS];
 /**************************************/
 void setup() {
   Serial.begin(9600);
-  Serial.println("Starting up...");
   Serial.setTimeout(500);
   
   pinMode(PIN_TRAY, INPUT);
@@ -141,6 +140,7 @@ void dispense() {
      }
      else {
        dumpTrayContentsIntoTrash();
+       pills_dispensed = 0;
      }
    }
    

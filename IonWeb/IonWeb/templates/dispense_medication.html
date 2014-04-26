@@ -1,0 +1,33 @@
+{% extends "touch_template.html" %}
+{% block page_title %}
+Dispense Medication
+{% endblock %}
+{% block head %}
+<script type="text/javascript">
+function issueCommand(command, dict_data, success_func, error_func) {
+  $.ajax({
+      url:"http://localhost:8888/" + command, 
+      data: dict_data, 
+      dataType: "jsonp",
+      timeout: 10000,
+      success: success_func
+  }).error(error_func);
+}
+
+$(document).ready(function() {
+  $("#test").click(function() {
+    issueCommand("ping", {data: "hi"}, function(data) { 
+      console.log(data);
+      $("#data").append(data);
+    }, function() {});
+  });
+});
+</script>
+{% endblock %}
+{% block header_title %}
+Dispensing
+{% endblock %}
+{% block content %}
+<a id="test" href="#">hi</a>
+<div id="data">blahblah</div>
+{% endblock %}
