@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     url(r'^rfid$', 'dispenser.views.updateRFID'),  
     url(r'^search$', 'DataEntry.views.search'),    
     url(r'^users$', 'DataEntry.views.users'),
+    url(r'^dispense-medication$', 'django.shortcuts.render', {'template_name': 'dispense_medication.html'})
 ) 
 urlpatterns += staticfiles_urlpatterns()
 

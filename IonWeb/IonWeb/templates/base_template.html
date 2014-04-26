@@ -25,10 +25,12 @@
           <a href="#"><img id="menu-icon" src="/static/images/menu6.png"></a>
           <a href="#"><img id="notification-icon" src="/static/images/mail2.png"></a>
         </div>
+        {% if user_group == 'caretaker' or user_group == 'admin' %}
         <form id="search" method="get" action="/search">
          <input type="hidden" name="requestType" value="searchPatients">
          <input id="search-box" type="text" name="search">
         </form>
+        {% endif %}
 				<ul id="main-menu">
           <li><a href="/">ION</a></li>
           {% if user_group == 'caretaker' or user_group == 'admin' %}
