@@ -35,7 +35,7 @@ def compartments(request):
          toEdit.expiration = request.POST['expiration']
          toEdit.save()
          # TODO: implement lastupdatetime
-   return render_to_response('compartment.html', {}, context_instance=RequestContext(request))
+   return render_to_response('compartment.html', {'compartments': compartment.objects()}, context_instance=RequestContext(request))
 
 def loadcompartment(request):
    message = ''
@@ -51,7 +51,7 @@ def loadcompartment(request):
          Compartment.save()
          disp.slots[slotNum] = Compartment
          disp.save()    
-         message = "Loaded compartment into slot number" + slotNum
+         message = "Loaded compartment into slot number " + str(slotNum)
          
       else:
          message = "Invalid operation (compartment loaded in another slot or slot is filled already)"
@@ -124,8 +124,9 @@ def dispenser_view(request):
             helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID)
 
             compNum = request.POST['compartment']
+            
             print "Arduino needs to dispense" + toTake['quantity'] + " pills from compartment " + compNum
-
+            # compartment, index, pills, weight
          if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':   
             validMedications = {}
             for rxuid in Patient.activeMeds:

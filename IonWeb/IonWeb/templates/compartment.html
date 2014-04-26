@@ -6,12 +6,23 @@ Compartment Manager
 Update Compartment Info
 {% endblock %}
 {% block content %}
-    {{ newID }}
+    {% load dispenser_tags %}
     <form method="post">
       {% csrf_token %}
 
       <input type = "hidden" name ="requestType" value="updateCompartment">
-      Compartment ID: <input type = "text" name = "id" value= {{ newID }}>
+      Compartment ID: 
+      <select name = "id">
+         {% for compartment in compartments %}
+            {% if compartment.rxuid %}
+               {% with medName=compartment.rxuid|get_medName %}
+                  <option value="{{ compartment.id }}"> {{ compartment.id }} | {{ medName }}
+               {% endwith %}
+            {% else %}
+               <option value="{{ compartment.id }}"> {{ compartment.id }} | EMPTY
+            {% endif %}
+         {% endfor %}
+      </select>
       <a href="/medinfo" target="_blank">RXUID LOOKUP</a><br>
       RXUID: <input type = "number" name ="rxuid" value="rxuid"> <br>
       LOT #: <input type = "number" name ="lot" value="lot"><br>

@@ -14,7 +14,9 @@ Load compartment into dispenser
          <h3>Compartment ID</h3>
          <select name = "compID">
             {% for compartment in compartments %}
+               {% if compartment.rxuid %}
                <option value="{{ compartment.id }}"> {{ compartment.id }}
+               {% endif %}
             {% endfor %}
          </select>
 
