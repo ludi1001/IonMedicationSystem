@@ -10,29 +10,41 @@ import urllib2
 import json
 
 def patientinfo(request):
+   message = ""
    if request.method == 'POST':
       if request.POST['requestType'] == 'newPatient':
          firstName = request.POST['firstName']
          lastName = request.POST['lastName']
          birthDate = request.POST['birthDate']
-         username = firstName + lastName         
-         userNum = len(User.objects(__raw__={'username':{'$regex': '^' + username, '$options' : 'i'}}))
+         
+         if(validate(birthDate)):
+            username = firstName + lastName         
+            userNum = len(User.objects(__raw__={'username':{'$regex': '^' + username, '$options' : 'i'}}))
 
-         user = User.create_user(username + str(userNum), 'password')
-         user.save()
-         ion_user = IonUser(user=user, group='patient', birthdate=birthDate)
-         ion_user.save()
-    
-         newPatient = patient(firstName=firstName, lastName=lastName, activeMeds = [], user=ion_user)
-         newPatient.save()
+            user = User.create_user(username + str(userNum), 'password')
+            user.save()
+            ion_user = IonUser(user=user, group='patient', birthdate=birthDate)
+            ion_user.save()
+       
+            newPatient = patient(firstName=firstName, lastName=lastName, activeMeds = [], user=ion_user)
+            newPatient.save()
+         else:
+            message = "Invalid birth date format. (should be mm-dd-yyyy)"
 
       if request.POST['requestType'] == 'deletePatient':
          id = request.POST['id']
          patient.objects(id=id)[0].delete()
          # don't know if we actually want to give people the ability to delete medical records...
-   return render_to_response('patientinfo.html', {'Patients': patient.objects},
+   return render_to_response('patientinfo.html', {'Patients': patient.objects, 'message': message},
                               context_instance=RequestContext(request))
 
+def validate(date_text):
+   try:
+      datetime.datetime.strptime(date_text, '%m-%d-%Y')
+      return True
+   except ValueError:
+      return False
+        
 def update(request):
    id = eval("request." + request.method + "['id']")
    Patient = patient.objects(id=id)[0]
