@@ -20,6 +20,9 @@ $(document).ready(function() {
       console.log(data);
       $("#data").append(data);
     }, function() {});
+    issueCommand("status", {}, function(data) {
+      console.log(data);
+    }, function() {});
   });
 });
 </script>

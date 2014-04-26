@@ -1,5 +1,6 @@
 import web
 import json
+from serialmanager import Dispenser
 
 urls = (
   '/', 'index',
@@ -76,11 +77,11 @@ def parse_dispenser_status(dispenser):
 class dispense(JSONAction):
   def response(self, input):
     global dispenser
-    data = json.loads(input)
-    dispenser.dispense(data)
+    dispenser.dispense(input)
     return parse_dispenser_status(dispenser)
 
 class status(JSONAction):
   def response(self, input):
+    global dispenser
     return parse_dispenser_status(dispenser)
     

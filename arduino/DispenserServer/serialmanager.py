@@ -12,13 +12,13 @@ class Dispenser:
   DONE = 4
   
   def __init__(self):
-    self.status = IDLE
+    self.status = Dispenser.IDLE
     self.error_msg = ""
     self.feedback = []
     
   def dispense(self, data):
     def run_dispenser(data):
-      self.status = BUSY
+      self.status = Dispenser.BUSY
       self.feedback = []
       try:
         ser = serial.Serial(PORT, 9600, timeout=2)
@@ -46,21 +46,21 @@ class Dispenser:
             res["value"] = result
           self.feedback.append(res)
         ser.close()
+        self.status = Dispenser.IDLE
       except:
-        self.status = ERROR
+        self.status = Dispenser.ERROR
         self.error_msg = traceback.format_exc()
-      self.status = IDLE
     try:
-      thread.start_new_thread(dispense, (data, ))
+      thread.start_new_thread(run_dispenser, (data, ))
     except:
-      self.status = ERROR
+      self.status = Dispenser.ERROR
       self.error_msg = "Unable start thread"
   
-  def status(self):
+  def get_status(self):
     return self.status
     
-  def get_error_message():
+  def get_error_message(self):
     return self.error_msg
     
-  def get_feedback():
+  def get_feedback(self):
     return self.feedback
