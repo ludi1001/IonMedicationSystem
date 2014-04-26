@@ -27,7 +27,12 @@ Search patients by name
             document.getElementById("repeatDays").removeAttribute("disabled");
         }
     }
-
+    
+    function loadTime() {
+      document.getElementById('times').value = '{{times}}';
+    }
+   
+    window.onload=loadTime;
     </script>
     
     <style = "text/css">
@@ -45,6 +50,64 @@ Search patients by name
 {% if requestType == 'patientInfo' %}
    <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
    <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
+   
+   <a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a><br>
+   
+    <div class="addMed" id="{{ patient.id }}" style="display:none;">
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="requestType" value="addMedication"><br>
+      <input type="hidden" name="id" value="{{ patient.id }}">
+      <h5>Medication Info</h5><br>
+      <a href = "../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID:</a>
+      
+      <input type="number" name="rxuid" value={{rxuid}}><br>
+      Number of pills: <input type="number" name="numPills" value = {{ numPills }}><br>
+      <input type="checkbox" name="dispensable" {{ dispensed }}>Dispensable?<br><br>
+     
+      
+      <h5>Schedule</h5><br>
+      <h6>Start Date</h6>
+      <input type="date" name="startDate" value = "{{ startDate }}"><br><br>
+     
+      <h6>Times</h6>
+      <select multiple name = "times" id = "times" size = "3">
+         <option> 12:00am
+         <option> 01:00am
+         <option> 02:00am
+         <option> 03:00am
+         <option> 04:00am
+         <option> 05:00am
+         <option> 06:00am
+         <option> 07:00am
+         <option> 08:00am
+         <option> 09:00am
+         <option> 10:00am
+         <option> 11:00am
+         <option> 12:00pm
+         <option> 01:00pm
+         <option> 02:00pm
+         <option> 03:00pm
+         <option> 04:00pm
+         <option> 05:00pm
+         <option> 06:00pm
+         <option> 07:00pm
+         <option> 08:00pm
+         <option> 09:00pm
+         <option> 10:00pm
+         <option> 11:00pm
+      </select>
+      
+      <h6>Repeat?</h6>
+      <input type="checkbox" onClick="disable_enable()" id="repeat" name="repeat" {{ repeat }}> 
+      Every <input type="number" id="repeatDays" name="repeatDays" value={{ repeatDays }}> days
+      
+      <br><br>
+      
+      <input type="submit" value="Add Medication">
+    </form>
+    </div>
+    
    <h5>Active Medications</h5>
    {% for rxuid in patient.activeMeds %}
          {% with medName=rxuid|get_medName %}
@@ -123,59 +186,6 @@ Search patients by name
          {% endif %}
          </ul>
       {% endfor %}
-          
-<a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a>
-    <div class="addMed" id="{{ patient.id }}" style="display:none;">
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="requestType" value="addMedication"><br>
-      <input type="hidden" name="id" value="{{ patient.id }}">
-      <h5>Medication Info</h5><br>
-      <a href = "../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID:</a><input type="number" name="rxuid"><br>
-      Dosage: <input type="number" name="numPills" placeholder="Number of pills"><br>
-      <input type="checkbox" name="dispensable" checked>Dispensable?<br><br>
-     
-      
-      <h5>Schedule</h5><br>
-      <h6>Start Date</h6>
-      <input type="date" name="startDate"><br><br>
-     
-      <h6>Times</h6>
-      <select multiple name = "times" size = "3">
-         <option> 12:00am
-         <option> 01:00am
-         <option> 02:00am
-         <option> 03:00am
-         <option> 04:00am
-         <option> 05:00am
-         <option> 06:00am
-         <option> 07:00am
-         <option> 08:00am
-         <option selected> 09:00am
-         <option> 10:00am
-         <option> 11:00am
-         <option> 12:00pm
-         <option> 01:00pm
-         <option> 02:00pm
-         <option> 03:00pm
-         <option> 04:00pm
-         <option> 05:00pm
-         <option> 06:00pm
-         <option> 07:00pm
-         <option> 08:00pm
-         <option> 09:00pm
-         <option> 10:00pm
-         <option> 11:00pm
-      </select>
-      
-      <h6>Repeat?</h6>
-      <input type="checkbox" onClick="disable_enable()" id="repeat" name="repeat" checked> 
-      Every <input type="number" id="repeatDays" name="repeatDays"> days
-      <br><br>
-      
-      <input type="submit" value="Add Medication">
-    </form>
-    </div>
                
   <!--    <form method="get" action="../update">
         <input type="hidden" name="id" value="{{ patient.id }}">
