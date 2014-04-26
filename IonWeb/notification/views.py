@@ -95,7 +95,7 @@ def list_all_notifications(request):
   #find first 20 notifications for user
   user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
   notifications = notification.objects(target=user).order_by('-creation_date')[:20]
-  return render_to_response('list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
+  return render(request, 'list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
 
 def pack_check(request):
   if 'id' not in request.GET:

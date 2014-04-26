@@ -7,10 +7,11 @@ Dispense Medication
 function issueCommand(command, dict_data, success_func, error_func) {
   $.ajax({
       url:"http://localhost:8888/" + command, 
-      data: dict_data, 
+      data: JSON.stringify(dict_data), 
       dataType: "jsonp",
       timeout: 10000,
-      success: success_func
+      success: success_func,
+      type: "POST"
   }).error(error_func);
 }
 
