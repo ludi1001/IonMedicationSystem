@@ -6,8 +6,6 @@ Compartment Manager
 Load compartment into dispenser
 {% endblock %}
 {% block content %}
-   {{ message }}
-
    <form method="post">
       {% csrf_token %}
       <input type = "hidden" name ="requestType" value="loadCompartment">
@@ -29,12 +27,12 @@ Load compartment into dispenser
 
          <h3>SLOT #</h3>
          <select name = "slotNum">
-            <option value="0"> Slot 0
-            <option value="1"> Slot 1
-            <option value="2"> Slot 2
-            <option value="3"> Slot 3
-            <option value="4"> Slot 4
-            <option value="5"> Slot 5
+            <option value="0"> Slot 1
+            <option value="1"> Slot 2
+            <option value="2"> Slot 3
+            <option value="3"> Slot 4
+            <option value="4"> Slot 5
+            <option value="5"> Slot 6
          </select>
          
          <input type="submit" value="Load Compartment into Dispenser">

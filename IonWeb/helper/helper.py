@@ -10,7 +10,6 @@ def active_medications(timeset, mode):
       ActivePatients = patient.objects(__raw__={ 'medications' : { '$elemMatch' : { 'times' : {'$in': timeset }, 'startDate' : { "$lte" : datetime.now().strftime("%Y-%m-%d") } } } })
       # TODO: if last medication taken time was # days ago
       # TODO: if dispensable = true
-      # TODO: if medication.active = true
    return ActivePatients
    
 def take_medication(Patient, rxuid, quantity, dispenserID):
@@ -26,3 +25,10 @@ def take_medication(Patient, rxuid, quantity, dispenserID):
    
    return Patient.firstName + " " + Patient.lastName + " took medication " + rxuid 
    
+def validate(date_text):
+   try:
+      datetime.strptime(date_text, '%Y-%m-%d')
+      return True
+   except ValueError:
+      return False
+        

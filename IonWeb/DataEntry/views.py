@@ -4,7 +4,7 @@ from mongoengine.django.auth import User
 from account.models import IonUser
 from models import patient
 from dispenser.models import dispenser
-from helper import RxNorm
+from helper import RxNorm, helper
 import datetime
 import urllib2
 import json
@@ -38,13 +38,6 @@ def patientinfo(request):
    return render_to_response('patientinfo.html', {'Patients': patient.objects, 'message': message},
                               context_instance=RequestContext(request))
 
-def validate(date_text):
-   try:
-      datetime.datetime.strptime(date_text, '%Y-%m-%d')
-      return True
-   except ValueError:
-      return False
-        
 def update(request):
    id = eval("request." + request.method + "['id']")
    Patient = patient.objects(id=id)[0]
@@ -116,12 +109,29 @@ def search(request):
       params['times'] = "09:00am"
       params['repeatDays'] = 1
       params['repeat'] = "checked"
-     
+      params['display'] = 'none'
+            
       if request.method == 'POST':
          if request.POST.get('requestType') == 'updateDisp':
             newDispenser = dispenser.objects(id=request.POST.get('newDisp'))[0]
             Patient.dispenser = newDispenser
             Patient.save()
+         
+         if request.POST.get('requestType') == 'deactivateMed':
+            rxuid = request.POST['rxuid']
+            for index, medication in enumerate(Patient.medications):
+               if medication['rxuid'] == rxuid:
+                  medication['active'] = False
+            Patient.save()
+            
+            params['rxuid'] = medication['rxuid']
+            params['numPills'] = medication['quantity']
+            params['dispensed'] = "checked" if medication['dispensed'] else ""
+            params['startDate'] = medication['startDate']
+            params['times'] = medication['times'][0]
+            params['repeatDays'] = medication['repeatDays']
+            params['repeat'] = "checked" if medication['repeatDays'] > -1 else ""
+            params['display'] = 'block'
             
          if request.POST['requestType'] == 'addMedication':
             rxuid = request.POST['rxuid']
@@ -135,7 +145,7 @@ def search(request):
             rxuidRepeat = False
             
             for medication in Patient.medications:
-               if medication['rxuid'] == rxuid:
+               if medication['rxuid'] == rxuid and medication['active'] == True:
                   rxuidRepeat = True
                   
             if not repeat:
@@ -153,7 +163,7 @@ def search(request):
                message = "Patient already has an entry for this medication"
             elif int(quantity) < 0 or int(quantity) > 50:
                message = 'Error: Quantity must be between 0 and 50'
-            elif not validate(startDate): 
+            elif not helper.validate(startDate): 
                message = 'Error: Medication start date must be mm-dd-yyy'
                startDate = datetime.datetime.now().strftime("%Y-%m-%d")
             elif datetime.datetime.strptime(startDate, "%Y-%m-%d").date() < datetime.date.today():
@@ -165,7 +175,7 @@ def search(request):
                message = 'Error: Repeat every how many days?'
                repeatDays = 1
             else:
-               Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays, 'active': 'true'})
+               Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays, 'active': True})
                Patient.save()
             
             params['rxuid'] = rxuid
@@ -175,6 +185,7 @@ def search(request):
             params['times'] = times[0]
             params['repeatDays'] = repeatDays
             params['repeat'] = "checked" if repeat else ""
+            params['display'] = 'block'
             
       # TODO: add ability to deactivate medication. record deactivation time.
    

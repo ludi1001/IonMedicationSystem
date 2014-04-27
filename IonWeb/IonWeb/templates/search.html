@@ -7,7 +7,7 @@ Search patients by name
 {% endblock %}
 {% block head %}
    {% load dispenser_tags %}
-  
+
     <script type="text/javascript">
 <!--
     function toggle_visibility(id) {
@@ -20,21 +20,21 @@ Search patients by name
     {
         if(document.getElementById("repeat").checked != 1)
         {
-            document.getElementById("repeatDays").setAttribute("disabled","disabled");  
+            document.getElementById("repeatDays").setAttribute("disabled","disabled");
         }
         else
         {
             document.getElementById("repeatDays").removeAttribute("disabled");
         }
     }
-    
+
     function loadTime() {
       document.getElementById('times').value = '{{times}}';
     }
-   
+
     window.onload=loadTime;
     </script>
-    
+
     <style = "text/css">
       div.addMed {
          background-color: #D0D0D0;
@@ -50,26 +50,26 @@ Search patients by name
 {% if requestType == 'patientInfo' %}
    <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
    <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
-   
+
    <a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a><br>
-   
-    <div class="addMed" id="{{ patient.id }}" style="display:none;">
+
+    <div class="addMed" id="{{ patient.id }}" style="display:{{ display }};">
     <form method="post">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="addMedication"><br>
       <input type="hidden" name="id" value="{{ patient.id }}">
       <h5>Medication Info</h5><br>
       <a href = "../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID:</a>
-      
+
       <input type="number" name="rxuid" value={{rxuid}}><br>
       Number of pills: <input type="number" name="numPills" value = {{ numPills }}><br>
       <input type="checkbox" name="dispensable" {{ dispensed }}>Dispensable?<br><br>
-     
-      
+
+
       <h5>Schedule</h5><br>
       <h6>Start Date</h6>
       <input type="date" name="startDate" value = "{{ startDate }}"><br><br>
-     
+
       <h6>Times</h6>
       <select multiple name = "times" id = "times" size = "3">
          <option> 12:00am
@@ -97,26 +97,26 @@ Search patients by name
          <option> 10:00pm
          <option> 11:00pm
       </select>
-      
+
       <h6>Repeat?</h6>
-      <input type="checkbox" onClick="disable_enable()" id="repeat" name="repeat" {{ repeat }}> 
+      <input type="checkbox" onClick="disable_enable()" id="repeat" name="repeat" {{ repeat }}>
       Every <input type="number" id="repeatDays" name="repeatDays" value={{ repeatDays }}> days
-      
+
       <br><br>
-      
+
       <input type="submit" value="Add Medication">
     </form>
     </div>
-    
-   <h5>Active Medications</h5>
+
+   <h5>Medications that need to be taken</h5>
    {% for rxuid in patient.activeMeds %}
          {% with medName=rxuid|get_medName %}
          <li>{{ medName }}<br>
          {% endwith %}
    {% endfor %}
    <br>
-   <h5>Medication History</h5> 
-   
+   <h5>Medication History</h5>
+
    {% for medEntry in patient.medHistory %}
          {% if medEntry.MedicationMissed %}
             {% with medName=medEntry.MedicationMissed.rxuid|get_medName %}
@@ -130,19 +130,19 @@ Search patients by name
          <br>
    {% endfor %}
    <br>
-   <h5>Dispenser Location</h5> 
+   <h5>Dispenser Location</h5>
    {{ patient.dispenser.location }} <br>
    <a href="#" onclick="toggle_visibility('dispenser'); return false">(update Dispenser)</a>
       <div class="updateDisp" id="dispenser" style="display:none;">
          <form method="post">
             {% csrf_token %}
-      
+
             <select name = "newDisp">
-               {% for dispenser in dispensers %} 
-                  <option value="{{ dispenser.id }}"> {{ dispenser.location }}                   
+               {% for dispenser in dispensers %}
+                  <option value="{{ dispenser.id }}"> {{ dispenser.location }}
                {% endfor %}
             </select>
-            
+
             <input type="hidden" name="patientID" value="{{ patient.id }}">
             <input type="hidden" name="requestType" value="updateDisp">
             <input type="submit" value="Save Dispenser Choice">
@@ -154,39 +154,53 @@ Search patients by name
    <br><br>
    <h5>Group</h5>
    {{ patient.user.group }}<br><br>
-   
+
    Username: {{ patient.user.user.username }}<br>
    Email: {{ patient.user.user.username }}
      <hr>
       <h3>Active Medications</h3>
+      * to edit a medication regime, first deactivate the current medication. Medication data from the deactivated medication will then auto-populate the "add medication" fields above, and you can edit and submit a new medication regime.<br><br>
+      
       {% for medication in patient.medications %}
-         {% with medName=medication.rxuid|get_medName %}
-         <h4> {{ medName }} </h4>
-         {% endwith %}
-         <ul>
-         
-         Rxuid: {{ medication.rxuid }}
-         {% if medication.dispensed %}
-            <li> {{ medication.quantity }} pills are dispensed at
-            {% for time in medication.times %}
-               {{ time }}, 
-            {% endfor %}
-            
-         {% if medication.repeatDays > 0 %}
-            every {{ medication.repeatDays }} days
+         {% if medication.active == True or medication.active == "true" or medication.active == true %}
+         <!-- backwards compatible -->
+
+            {% with medName=medication.rxuid|get_medName %}
+            <h4> {{ medName }} </h4>
+            {% endwith %}
+            <ul>
+
+            Rxuid: {{ medication.rxuid }}
+            {% if medication.dispensed %}
+               <li> {{ medication.quantity }} pills are dispensed at
+               {% for time in medication.times %}
+                  {{ time }},
+               {% endfor %}
+
+            {% if medication.repeatDays > 0 %}
+               every {{ medication.repeatDays }} days
+               {% else %}
+               only once
+               {% endif %}
+
+               <br>
+               Start Date: {{ medication.startDate }}
+
             {% else %}
-            only once
+            <li> Medication is not dispensed.
             {% endif %}
-            
-            <br>
-            Start Date: {{ medication.startDate }} 
-            
-         {% else %}
-         <li> Medication is not dispensed.
-         {% endif %}
-         </ul>
+            </ul>
+
+            <form method="post" onSubmit="return confirm('Do you really want to deactivate this medication?');">
+              {% csrf_token %}
+
+              <input type="hidden" name="requestType" value="deactivateMed">
+              <input type="hidden" name="rxuid" value="{{ medication.rxuid }}">
+              <input type="submit" name="" value="Deactivate medication">
+            </form>
+            {% endif %}
       {% endfor %}
-               
+
   <!--    <form method="get" action="../update">
         <input type="hidden" name="id" value="{{ patient.id }}">
         <input type="hidden" name="name" value="{{ patient.name }}">
@@ -194,7 +208,7 @@ Search patients by name
         <input type="hidden" name="dispenserID" value="{{ patient.dispenserID }}">
         <input type="submit" name="" value="update">
       </form> -->
-      
+
 {% else %}
 
    <i>*Leave blank for entire patient list</i><br>
@@ -202,11 +216,14 @@ Search patients by name
       <input type="hidden" name="requestType" value="searchPatients">
       <input type="text" name="search" placeholder="name">
    </form>
-    
-   {% for patient in patientlist %}
-         > <a href = ../search?requestType=patientInfo&id={{ patient.id }}>{{ patient.lastName }}, {{ patient.firstName }}</a><br>
-   {% endfor %}
-{% endif %}   
-   
-   
-{% endblock %} 
+   {% if patientlist %}
+      {% for patient in patientlist %}
+            > <a href = ../search?requestType=patientInfo&id={{ patient.id }}>{{ patient.lastName }}, {{ patient.firstName }}</a><br>
+      {% endfor %}
+    {% else %}
+      No patients match query.
+    {% endif %}
+{% endif %}
+
+
+{% endblock %}
