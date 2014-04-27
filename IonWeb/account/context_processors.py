@@ -1,7 +1,7 @@
 from models import IonUser
 
 def IonAccessControl(request):
-  group = {'user_group':None}
+  group = {'user_group':'anonymous'}
   if request.user.is_authenticated():
     user = IonUser.objects(user=request.user)[0]
     group['user_group'] = user.group

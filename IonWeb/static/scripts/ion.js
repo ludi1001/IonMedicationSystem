@@ -47,6 +47,7 @@ $(document).ready(function() {
   });
   $("#notification-icon").click(function() {
     $(this).attr("src","/static/images/mail.png");
+    notification.markNewlyRead();
     //hide main menu if necessary
     if(!$("#notifications").is(":visible") && $("#menu-icon").is(":visible"))
       $("#main-menu").hide();
@@ -102,6 +103,7 @@ var notification = (function() {
       (H <= 9 ? '0' + H : H) + ':' + (M <= 9 ? '0' + M : M) + ':' + (S <= 9 ? '0' + S : S);
    }  
   
+  var newlyUnread = false; //did we receive any new notifications
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
       //this is very inefficient but w/e
@@ -113,6 +115,7 @@ var notification = (function() {
       if(j == notification_list.length) {
         //notification does not exist
         notification_list.push(list[i]);
+        newlyUnread = true;
       }
       else {
         //replace old notification just in case
@@ -200,7 +203,7 @@ var notification = (function() {
       html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
       html.push("</time>");
       html.push("</div>");
-      html.push("Test asdfjaksdfl  ");
+      html.push(n.message);
       html.push("</li>");
       var li = $(html.join(""));
       if(n.unread) {
@@ -222,12 +225,15 @@ var notification = (function() {
         notification_list[li.data("index")].unread = false; //assume it went through, we'll get an updated copy later
       });
     });
-    if(unread) {
+    if(newlyUnread) {
       $("#notification-icon").attr("src", "/static/images/mail2.png");
     }
     else {
       $("#notification-icon").attr("src", "/static/images/mail.png");
     }
+  }
+  my.markNewlyRead = function() {
+    newlyUnread = false;
   }
   my.getNotifications = function() {
     return notification_list;

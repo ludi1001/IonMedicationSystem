@@ -18,10 +18,10 @@ def index(request):
       
 @is_in_group('admin')      
 def create(request):
-  user = User.create_user('iveel', 'password', 'solix@trewq.com')
+  user = User.create_user('dispenser', 'password', 'solix@trewq.com')
   #user.groups = ['patient']
   user.save()
-  ion_user = IonUser(user=user, group='admin', birthdate=datetime.datetime.now())
+  ion_user = IonUser(user=user, group='dispenser', birthdate=datetime.datetime.now())
   ion_user.save()
   return HttpResponse("Account create successful")
 
@@ -31,6 +31,11 @@ def profile(request):
   return render_to_response('profile.html', {'user':user},context_instance=RequestContext(request))
   
 def temp(request):
+  #from dispenser.models import dispenser, compartment
+  #dispenser.objects().delete()
+  #compartment.objects().delete()
+  #from notification.models import notification
+  #notification.objects().delete()
   return HttpResponse("authenticated: {0}".format(request.user.is_authenticated()))
   
 @is_in_group(ALL)    

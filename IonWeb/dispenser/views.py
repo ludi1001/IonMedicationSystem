@@ -1,8 +1,10 @@
 import datetime
+from mongoengine.django.auth import User
 from helper import RxNorm, helper
 from models import dispenser
 from models import compartment
 from DataEntry.models import patient
+from account.models import IonUser
 from django.shortcuts import render
 import re
 from account.models import IonUser
@@ -204,8 +206,12 @@ def dispenser_admin(request):
    newID = ""
    if request.method == 'POST':
       if request.POST['requestType'] == 'newDispenser':
-         location = request.POST['location']
-         newDispenser = dispenser(location=location)
+         location = request.POST['location'].strip()
+         user = User.create_user(location, 'password')
+         user.save()
+         user = IonUser(user=user,group='dispenser',birthdate=datetime.datetime.now())
+         user.save()
+         newDispenser = dispenser(user=user,location=location)
          newDispenser.creationTime = datetime.datetime.now()
          newDispenser.slots = [ None for i in range(6)];
          newDispenser.save()

@@ -6,10 +6,11 @@ from django.views.decorators.csrf import csrf_exempt
 from account.privilege_tests import *
 
 from DataEntry.models import patient
-from models import notification
+from models import notification, DispenserError, CompartmentEmpty
 from account.models import IonUser
 from helper import RxNorm, helper
 from notify import runNotify
+from dispenser.models import dispenser
 
 import json
 from datetime import datetime, timedelta, date
@@ -21,7 +22,8 @@ def create_json_notifications(notifications):
               'creation_date':n.creation_date.strftime(DATE_STRING_FORMAT),
               'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 
               'unread': True if n.viewed_date is None else False,
-              'type':n.type} for n in notifications]
+              'type':n.type,
+              'message': notificationMessage(n)} for n in notifications]
   return json_list
   
 @is_in_group(ALL)
@@ -88,15 +90,71 @@ def mark_notification_read(request):
     
     return HttpResponse('{"success":"success"}',content_type='application/json')
   except ValueError:
-    return HttpResponse('{"error":"Malformed JSON"}',mimetype='application/json')
+    return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
 
 @is_in_group(ALL)
 def list_all_notifications(request):
   #find first 20 notifications for user
   user = IonUser.objects(user=request.user)[0] #corrupt database if this crashes
   notifications = notification.objects(target=user).order_by('-creation_date')[:20]
-  return render_to_response('list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
+  return render(request, 'list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
 
+@is_in_group(ALL) 
+def notify_group(request):
+  user = IonUser.objects(user=request.user)[0]
+  if user.group == 'dispenser':
+    return notify_group_dispenser(request)
+  else:
+    return HttpResponse("unimplemented")
+
+def notify_group_dispenser(request):
+  """Notifies an entire group of an issue.
+  Expects JSON request in form
+  {
+    group:string,
+    messages:[message,...]
+  }
+  where message is in the form
+  {
+    type:error|empty-compartment,
+    arbitrary data
+  }
+  
+  for error, message is in form
+  {
+    type:error,
+    error:string,
+    compartment:int
+  }
+  
+  for empty-compartment, message is in form
+  {
+    type:empty-compartment,
+    compartment:int
+  }
+  """
+  dispenser = IonUser.objects(user=request.user)[0]
+  try:
+    obj = json.loads(request.body)
+    group = obj['group']
+    targets = IonUser.objects(group=group)
+    for message in obj['messages']:
+      if message['type'] == 'error':
+        for target in targets:
+          notification = DispenserError(target=target,dispenser=dispenser,generator="notify_group_dispenser", 
+            type="DispenserError",error=message['error'],compartment=message['compartment'])
+          notification.save()
+      elif message['type'] == 'empty-compartment':
+        for target in targets:
+          notification = CompartmentEmpty(target=target,dispenser=dispenser,generator="notify_group_dispenser",
+            type="CompartmentEmpty",compartment=message['compartment'])
+          notification.save()
+    return HttpResponse('{"error":"success"}',content_type='application/json')
+  except KeyError:
+    return HttpResponse('{"error":"malformed request"}',content_type='application/json')
+  except ValueError:
+    return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
+    
 def pack_check(request):
   if 'id' not in request.GET:
     return redirect('/')
@@ -169,19 +227,31 @@ def notify(request):
    return render_to_response('notifications.html', {'Notifications': notification.objects}, context_instance=RequestContext(request))
 
 def notificationMessage(notein):
-   if notein.type == 'reminder':
-      patientName = notein.patientName
-      medName = RxNorm.getName(notein.rxuid)
-      time = notein.time
-      return "Reminder for " + patientName + ": Take medication " + medName + " (" + time + ")"
-   
-   if notein.type == 'missed':
-      patientName = notein.patientName
-      name = RxNorm.getName(notein.rxuid)
-      time = notein.time
-      return patientName + " missed medication " + medName + " (" + time + ")"
-   
-   return "unknown notification type"
+  if notein.type == 'reminder':
+    patientName = notein.patientName
+    medName = RxNorm.getName(notein.rxuid)
+    time = notein.time
+    return "Reminder for " + patientName + ": Take medication " + medName + " (" + time + ")"
+    
+  elif notein.type == 'missed':
+    patientName = notein.patientName
+    name = RxNorm.getName(notein.rxuid)
+    time = notein.time
+    return patientName + " missed medication " + medName + " (" + time + ")"
+  
+  elif notein.type == 'CompartmentEmpty':
+    dispenser_unit = dispenser.objects(user=notein.dispenser)[0]
+    return "Compartment " + notein.compartment + " of dispenser " + dispenser_unit.location + " is empty"   
+  
+  elif notein.type == 'DispenserError':
+    dispenser_unit = dispenser.objects(user=notein.dispenser)[0]
+    string = "Dispenser " + dispenser_unit.location + " encountered error"
+    if notein.compartment != -1:
+      string += " associated with compartment " + notein.compartment
+    string += ": " + notein.error
+    return string
+    
+  return "unknown notification type"
    
 def medication(request):
    return render_to_response('medication.html', {}, context_instance=RequestContext(request))

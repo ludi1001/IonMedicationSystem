@@ -37,7 +37,7 @@ class confirm_notification:
 
 class JSONAction(object):
   def response(self, input):
-    return {}  
+    return {}
     
   def GET(self):
     input = web.input()
@@ -49,17 +49,27 @@ class JSONAction(object):
     print r
     return r
     
+  def POST(self):
+    input = json.loads(web.data())
+    web.header('Content-Type', 'application/javascript')
+    web.header('Access-Control-Allow-Origin', '*')
+    web.header('Access-Control-Allow-Credentials', 'true')
+    res = self.response(input)
+    r = web.input().callback + '(' + json.dumps(res) + ')'
+    print r
+    return r
+    
   def OPTIONS(self):
     web.header('Content-Type', 'application/json')
     web.header('Access-Control-Allow-Origin', '*')
     web.header('Access-Control-Allow-Credentials', 'true')
     web.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-    web.header('Access-Control-Allow-Headers',  'X-Requested-With')
+    web.header('Access-Control-Allow-Headers',  'X-Requested-With, X-CSRFToken')
     return
   
 class ping(JSONAction):
   def response(self, input):
-    return input.data
+    return input['data']
 
 dispenser = Dispenser()
 
@@ -70,18 +80,24 @@ def parse_dispenser_status(dispenser):
   res["status"] = status
   if status == Dispenser.ERROR:
     res["message"] = dispenser.get_error_message()
-  elif status == Dispenser.IDLE:
+  elif status == Dispenser.IDLE or status == Dispenser.DONE:
     res["feedback"] = dispenser.get_feedback()
   return res
 
 class dispense(JSONAction):
   def response(self, input):
     global dispenser
+    print input
     dispenser.dispense(input)
     return parse_dispenser_status(dispenser)
 
 class status(JSONAction):
   def response(self, input):
     global dispenser
+    return parse_dispenser_status(dispenser)
+    
+class clear(JSONAction):
+  def response(self, input):
+    dispenser.clear_feedback()
     return parse_dispenser_status(dispenser)
     

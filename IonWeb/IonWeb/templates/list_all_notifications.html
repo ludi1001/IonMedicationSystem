@@ -29,7 +29,7 @@ Notifications
 <script type="text/javascript">
 $(document).ready(function() {
   //setup filters
-  
+
   //map of filters, function returns true if notification is to be kept in the list
   var filters = {
     "start-date":function(notification) {
@@ -74,7 +74,7 @@ $(document).ready(function() {
       html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
       html.push("</time>");
       html.push("</div>");
-      html.push("Test asdfjaksdfl  ");
+      html.push(n.message);
       html.push("</li>");
       var li = $(html.join(""));
       if(n.unread) {
@@ -137,12 +137,6 @@ $(document).ready(function() {
     <ul id="notification-list">
       
     </ul>
-		  <!--{% for notification in notifications %}
-        <div>
-          <time>{{ notification.creation_time }}</time>
-        </div>
-        Blah Blah blah
-     {% endfor %}-->
 	</div>
     <hr>
    

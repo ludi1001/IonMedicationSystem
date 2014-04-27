@@ -7,5 +7,6 @@ urlpatterns = patterns('notification.views',
     url(r'^runNotify$', 'notify'),
     url(r'^read$','mark_notification_read'),
     url(r'^pack/check$', 'pack_check'),
-    url(r'^pack/confirm$','pack_confirm')
+    url(r'^pack/confirm$','pack_confirm'),
+    url(r'^notify-group$', 'notify_group')
 )

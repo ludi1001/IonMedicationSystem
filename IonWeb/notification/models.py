@@ -32,3 +32,12 @@ class medNotification(notification):
    rxuid = IntField()
    patientName = StringField()
    time = StringField()
+   
+class CompartmentEmpty(notification):
+  dispenser = ReferenceField('IonUser', required=True)
+  compartment = IntField(required=True)
+
+class DispenserError(notification):
+  dispenser = ReferenceField('IonUser', required=True)
+  error = StringField()
+  compartment = IntField(default=-1)

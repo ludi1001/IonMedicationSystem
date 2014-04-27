@@ -21,7 +21,7 @@ Compartment compartments[NUM_COMPARTMENTS];
 /**************************************/
 void setup() {
   Serial.begin(9600);
-  Serial.setTimeout(500);
+  Serial.setTimeout(5000);
   
   pinMode(PIN_TRAY, INPUT);
   
@@ -37,21 +37,21 @@ void setupCompartments() {
 
 void loop() {
   if(Serial.available()) {
-    char first_char = Serial.read();
-
     char buffer[100];
-    buffer[0] = 0;
-    int res = Serial.readBytesUntil('\n', buffer, 100);
-    if(res <= 0) return; //make sure we read nonzero data
+    for(int i = 0; i < 100; ++i) buffer[i] = 0;
     
+    int res = Serial.readBytesUntil('\n', buffer, 100); 
+    char first_char = buffer[0];
+    if(res <= 0) return; //make sure we read nonzero data
+   
     if(first_char == '!') { //a command was sent
-      if(strcmp(buffer, "ping") == 0)
+      if(strcmp(buffer+1, "ping") == 0)
         ping();
-      else if(strcmp(buffer, "dispense") == 0)
+      else if(strcmp(buffer+1, "dispense") == 0)
         dispense();
     }
     else {
-      Serial.println(buffer); //echo back
+      //Serial.println(buffer); //echo back
     }
   }
 }
@@ -75,22 +75,21 @@ void dispense() {
      Serial.println("Illegal compartment number");
      return;
    }
-   
+
    //grab number of pills to dispense
    int num_pills = Serial.parseInt();
    if(num_pills <= 0 || num_pills >= MAX_PILLS) {
      Serial.println("!error");
-     Serial.println("Bad number of pills");
+     Serial.println("Invalid number of pills requested");
      return;
    }
-   
+
    //get pill weight
    int pill_weight = Serial.parseInt();
    if(pill_weight <= 0 || pill_weight >= MAX_PILL_WEIGHT) {
      Serial.println("!error");
-     Serial.println("Bad pill weight");
+     Serial.println("Invalid pill weight");
    }
-   
         
    //read ambient noise for phototransistor
    int phototransistor_no_light = readPhototransistor(compartments[index].detector);
@@ -99,10 +98,9 @@ void dispense() {
    //read phototransistor value
    int phototransistor_with_light = readPhototransistor(compartments[index].detector);
    
-   int pills_dispensed = 0; //pills dispensed for patient
+   int pills_in_tray = 0; //pills dispensed for patient in tray
    int total_pills_dispensed = 0; //pills dispensed in total, including those trashed
-   while(pills_dispensed < pill_weight) {
-     
+   while(pills_in_tray < num_pills) {
      //weight tray beforehand
      int tray_before = weighTray();
      
@@ -112,8 +110,8 @@ void dispense() {
      
      unsigned long start_time = micros();
      
-     int pills_dispensed = 0;
-     while(pills_dispensed < pill_weight) {
+     int pills_dispensed = 0; //counter for loop
+     while(pills_dispensed < num_pills) {
        if(true /*optical sensor detected something*/) {
          ++pills_dispensed;
          start_time = micros();
@@ -132,25 +130,25 @@ void dispense() {
      //weigh tray
      int tray_after = weighTray();
      
-     pills_dispensed = calculatePillsDispensed(tray_before, tray_after, pill_weight); //calculate correct number of pills dispensed
-     total_pills_dispensed += pills_dispensed;
-     
-     if(pills_dispensed == num_pills) {
-       dumpTrayContentsIntoCup();
-     }
-     else {
+     int actual_pills_dispensed = calculatePillsDispensed(tray_before, tray_after, pill_weight); //calculate correct number of pills dispensed
+     pills_in_tray += actual_pills_dispensed;
+     total_pills_dispensed += actual_pills_dispensed;
+
+     if(pills_dispensed > num_pills) {
        dumpTrayContentsIntoTrash();
-       pills_dispensed = 0;
+       pills_in_tray = 0;
      }
    }
+   
+   dumpTrayContentsIntoCup();
    
    //turn laser off
    digitalWrite(compartments[index].diode, LOW);
    
    //output dispensing stats
    Serial.println("!successful_dispense");
-   Serial.println(pills_dispensed);
    Serial.println(total_pills_dispensed);
+   delay(1000);
 }
 /*************************************/
 int readPhototransistor(int pin) {
@@ -172,15 +170,19 @@ int weighTray() {
 }
 void dumpTrayContentsIntoCup() {
   tray.attach(PIN_TRAY_SERVO);
+  delay(1000);
   tray.detach();
+
 }
 void dumpTrayContentsIntoTrash() {
   tray.attach(PIN_TRAY_SERVO);
+  delay(1000);
   tray.detach();
 }
 int calculatePillsDispensed(int tray_before, int tray_after, int pill_weight) {
-  double diff = tray_after - tray_before;
+  /*double diff = tray_after - tray_before;
   diff *= MG_PER_MV * 5000.0 / 1024;
   diff /= pill_weight;
-  return round(diff);
+  return round(diff);*/
+  return 1;
 }
