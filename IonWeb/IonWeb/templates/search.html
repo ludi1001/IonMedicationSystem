@@ -124,7 +124,13 @@ Search patients by name
             {% endwith %}
          {% elif medEntry.MedicationTaken %}
             {% with medName=medEntry.MedicationTaken.rxuid|get_medName %}
-            {{ medEntry.MedicationTaken.timestamp }} - Patient took {{ medEntry.MedicationTaken.quantity }} pills of {{ medName }}
+            {{ medEntry.MedicationTaken.timestamp }} - 
+            {% if medEntry.MedicationTaken.caretaker %}
+            Caretaker {{ medEntry.MedicationTaken.caretaker.user.first_name }} {{ medEntry.MedicationTaken.caretaker.user.last_name }} administered
+            {% else %}
+            Patient took 
+            {% endif %}
+            {{ medEntry.MedicationTaken.quantity }} pills of {{ medName }}
             {% endwith %}
          {% endif %}
          <br>
@@ -132,7 +138,7 @@ Search patients by name
    <br>
    <h5>Dispenser Location</h5>
    {{ patient.dispenser.location }} <br>
-   <a href="#" onclick="toggle_visibility('dispenser'); return false">(update Dispenser)</a>
+   <a href="#" onclick="toggle_visibility('dispenser'); return false">(update dispenser)</a>
       <div class="updateDisp" id="dispenser" style="display:none;">
          <form method="post">
             {% csrf_token %}
@@ -143,18 +149,39 @@ Search patients by name
                {% endfor %}
             </select>
 
-            <input type="hidden" name="patientID" value="{{ patient.id }}">
             <input type="hidden" name="requestType" value="updateDisp">
             <input type="submit" value="Save Dispenser Choice">
          </form>
       </div>
       <br><br>
+      
+    <h5>Caretaker</h5>
+   {{ patient.caretaker.user.first_name }} {{ patient.caretaker.user.last_name }} <br>
+   {{ patient.caretaker.id }} <br>
+   <a href="#" onclick="toggle_visibility('updateCaretaker'); return false">(update caretaker)</a>
+      <div class="updateCare" id="updateCaretaker" style="display:none;">
+         <form method="post">
+            {% csrf_token %}
+
+            <select name = "newCaretaker">
+               {% for caretaker in caretakers %}
+                  <option value="{{ caretaker.id }}"> {{ caretaker.user.first_name }} {{ caretaker.user.last_name }}
+               {% endfor %}
+            </select>
+
+            <input type="hidden" name="requestType" value="updateCaretaker">
+            <input type="submit" value="Save Caretaker">
+         </form>
+      </div>
+      <br><br>
+   
    <h5>Birthdate</h5>
    {{ patient.user.birthdate|date:"m/d/Y"}}
    <br><br>
    <h5>Group</h5>
    {{ patient.user.group }}<br><br>
 
+   Ion User ID: {{ patient.user.id }}<br>
    Username: {{ patient.user.user.username }}<br>
    Email: {{ patient.user.user.username }}
      <hr>
@@ -162,8 +189,7 @@ Search patients by name
       * to edit a medication regime, first deactivate the current medication. Medication data from the deactivated medication will then auto-populate the "add medication" fields above, and you can edit and submit a new medication regime.<br><br>
       
       {% for medication in patient.medications %}
-         {% if medication.active == True or medication.active == "true" or medication.active == true %}
-         <!-- backwards compatible -->
+         {% if medication.active == True %}
 
             {% with medName=medication.rxuid|get_medName %}
             <h4> {{ medName }} </h4>
@@ -200,15 +226,6 @@ Search patients by name
             </form>
             {% endif %}
       {% endfor %}
-
-  <!--    <form method="get" action="../update">
-        <input type="hidden" name="id" value="{{ patient.id }}">
-        <input type="hidden" name="name" value="{{ patient.name }}">
-        <input type="hidden" name="medications" value="{{ patient.medications }}">
-        <input type="hidden" name="dispenserID" value="{{ patient.dispenserID }}">
-        <input type="submit" name="" value="update">
-      </form> -->
-
 {% else %}
 
    <i>*Leave blank for entire patient list</i><br>

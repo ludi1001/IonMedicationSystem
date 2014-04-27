@@ -15,15 +15,10 @@ def getRXUID(ndc):
    return 0
    
 def getName(rxuid):
-   #url = ''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', rxuid])
-   
-   #attributes = RxNorm.getJSON(''.join([url, '/allProperties?prop=attributes']))
-   #ndcs = RxNorm.getJSON(''.join([url, '/ndcs']))
-   #ndc = ndcs['ndcGroup']['ndcList']['ndc'][0]
    names = getJSON(''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', str(rxuid), '/allProperties?prop=names']))
    if names['propConceptGroup']:
       name = names['propConceptGroup']['propConcept'][0]['propValue']
       return name
    else:
       return None
- #  return names['propConceptGroup']['propConcept'][0]['propValue']
+ 

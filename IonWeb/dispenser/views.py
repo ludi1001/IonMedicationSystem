@@ -7,6 +7,7 @@ from DataEntry.models import patient
 from account.models import IonUser
 from django.shortcuts import render
 import re
+from account.models import IonUser
 
 def management(request):
    if request.method == 'POST':
@@ -73,7 +74,7 @@ def loadcompartment(request):
          Compartment.save()
          disp.slots[slotNum] = Compartment
          disp.save()
-         message = "Loaded compartment into slot number " + str(slotNum)
+         message = "Loaded compartment into slot number " + str(slotNum + 1)
 
       else:
          message = "Invalid operation (compartment loaded in another slot or slot is filled already)"
@@ -124,6 +125,7 @@ def updateRFID(request):
       compData = compartment.objects(rfid = RFID)[0]
 
    return render(request, 'scanrfid.html', {'compData': compData})
+   
 def is_valid(str):
    return re.match("^[0-9a-fA-F]{24}$", str)
 
@@ -138,37 +140,62 @@ def dispenser_view(request):
          params['message'] = 'Invalid dispenser ID'
 
       if request.method == 'POST':
-         patientID = request.POST['patientID']
-         if is_valid(patientID) and patient.objects(id=patientID):
-            Patient = patient.objects(id=patientID)[0]
+         userID = request.POST['userID']
+         params['userID'] = userID
+         
+         if is_valid(userID) and IonUser.objects(id=userID):
+            ionuser = IonUser.objects(id=userID)[0]
+            if ionuser.group == "admin" or ionuser.group == "caretaker":
+               # caretaker/admin stuff
+               if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
+                  validMedications = {}
+                  myPatients = patient.objects(caretaker=ionuser.id)
+                  for Patient in myPatients:
+                     for rxuid in Patient.activeMeds:
+                        for index, Compartment in enumerate(Dispenser.slots):
+                           if Compartment:
+                              if int(rxuid) == Compartment.rxuid:
+                                 validMedications[rxuid] = index, Patient, True
+                  params['validMedications'] = validMedications
+                  
+            elif ionuser.group == "patient":
+               Patient = patient.objects(user=ionuser.id)[0]
+      
+               if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
+                  validMedications = {}
+                  for rxuid in Patient.activeMeds:
+                     for index, Compartment in enumerate(Dispenser.slots):
+                        if Compartment:
+                           if int(rxuid) == Compartment.rxuid:
+                              validMedications[rxuid] = index, Patient, False
+                     
+               if len(validMedications) == 0:
+                  params['message'] = "No valid medications at this time"
+               print validMedications
+               params['validMedications'] = validMedications
+               
             if request.POST['requestType'] == 'takeMed':
                rxuid = request.POST['rxuid']
-
+               caretaker = request.POST['caretaker']
+               
+               Patient = patient.objects(id=request.POST['patientID'])[0]
+   
                for medication in Patient.medications:
                   if medication['rxuid'] == rxuid and medication['active'] == True:
                      toTake = medication
 
-               helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID)
+               helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID, caretaker)
 
-               compNum = request.POST['compartment']
-
-               print "Arduino needs to dispense" + toTake['quantity'] + " pills from compartment " + compNum
-               # compartment, index, pills, weight
-            if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
-               validMedications = {}
-               for rxuid in Patient.activeMeds:
-                  for index, Compartment in enumerate(Dispenser.slots):
-                     if Compartment:
-                        if int(rxuid) == Compartment.rxuid:
-                           validMedications['index'] = rxuid
-
-            if len(validMedications) == 0:
-               params['message'] = "No valid medications at this time"
-            params['validMedications'] = validMedications
-            params['patientID'] = patientID
-
+               compNum = str(request.POST['compartment'])
+               params['message'] = "Successfully took medication"
+               
+               del params['validMedications'][rxuid]
+               
+               print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum
+               # TODO: compartment, index, pills, weight
+               
          else:
-            params['message'] = 'Invalid patient ID'
+            params['message'] = 'Invalid ID'
 
    else:
       params = {'message' : "Incorrect or no dispenser specified"}

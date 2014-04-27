@@ -17,11 +17,13 @@ def patientinfo(request):
          lastName = request.POST['lastName']
          birthDate = request.POST['birthDate']
          
-         if(validate(birthDate)):
+         if(helper.validate(birthDate)):
             username = firstName + lastName         
             userNum = len(User.objects(__raw__={'username':{'$regex': '^' + username, '$options' : 'i'}}))
 
             user = User.create_user(username + str(userNum), 'password')
+            user.first_name = firstName
+            user.last_name = lastName
             user.save()
             ion_user = IonUser(user=user, group='patient', birthdate=birthDate)
             ion_user.save()
@@ -100,7 +102,8 @@ def search(request):
    if request.GET.get('requestType') == 'patientInfo':
       id = request.GET.get('id')
       Patient = patient.objects(id=id)[0]
-      params = {'requestType' : 'patientInfo', 'patient': Patient, 'dispensers': dispenser.objects}
+      caretakers = IonUser.objects(group__in=["caretaker", "admin"])
+      params = {'requestType' : 'patientInfo', 'patient': Patient, 'dispensers': dispenser.objects, 'caretakers': caretakers}
       
       params['rxuid'] = 0
       params['numPills'] = 1
@@ -117,11 +120,17 @@ def search(request):
             Patient.dispenser = newDispenser
             Patient.save()
          
+         if request.POST.get('requestType') == 'updateCaretaker':
+            newCaretaker = IonUser.objects(id=request.POST.get('newCaretaker'))[0]
+            Patient.caretaker = newCaretaker
+            Patient.save()
+         
          if request.POST.get('requestType') == 'deactivateMed':
             rxuid = request.POST['rxuid']
             for index, medication in enumerate(Patient.medications):
                if medication['rxuid'] == rxuid:
                   medication['active'] = False
+                  medication['deactivated'] = datetime.datetime.now()
             Patient.save()
             
             params['rxuid'] = medication['rxuid']
@@ -186,9 +195,6 @@ def search(request):
             params['repeatDays'] = repeatDays
             params['repeat'] = "checked" if repeat else ""
             params['display'] = 'block'
-            
-      # TODO: add ability to deactivate medication. record deactivation time.
-   
    params['message'] = message
    
    return render(request, "search.html", params)

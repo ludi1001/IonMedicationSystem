@@ -27,7 +27,7 @@ def runNotify():
    timeset = [now.strftime("%I:00%p").lower(), minusone.strftime("%I:00%p").lower()]
    NotificationPatients = helper.active_medications(timeset, 1);
    for Patient in NotificationPatients:
-      for rxuid in Patient.activeMedications:
+      for rxuid in Patient.activeMeds:
          if any(True for x in medication['times'] if x in timeset):
             if Patient.user:
                newNotification = medNotification(target=Patient.user, type="reminder", generator = "CRON", rxuid = rxuid, patientName = Patient.firstName + Patient.lastName, time = now.strftime("%I:00%p"))
