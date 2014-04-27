@@ -32,37 +32,49 @@ function setupAjax() {
 
 
 $(document).ready(function() {
-  $("#menu-icon").click(function() {
-    if($("#main-menu").is(":hidden")) {
-      $("#content-container").fadeTo("fast",.2);
-    }
-    else {
-      $("#content-container").fadeTo("fast",1);
-    }
-    //hide notifications if it is open
-    if(!$("#main-menu").is(":visible"))
-      $("#notifications").hide();
-    
-    $("#main-menu").slideToggle("fast");
-  });
-  $("#notification-icon").click(function() {
-    $(this).attr("src","/static/images/mail.png");
-    notification.markNewlyRead();
-    //hide main menu if necessary
-    if(!$("#notifications").is(":visible") && $("#menu-icon").is(":visible"))
-      $("#main-menu").hide();
+  setupAjax();
+  if($("#menu-icon").length > 0) {
+    $("#menu-icon").click(function() {
+      if($("#main-menu").is(":hidden")) {
+        $("#content-container").fadeTo("fast",.2);
+      }
+      else {
+        $("#content-container").fadeTo("fast",1);
+      }
+      //hide notifications if it is open
+      if(!$("#main-menu").is(":visible"))
+        $("#notifications").hide();
+      
+      $("#main-menu").slideToggle("fast");
+    });
+  }
+  if($("#notification-icon").length > 0) {
+    $("#notification-icon").click(function() {
+      $(this).attr("src","/static/images/mail.png");
+      notification.markNewlyRead();
+      //hide main menu if necessary
+      if(!$("#notifications").is(":visible") && $("#menu-icon").is(":visible"))
+        $("#main-menu").hide();
 
-    //gray out background content
-    if($("#notifications").is(":hidden")) {
-      $("#content-container").fadeTo("fast",.2);
-    }
-    else {
-      $("#content-container").fadeTo("fast",1);
-    }
-    
-    $("#notifications").slideToggle("fast");
-    
-  });
+      //gray out background content
+      if($("#notifications").is(":hidden")) {
+        $("#content-container").fadeTo("fast",.2);
+      }
+      else {
+        $("#content-container").fadeTo("fast",1);
+      }
+      
+      $("#notifications").slideToggle("fast");
+      event.stopPropagation();
+    });
+    $(document).click(function() {
+      if($("#notifications").is(":visible")) {
+        $("#content-container").fadeTo("fast", 1);
+        $("#notifications").slideUp("fast");
+      }
+    });
+    notification.initialize();
+  }
   
   $(window).resize(function() {
     if($("#menu-icon").is(":visible")) {
@@ -74,11 +86,6 @@ $(document).ready(function() {
     $("#content-container").fadeTo("fast",1);
     $("#notifications").hide();
   });
-  
-  setupAjax();
-  
-  notification.initialize();
-  
 });
 
 //notification manager
@@ -104,6 +111,7 @@ var notification = (function() {
    }  
   
   var newlyUnread = false; //did we receive any new notifications
+  var firstCall = true; //on first call to append notifications, ignore new notifications
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
       //this is very inefficient but w/e
@@ -115,7 +123,8 @@ var notification = (function() {
       if(j == notification_list.length) {
         //notification does not exist
         notification_list.push(list[i]);
-        newlyUnread = true;
+        if(!firstCall)
+          newlyUnread = true;
       }
       else {
         //replace old notification just in case
@@ -128,7 +137,6 @@ var notification = (function() {
       var y = b.creation_date;
       return (x > y ? -1 : (x < y ? 1 : 0));
     });
-    
   }
   
   function cleanNotifications(list) {
@@ -141,6 +149,22 @@ var notification = (function() {
   }
   
   my.initialize = function() {
+    //periodically check for updates
+    setInterval(function() {
+      var time = new Date(0); //Jan 1, 1970
+      if(notification_list.length > 0) {
+        time = notification_list[0].creation_date; //we assume the list is sorted
+        time = new Date(time.getTime() - 1000); //push time back a little earlier just in case that there's a new notification at exactly the same time
+      }
+      my.fetch({'earliest':serializeTime(time)});
+    }, REFRESH_TIME);
+    
+    var lastUpdateTime = new Date();
+    setInterval(function() {
+      my.fetch({"updated_since":serializeTime(lastUpdateTime)});
+      lastUpdateTime = new Date();
+    }, REFRESH_TIME_UPDATE);
+    
     //request notifications day by day until we have at least 10 notifications
     my.fetch({"recent":IDEAL_NUM_NOTIFICATIONS});
   }
@@ -225,12 +249,15 @@ var notification = (function() {
         notification_list[li.data("index")].unread = false; //assume it went through, we'll get an updated copy later
       });
     });
+    if(firstCall)
+      newlyUnread = unread;
     if(newlyUnread) {
       $("#notification-icon").attr("src", "/static/images/mail2.png");
     }
     else {
       $("#notification-icon").attr("src", "/static/images/mail.png");
     }
+    firstCall = false;
   }
   my.markNewlyRead = function() {
     newlyUnread = false;
@@ -241,21 +268,5 @@ var notification = (function() {
   my.printNotifications = function() {
     console.log(notification_list);
   }
-  
-  //periodically check for updates
-  setInterval(function() {
-    var time = new Date(0); //Jan 1, 1970
-    if(notification_list.length > 0) {
-      time = notification_list[0].creation_date; //we assume the list is sorted
-      time = new Date(time.getTime() - 1000); //push time back a little earlier just in case that there's a new notification at exactly the same time
-    }
-    my.fetch({'earliest':serializeTime(time)});
-  }, REFRESH_TIME);
-  
-  var lastUpdateTime = new Date();
-  setInterval(function() {
-    my.fetch({"updated_since":serializeTime(lastUpdateTime)});
-    lastUpdateTime = new Date();
-  }, REFRESH_TIME_UPDATE);
   return my;
 })();
