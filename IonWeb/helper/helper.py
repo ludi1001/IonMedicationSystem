@@ -1,5 +1,6 @@
 from DataEntry.models import patient
 from datetime import datetime, timedelta, date
+from account.shortcuts import *
 
 # can't import from notifications.views...
 def active_medications(timeset, mode): 
@@ -34,4 +35,4 @@ def validate(date_text):
       return True
    except ValueError:
       return False
-        
+   

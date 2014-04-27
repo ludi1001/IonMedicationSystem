@@ -203,6 +203,9 @@ ul.action-list li:hover {
 
 ul.action-list li a {
 	color:#666;
+  display:block;
+  width:100%;
+  text-align:center;
 }
 
 ul.action-list li a:hover {

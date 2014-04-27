@@ -65,7 +65,13 @@ $(document).ready(function() {
       }
       
       $("#notifications").slideToggle("fast");
-      
+      event.stopPropagation();
+    });
+    $(document).click(function() {
+      if($("#notifications").is(":visible")) {
+        $("#content-container").fadeTo("fast", 1);
+        $("#notifications").slideUp("fast");
+      }
     });
     notification.initialize();
   }
@@ -80,8 +86,6 @@ $(document).ready(function() {
     $("#content-container").fadeTo("fast",1);
     $("#notifications").hide();
   });
-
-  
 });
 
 //notification manager

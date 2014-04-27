@@ -21,7 +21,7 @@ Dispenser Management
      <h2>My Dispensers</h2>
    {% if dispensers %}
       {% for dispenser in dispensers %}
-         <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');"><h4>{{ dispenser.location }}</h4></a>
+         <h4><a href="#" onclick="toggle_visibility('{{ dispenser.id }}');">{{ dispenser.location }}</a></h4>
          <div id = "{{ dispenser.id }}" style="display:none;">
          <a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
                         
