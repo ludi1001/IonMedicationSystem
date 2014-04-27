@@ -10,15 +10,17 @@ My Portal
    
    {% if validMedications %}
    <h2>Valid Medications</h2>
-      {% for compartment, rxuid in validMedications.items %}
+      {% for rxuid, medData in validMedications.items %}
          {% with medName=rxuid|get_medName %}
             <form method="post">
                {% csrf_token %}
                <input type="hidden" name="requestType" value="takeMed">
-               <input type="hidden" name="compartment" value="{{ compartment }}">
+               <input type="hidden" name="compartment" value="{{ medData.0 }}">
                <input type="hidden" name="rxuid" value="{{ rxuid }}">
-               <input type="hidden" name="patientID" value="{{ patientID }}">
-               <input type="submit" value="Take {{ medName}}">
+               <input type="hidden" name="patientID" value="{{ medData.1.id }}">
+               <input type="hidden" name="userID" value ="{{ userID }}">
+               <input type="hidden" name="caretaker" value ="{{ medData.2 }}">
+               <input type="submit" value="Take {{ medName}} for {{ medData.1.firstName }} {{ medData.1.lastName }}">
              </form>
          {% endwith %}
       {% endfor %}
@@ -27,7 +29,7 @@ My Portal
    <form method="post">
       {% csrf_token %}
       <input type="hidden" name="requestType" value="scannedID">
-      <input type="text" name="patientID" placeholder="Scan your badge" autofocus="autofocus">
+      <input type="text" name="userID" placeholder="Scan your badge" autofocus="autofocus">
     </form>
     
    {% endif %}

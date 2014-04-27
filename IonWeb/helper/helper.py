@@ -12,13 +12,16 @@ def active_medications(timeset, mode):
       # TODO: if dispensable = true
    return ActivePatients
    
-def take_medication(Patient, rxuid, quantity, dispenserID):
+def take_medication(Patient, rxuid, quantity, dispenserID, caretaker):
    medEntry = {}
    medEntry['rxuid'] = rxuid
    medEntry['quantity'] = quantity
    medEntry['timestamp'] = datetime.now()
    medEntry['dispenserID'] = dispenserID;
-   
+   if caretaker == "True":
+      print "hi!"
+      medEntry['caretaker'] = Patient.caretaker
+      
    Patient.medHistory.append({ 'MedicationTaken' : medEntry })
    Patient.activeMeds.remove( rxuid )
    Patient.save()
