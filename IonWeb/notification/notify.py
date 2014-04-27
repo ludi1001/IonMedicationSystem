@@ -16,20 +16,21 @@ def runNotify():
    SetFlagPatients = helper.active_medications(timeset, 0)
    for Patient in SetFlagPatients:
       for medication in Patient.medications:
-         if any(True for x in medication['times'] if x in timeset):
-            if medication['rxuid'] not in Patient.activeMeds:
-               Patient.activeMeds.append(medication['rxuid'])
-               Patient.save()
-               print "set flag for " + medication['rxuid']
+         if medication['active'] == True:           
+            if any(True for x in medication['times'] if x in timeset):
+               if medication['rxuid'] not in Patient.activeMeds:
+                  Patient.activeMeds.append(medication['rxuid'])
+                  Patient.save()
+                  print "set flag for " + medication['rxuid']
 
    # notify the now and 1 hour ago people
-   timeset = [plusone.strftime("%I:00%p").lower(), now.strftime("%I:00%p").lower(), minusone.strftime("%I:00%p").lower()]
+   timeset = [now.strftime("%I:00%p").lower(), minusone.strftime("%I:00%p").lower()]
    NotificationPatients = helper.active_medications(timeset, 1);
    for Patient in NotificationPatients:
-      for medication in Patient.medications:
+      for rxuid in Patient.activeMedications:
          if any(True for x in medication['times'] if x in timeset):
             if Patient.user:
-               newNotification = medNotification(target=Patient.user, type="reminder", generator = "CRON", rxuid = medication['rxuid'], patientName = Patient.firstName + Patient.lastName, time = now.strftime("%I:00%p"))
+               newNotification = medNotification(target=Patient.user, type="reminder", generator = "CRON", rxuid = rxuid, patientName = Patient.firstName + Patient.lastName, time = now.strftime("%I:00%p"))
                newNotification.save()
             else:
                print Patient.firstName + " " + Patient.lastName + " doesn't have an Ion Account"
@@ -43,7 +44,7 @@ def runNotify():
    # doesn't work if patient is returned anyways and has taken one of their medications
    for Patient in MissedPatients:
       for medication in Patient.medications:
-         if any(True for x in medication['times'] if x in timeset) and medication['rxuid'] in Patient.activeMeds:
+         if any(True for x in medication['times'] if x in timeset) and medication['rxuid'] in Patient.activeMeds and medication['active'] == True:
             missedEntry = {}
             missedEntry['rxuid'] = medication['rxuid']
             missedEntry['quantity'] = medication['quantity']

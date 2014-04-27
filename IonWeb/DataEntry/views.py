@@ -1,10 +1,10 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.template import RequestContext
 from mongoengine.django.auth import User
 from account.models import IonUser
 from models import patient
 from dispenser.models import dispenser
-from helper import RxNorm
+from helper import RxNorm, helper
 import datetime
 import urllib2
 import json
@@ -38,13 +38,6 @@ def patientinfo(request):
    return render_to_response('patientinfo.html', {'Patients': patient.objects, 'message': message},
                               context_instance=RequestContext(request))
 
-def validate(date_text):
-   try:
-      datetime.datetime.strptime(date_text, '%m-%d-%Y')
-      return True
-   except ValueError:
-      return False
-        
 def update(request):
    id = eval("request." + request.method + "['id']")
    Patient = patient.objects(id=id)[0]
@@ -99,7 +92,7 @@ def users(request):
    
 def search(request):
    params = {}
-
+   message = ''
    if request.GET.get('requestType') == 'searchPatients':
       patientlist = patient.objects(__raw__={ '$or' : [{'firstName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}, { 'lastName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}]})
       params = { 'patientlist' : patientlist }
@@ -108,27 +101,95 @@ def search(request):
       id = request.GET.get('id')
       Patient = patient.objects(id=id)[0]
       params = {'requestType' : 'patientInfo', 'patient': Patient, 'dispensers': dispenser.objects}
-
+      
+      params['rxuid'] = 0
+      params['numPills'] = 1
+      params['dispensed'] = "checked"
+      params['startDate'] = datetime.datetime.now().strftime("%Y-%m-%d")
+      params['times'] = "09:00am"
+      params['repeatDays'] = 1
+      params['repeat'] = "checked"
+      params['display'] = 'none'
+            
       if request.method == 'POST':
          if request.POST.get('requestType') == 'updateDisp':
             newDispenser = dispenser.objects(id=request.POST.get('newDisp'))[0]
             Patient.dispenser = newDispenser
             Patient.save()
+         
+         if request.POST.get('requestType') == 'deactivateMed':
+            rxuid = request.POST['rxuid']
+            for index, medication in enumerate(Patient.medications):
+               if medication['rxuid'] == rxuid:
+                  medication['active'] = False
+            Patient.save()
+            
+            params['rxuid'] = medication['rxuid']
+            params['numPills'] = medication['quantity']
+            params['dispensed'] = "checked" if medication['dispensed'] else ""
+            params['startDate'] = medication['startDate']
+            params['times'] = medication['times'][0]
+            params['repeatDays'] = medication['repeatDays']
+            params['repeat'] = "checked" if medication['repeatDays'] > -1 else ""
+            params['display'] = 'block'
             
          if request.POST['requestType'] == 'addMedication':
             rxuid = request.POST['rxuid']
-            quantity = request.POST['numPills']
+            quantity = request.POST['numPills'] 
             dispensed = 'dispensable' in request.POST
-            # startDate can't be in the past
             startDate = request.POST['startDate']
             times = request.POST.getlist('times')
+            repeat = 'repeat' in request.POST
             repeatDays = request.POST.get('repeatDays', -1)
+   
+            rxuidRepeat = False
             
-            # TODO: if rxuid is already in the patient's medication, don't append and throw an error
-            Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays, 'active': 'true'})
-            Patient.save()
+            for medication in Patient.medications:
+               if medication['rxuid'] == rxuid and medication['active'] == True:
+                  rxuidRepeat = True
+                  
+            if not repeat:
+               repeatDays = -1
+            
+            if rxuid == "":
+               message = "Error: Please enter a rxuid"
+               rxuid = 0
+            elif quantity == "":
+               message = "Error: Please enter an quantity"
+               quantity = 1
+            elif RxNorm.getName(rxuid) == None:
+               message = "Error: Invalid rxuid"
+            elif rxuidRepeat:
+               message = "Patient already has an entry for this medication"
+            elif int(quantity) < 0 or int(quantity) > 50:
+               message = 'Error: Quantity must be between 0 and 50'
+            elif not helper.validate(startDate): 
+               message = 'Error: Medication start date must be mm-dd-yyy'
+               startDate = datetime.datetime.now().strftime("%Y-%m-%d")
+            elif datetime.datetime.strptime(startDate, "%Y-%m-%d").date() < datetime.date.today():
+               message = 'Error: Start date can not be in the past'
+            elif len(times) == 0:
+               message = 'Error: No medication times specified'
+               times.append("09:00am")
+            elif repeat and repeatDays == "":
+               message = 'Error: Repeat every how many days?'
+               repeatDays = 1
+            else:
+               Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays, 'active': True})
+               Patient.save()
+            
+            params['rxuid'] = rxuid
+            params['numPills'] = quantity
+            params['dispensed'] = "checked" if dispensed else ""
+            params['startDate'] = startDate
+            params['times'] = times[0]
+            params['repeatDays'] = repeatDays
+            params['repeat'] = "checked" if repeat else ""
+            params['display'] = 'block'
             
       # TODO: add ability to deactivate medication. record deactivation time.
-
-   return render_to_response("search.html", params, context_instance=RequestContext(request))
+   
+   params['message'] = message
+   
+   return render(request, "search.html", params)
    

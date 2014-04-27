@@ -19,40 +19,50 @@ Dispenser Management
    {% load dispenser_tags %}
    <div class="two-thirds column">
      <h2>My Dispensers</h2>
-
-   {% for dispenser in dispensers %}
-      <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');"><h4>{{ dispenser.location }}</h4></a>
-      <div id = "{{ dispenser.id }}" style="display:none;">
-      <a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
-      <ul>
-      {% for compartment in dispenser.slots %}
-         <li> Compartment {{ forloop.counter0 }} :
-         {% if compartment %}
-            {% with medName=compartment.rxuid|get_medName %}
-               <br>
-                  Medication: {{ medName }} <br>
-                  Expiration: {{ compartment.expiration }} <br>
-                  Lot Number: {{ compartment.lot }}<br>
-                  <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="requestType" value="removeCompartment">
-                    <input type="hidden" name="dispID" value="{{dispenser.id}}">
-                    <input type="hidden" name="compID" value="{{compartment.id}}">
-                    <input type="submit" value="remove compartment">
-                  </form>
-            {% endwith %}
-         {% else %}
-            OPEN
-         {% endif %}
-      {% endfor %}
-      </ul>
-      </div>
-    {% endfor %}
+   {% if dispensers %}
+      {% for dispenser in dispensers %}
+         <a href="#" onclick="toggle_visibility('{{ dispenser.id }}');"><h4>{{ dispenser.location }}</h4></a>
+         <div id = "{{ dispenser.id }}" style="display:none;">
+         <a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
+                        
+         <form method="post" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+           {% csrf_token %}
+           <input type="hidden" name="requestType" value="deleteDispenser">
+           <input type="hidden" name="id" value="{{dispenser.id}}">
+           <input type="submit" value="delete dispenser">
+         </form>
+  
+         <hr>
+         {% for compartment in dispenser.slots %}
+            Compartment {{ forloop.counter }}:
+            {% if compartment %}
+               {% with medName=compartment.rxuid|get_medName %}
+                  <br>
+                     Medication: {{ medName }} <br>
+                     Expiration: {{ compartment.expiration }} <br>
+                     Lot Number: {{ compartment.lot }}<br>
+                     <form method="post">
+                       {% csrf_token %}
+                       <input type="hidden" name="requestType" value="removeCompartment">
+                       <input type="hidden" name="dispID" value="{{dispenser.id}}">
+                       <input type="hidden" name="compID" value="{{compartment.id}}">
+                       <input type="submit" value="remove compartment">
+                     </form>
+               {% endwith %}
+            {% else %}
+               OPEN
+            {% endif %}
+         {% endfor %}
+         </div>
+       {% endfor %}
+    {% else %}
+      No dispensers
+    {% endif %}
    </div>
    <div class="one-third column">
      <h2>Tasks</h2>
      <ul class="action-list">
-      <li><a href = "/dispenser/admin">Dispenser/Compartment Admin</a>
+      <li><a href = "/dispenser/admin">Dispenser/Compartment Manufacturer</a>
       <li><a href = "/compartment">Update Compartments</a>
       <li><a href = "/loadcompartment">Load Compartment</a>
      </ul>

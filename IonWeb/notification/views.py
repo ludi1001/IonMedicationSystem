@@ -197,7 +197,7 @@ def medication_status(request):
    for active_patient in ActivePatients:
       medications = []
       for medication in active_patient.medications:
-         if medication['rxuid'] in active_patient.activeMeds and any((True for x in medication['times'] if x in timeset)):
+         if medication['rxuid'] in active_patient.activeMeds and any((True for x in medication['times'] if x in timeset)) and medication['active'] == True:
             medications.append(medication)
             
       if medications:
@@ -240,5 +240,4 @@ def notificationMessage(notein):
    return "unknown notification type"
    
 def medication(request):
-          
    return render_to_response('medication.html', {}, context_instance=RequestContext(request))
