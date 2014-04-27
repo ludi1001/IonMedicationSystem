@@ -203,7 +203,7 @@ var notification = (function() {
       html.push(n.creation_date.toLocaleDateString() + " " + n.creation_date.toLocaleTimeString());
       html.push("</time>");
       html.push("</div>");
-      html.push("Test asdfjaksdfl  ");
+      html.push(n.message);
       html.push("</li>");
       var li = $(html.join(""));
       if(n.unread) {

@@ -31,6 +31,11 @@ def profile(request):
   return render_to_response('profile.html', {'user':user},context_instance=RequestContext(request))
   
 def temp(request):
+  #from dispenser.models import dispenser, compartment
+  #dispenser.objects().delete()
+  #compartment.objects().delete()
+  #from notification.models import notification
+  #notification.objects().delete()
   return HttpResponse("authenticated: {0}".format(request.user.is_authenticated()))
   
 @is_in_group(ALL)    

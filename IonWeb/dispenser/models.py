@@ -1,6 +1,7 @@
 from mongoengine import *
 
 class dispenser(Document):
+   user = ReferenceField('IonUser', required=True)
    location = StringField(max_length=120, required=True)
    slots = ListField()
    

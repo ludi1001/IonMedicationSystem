@@ -10,6 +10,7 @@ from models import notification, DispenserError, CompartmentEmpty
 from account.models import IonUser
 from helper import RxNorm, helper
 from notify import runNotify
+from dispenser.models import dispenser
 
 import json
 from datetime import datetime, timedelta, date
@@ -21,7 +22,8 @@ def create_json_notifications(notifications):
               'creation_date':n.creation_date.strftime(DATE_STRING_FORMAT),
               'last_modified':n.modified_date.strftime(DATE_STRING_FORMAT), 
               'unread': True if n.viewed_date is None else False,
-              'type':n.type} for n in notifications]
+              'type':n.type,
+              'message': notificationMessage(n)} for n in notifications]
   return json_list
   
 @is_in_group(ALL)
@@ -225,19 +227,31 @@ def notify(request):
    return render_to_response('notifications.html', {'Notifications': notification.objects}, context_instance=RequestContext(request))
 
 def notificationMessage(notein):
-   if notein.type == 'reminder':
-      patientName = notein.patientName
-      medName = RxNorm.getName(notein.rxuid)
-      time = notein.time
-      return "Reminder for " + patientName + ": Take medication " + medName + " (" + time + ")"
-   
-   if notein.type == 'missed':
-      patientName = notein.patientName
-      name = RxNorm.getName(notein.rxuid)
-      time = notein.time
-      return patientName + " missed medication " + medName + " (" + time + ")"
-   
-   return "unknown notification type"
+  if notein.type == 'reminder':
+    patientName = notein.patientName
+    medName = RxNorm.getName(notein.rxuid)
+    time = notein.time
+    return "Reminder for " + patientName + ": Take medication " + medName + " (" + time + ")"
+    
+  elif notein.type == 'missed':
+    patientName = notein.patientName
+    name = RxNorm.getName(notein.rxuid)
+    time = notein.time
+    return patientName + " missed medication " + medName + " (" + time + ")"
+  
+  elif notein.type == 'CompartmentEmpty':
+    dispenser_unit = dispenser.objects(user=notein.dispenser)[0]
+    return "Compartment " + notein.compartment + " of dispenser " + dispenser_unit.location + " is empty"   
+  
+  elif notein.type == 'DispenserError':
+    dispenser_unit = dispenser.objects(user=notein.dispenser)[0]
+    string = "Dispenser " + dispenser_unit.location + " encountered error"
+    if notein.compartment != -1:
+      string += " associated with compartment " + notein.compartment
+    string += ": " + notein.error
+    return string
+    
+  return "unknown notification type"
    
 def medication(request):
    return render_to_response('medication.html', {}, context_instance=RequestContext(request))
