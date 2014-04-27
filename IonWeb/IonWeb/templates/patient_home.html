@@ -15,103 +15,13 @@ My Information
       e.style.display = ((e.style.display!='none') ? 'none' : 'block');
     }
 //-->
-
-    function disable_enable()
-    {
-        if(document.getElementById("repeat").checked != 1)
-        {
-            document.getElementById("repeatDays").setAttribute("disabled","disabled");
-        }
-        else
-        {
-            document.getElementById("repeatDays").removeAttribute("disabled");
-        }
-    }
-
-    function loadTime() {
-      if(document.getElementById('times') != null) {
-         document.getElementById('times').value = '{{times}}';
-      }
-    }
-
-    function loadrxuid(rxuid) {
-      document.getElementById('rxuid').value = rxuid;
-    }
-    
-    window.onload=loadTime;
     </script>
-
-    <style = "text/css">
-      div.addMed {
-         background-color: #D0D0D0;
-         padding-left: 20px;
-         padding-bottom: 0px;
-         width: 290px;
-      }
-    </style>
 
 {% endblock %}
 {% block content %}
 
    <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
    <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
-
-   <a href="#" onclick="toggle_visibility('{{ patient.id }}'); return false">(add medication)</a><br>
-
-    <div class="addMed" id="{{ patient.id }}" style="display:{{ display }};">
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="requestType" value="addMedication"><br>
-      <input type="hidden" name="id" value="{{ patient.id }}">
-      <h5>Medication Info</h5><br>
-      <a href = "../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID:</a>
-
-      <input type="number" id="rxuid" name="rxuid" value={{rxuid}}><br>
-      Number of pills: <input type="number" name="numPills" value = {{ numPills }}><br>
-      <input type="checkbox" name="dispensable" {{ dispensed }}>Dispensable?<br><br>
-
-
-      <h5>Schedule</h5><br>
-      <h6>Start Date</h6>
-      <input type="date" name="startDate" value = "{{ startDate }}"><br><br>
-
-      <h6>Times</h6>
-      <select multiple name = "times" id = "times" size = "3">
-         <option> 12:00am
-         <option> 01:00am
-         <option> 02:00am
-         <option> 03:00am
-         <option> 04:00am
-         <option> 05:00am
-         <option> 06:00am
-         <option> 07:00am
-         <option> 08:00am
-         <option> 09:00am
-         <option> 10:00am
-         <option> 11:00am
-         <option> 12:00pm
-         <option> 01:00pm
-         <option> 02:00pm
-         <option> 03:00pm
-         <option> 04:00pm
-         <option> 05:00pm
-         <option> 06:00pm
-         <option> 07:00pm
-         <option> 08:00pm
-         <option> 09:00pm
-         <option> 10:00pm
-         <option> 11:00pm
-      </select>
-
-      <h6>Repeat?</h6>
-      <input type="checkbox" onClick="disable_enable()" id="repeat" name="repeat" {{ repeat }}>
-      Every <input type="number" id="repeatDays" name="repeatDays" value={{ repeatDays }}> days
-
-      <br><br>
-
-      <input type="submit" value="Add Medication">
-    </form>
-    </div>
 
    <h5>Medications that need to be taken</h5>
    {% for rxuid in patient.activeMeds %}
@@ -122,7 +32,7 @@ My Information
    <br>
    <h5>Medication History</h5>
 
-   {% for medEntry in patient.medHistory %}
+   {% for medEntry in patient.medHistory|last_entries:10 %}
          {% if medEntry.MedicationMissed %}
             {% with medName=medEntry.MedicationMissed.rxuid|get_medName %}
             {{ medEntry.MedicationMissed.timestamp }} - Patient missed taking {{ medEntry.MedicationMissed.quantity }} pills of {{ medName }} ({{ medEntry.MedicationMissed.time }})
@@ -143,42 +53,10 @@ My Information
    <br>
    <h5>Dispenser Location</h5>
    {{ patient.dispenser.location }} <br>
-   <a href="#" onclick="toggle_visibility('dispenser'); return false">(update dispenser)</a>
-      <div class="updateDisp" id="dispenser" style="display:none;">
-         <form method="post">
-            {% csrf_token %}
-
-            <select name = "newDisp">
-               {% for dispenser in dispensers %}
-                  <option value="{{ dispenser.id }}"> {{ dispenser.location }}
-               {% endfor %}
-            </select>
-
-            <input type="hidden" name="requestType" value="updateDisp">
-            <input type="submit" value="Save Dispenser Choice">
-         </form>
-      </div>
-      <br><br>
-      
+   
     <h5>Caretaker</h5>
    {{ patient.caretaker.user.first_name }} {{ patient.caretaker.user.last_name }} <br>
-   {{ patient.caretaker.id }} <br>
-   <a href="#" onclick="toggle_visibility('updateCaretaker'); return false">(update caretaker)</a>
-      <div class="updateCare" id="updateCaretaker" style="display:none;">
-         <form method="post">
-            {% csrf_token %}
-
-            <select name = "newCaretaker">
-               {% for caretaker in caretakers %}
-                  <option value="{{ caretaker.id }}"> {{ caretaker.user.first_name }} {{ caretaker.user.last_name }}
-               {% endfor %}
-            </select>
-
-            <input type="hidden" name="requestType" value="updateCaretaker">
-            <input type="submit" value="Save Caretaker">
-         </form>
-      </div>
-      <br><br>
+   {{ patient.caretaker.id }} <br><br>
    
    <h5>Birthdate</h5>
    {{ patient.user.birthdate|date:"m/d/Y"}}
@@ -221,14 +99,6 @@ My Information
             <li> Medication is not dispensed.
             {% endif %}
             </ul>
-
-            <form method="post" onSubmit="return confirm('Do you really want to deactivate this medication?');">
-              {% csrf_token %}
-
-              <input type="hidden" name="requestType" value="deactivateMed">
-              <input type="hidden" name="rxuid" value="{{ medication.rxuid }}">
-              <input type="submit" name="" value="Deactivate medication">
-            </form>
-            {% endif %}
+         {% endif %}
       {% endfor %}
 {% endblock %}

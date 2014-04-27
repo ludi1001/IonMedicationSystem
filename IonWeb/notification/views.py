@@ -183,7 +183,7 @@ def medication_status(request):
          rxuid = request.POST['rxuid']
          quantity = request.POST['quantity']
          patientID = request.POST['patientID']
-         message = helper.take_medication(patient.objects(id=patientID)[0], rxuid, quantity, "ONLINE")
+         message = helper.take_medication(patient.objects(id=patientID)[0], rxuid, quantity, "ONLINE", False)
          
    minusone = datetime.now()-timedelta(hours=1)
    now = datetime.now()

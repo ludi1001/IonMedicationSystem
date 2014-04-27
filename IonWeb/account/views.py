@@ -5,6 +5,8 @@ from django.contrib.auth import authenticate
 import django.contrib.auth as auth
 import mongoengine.django.mongo_auth.models
 from mongoengine.django.auth import User
+from helper import helper
+from DataEntry.models import patient
 from mongoengine import django
 import datetime
 
@@ -15,7 +17,19 @@ from shortcuts import choose_group_dependent_page
 @is_in_group(ALL)
 def index(request):
   def index_patient(request, user):
-    return HttpResponse('patient page')
+   params = {}
+   message = ""
+   
+   IonUser = helper.get_ion_user(request)
+   if patient.objects(user=IonUser):
+      Patient = patient.objects(user=IonUser)[0]
+      params['patient'] = Patient
+   else:
+         message = "Not a patient"
+   params['message'] = message
+   
+   return render(request, "patient_home.html", params)
+
   def index_dispenser(request, user):
     return HttpResponse('dispenser page')#render(request, 'index.html')
   def index_caretaker(request, user):
