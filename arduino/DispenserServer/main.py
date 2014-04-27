@@ -80,7 +80,7 @@ def parse_dispenser_status(dispenser):
   res["status"] = status
   if status == Dispenser.ERROR:
     res["message"] = dispenser.get_error_message()
-  elif status == Dispenser.IDLE:
+  elif status == Dispenser.IDLE or status == Dispenser.DONE:
     res["feedback"] = dispenser.get_feedback()
   return res
 

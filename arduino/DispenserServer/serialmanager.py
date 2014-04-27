@@ -22,7 +22,12 @@ class Dispenser:
       self.status = Dispenser.BUSY
       self.feedback = []
       try:
-        ser = serial.Serial(PORT, 9600)
+        try:
+          ser = serial.Serial(PORT, 9600)
+        except serial.SerialException:
+          self.status = Dispenser.ERROR
+          self.error_msg = "Unable to connect to dispenser"
+          return
         time.sleep(3)
         ser.write('!ping\n')
         print ser.readline()
@@ -60,7 +65,7 @@ class Dispenser:
             res["value"] = result
           self.feedback.append(res)
         ser.close()
-        self.status = Dispenser.IDLE
+        self.status = Dispenser.DONE
       except:
         self.status = Dispenser.ERROR
         self.error_msg = traceback.format_exc()

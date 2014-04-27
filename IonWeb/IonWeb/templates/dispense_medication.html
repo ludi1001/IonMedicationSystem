@@ -4,34 +4,268 @@ Dispense Medication
 {% endblock %}
 {% block head %}
 <script type="text/javascript">
+var statusCheckInterval = 0;
 function issueCommand(command, dict_data, success_func, error_func) {
   $.ajax({
       url:"http://localhost:8888/" + command, 
       data: JSON.stringify(dict_data), 
       dataType: "jsonp",
       timeout: 10000,
-      success: success_func,
+      success: processResponse,
       type: "POST"
-  }).error(error_func);
+  }).error(function() {
+    displayMessage("An internal error has been encountered.", "The admin have been notified.", "AJAX request failed");
+    //inform admin of problem!
+    reportToAdmin([{"message":"AJAX request failed","compartment":-1}]);
+  });
+}
+
+function processResponse(resp) {
+  console.log(resp);
+  $("#additional-status-text").text("");
+  if(resp.status == 0) {
+    displayMessage("Dispenser is idle.");
+    $("#spinning-wheel").hide();
+  }
+  else if(resp.status == 1) {
+    $("#spinning-wheel").show();
+    displayMessage("Your medication is dispensing...");
+  }
+  else if(resp.status == 2) {
+    clearInterval(statusCheckInterval);
+    displayMessage("Uh oh! Dispenser error encountered.", "The admin have been notified.", resp.message);
+    $("#spinning-wheel").hide();
+    reportToAdmin([{"message":resp.message,compartment:-1}]);
+  }
+  else if(resp.status == 4) {
+    clearInterval(statusCheckInterval);
+    //check feedback
+    var errors = [];
+    var emptyCompartments = [];
+    
+    var success = true;
+    
+    var html = []; //log errors in html as well
+    html.push("<ul>");
+    for(var i = 0; i < resp.feedback.length; ++i) {
+      var entry = resp.feedback[i];
+      if(entry.result != "success") {
+        success = false;
+        html.push("<li>");
+        html.push("Compartment " + entry.compartment);
+        if(entry.result == "empty") {
+          emptyCompartments.push(entry.compartment);
+          html.push(" is empty");
+        }
+        else if(entry.result == "error") {
+          errors.push({"compartment":entry.compartment,"message":entry.value});
+          html.push(": " + entry.value);
+        }
+        else
+          html.push(": " + entry.value);
+        html.push("</li>");
+      }
+    }
+    html.push("</ul>");
+    if(success)
+      displayMessage("Dispensing complete!", "Please take your cup.");
+    else
+      displayMessage("Dispensing is complete, but...", "Unfortunately, not all of your medication was dispensed. Go ahead and take the cup. Your caretaker has been notified.", html.join(""));
+    $("#spinning-wheel").hide();
+    
+    if(errors.length > 0)
+      reportToAdmin(errors);
+    if(emptyCompartments.length > 0)
+      reportEmptyCompartments(emptyCompartments);
+  }
+}
+
+function reportToAdmin(errors) {
+  request = {
+    "group":"admin",
+    "messages": []
+  };
+  errors.forEach(function(error) {
+    request['messages'].push({'type':'error','error':error["message"],'compartment':error["compartment"]});
+  });
+  
+  $.ajax({
+    url:"/notification/notify-group",
+    type: 'POST',
+    data: JSON.stringify(request),
+    contentType: 'application/json; charset=utf-8',
+    dataType: 'json',
+    success: function(data){console.log(data)}
+  });
+}
+
+function reportEmptyCompartments(compartments) {
+  request = {
+    "group":"caretaker",
+    "messages":[]
+  }
+  compartments.forEach(function(compartment) {
+    request['messages'].push({'type':'empty-compartment','compartment':compartment});
+  });
+  
+  $.ajax({
+    url:"/notification/notify-group",
+    type: 'POST',
+    data: JSON.stringify(request),
+    contentType: 'application/json; charset=utf-8',
+    dataType: 'json'
+  });
+}
+
+function displayMessage(msg, additional_status, additional ) {
+  $("#status-text").text(msg);
+  $("#additional-info").html("");
+  $("#additional-status-text").html("");
+  $("#additional-info-link").hide();
+  if(additional) {
+    $("#additional-info").html(additional);
+    $("#additional-info").hide();
+    $("#additional-info-link").show();
+  }
+  if(additional_status) {
+    $("#additional-status-text").html(additional_status);
+  }
+}
+
+function setupAjax() {
+  //setup ajax
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+  }
+  var csrftoken = getCookie('csrftoken');
+  function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+  }
+  $.ajaxSetup({
+      crossDomain: false, // obviates need for sameOrigin test
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type)) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
 }
 
 $(document).ready(function() {
-  $("#test").click(function() {
-    issueCommand("ping", {data: "hi"}, function(data) { 
-      console.log(data);
-      $("#data").append(data);
-    }, function() {});
-    issueCommand("status", {}, function(data) {
-      console.log(data);
-    }, function() {});
+  $("#additional-info-link").hide();
+  $("#additional-info-link").click(function() {
+    $("#additional-info").fadeToggle();
   });
+  
+  setupAjax();
+  
+  setTimeout(function() {
+    issueCommand("dispense", {"dispense": [{"compartment":1, "pills":1, "weight":100},{"compartment":2,"pills":4,"weight":10}]});
+     
+    statusCheckInterval = setInterval(function() {
+      issueCommand("status", {});
+    }, 2000);
+  }, 1000);
+  
 });
 </script>
+<style type="text/css">
+#spinning-wheel {
+  position:relative;
+}
+#loaderImage {
+  width:128px;
+  margin: 0 auto;
+}
+</style>
 {% endblock %}
 {% block header_title %}
-Dispensing
+Ion Medication Systems
 {% endblock %}
 {% block content %}
-<a id="test" href="#">hi</a>
-<div id="data">blahblah</div>
+<h2 id="status-text">Preparing to dispense...</h2>
+<h4 id="additional-status-text"></h4>
+<a id="additional-info-link" href="#">Additional Information</a>
+<div id="additional-info"></div>
+<br>
+<div id="spinning-wheel">
+<div id="loaderImage"></div>
+<script type="text/javascript">
+//from http://preloaders.net/
+	var cSpeed=9;
+	var cWidth=128;
+	var cHeight=128;
+	var cTotalFrames=12;
+	var cFrameWidth=128;
+	var cImageSrc='/static/images/spinning-wheel.gif';
+	
+	var cImageTimeout=false;
+	var cIndex=0;
+	var cXpos=0;
+	var cPreloaderTimeout=false;
+	var SECONDS_BETWEEN_FRAMES=0;
+	
+	function startAnimation(){
+		
+		document.getElementById('loaderImage').style.backgroundImage='url('+cImageSrc+')';
+		document.getElementById('loaderImage').style.width=cWidth+'px';
+		document.getElementById('loaderImage').style.height=cHeight+'px';
+		
+		//FPS = Math.round(100/(maxSpeed+2-speed));
+		FPS = Math.round(100/cSpeed);
+		SECONDS_BETWEEN_FRAMES = 1 / FPS;
+		
+		cPreloaderTimeout=setTimeout('continueAnimation()', SECONDS_BETWEEN_FRAMES/1000);
+		
+	}
+	
+	function continueAnimation(){
+		
+		cXpos += cFrameWidth;
+		//increase the index so we know which frame of our animation we are currently on
+		cIndex += 1;
+		 
+		//if our cIndex is higher than our total number of frames, we're at the end and should restart
+		if (cIndex >= cTotalFrames) {
+			cXpos =0;
+			cIndex=0;
+		}
+		
+		if(document.getElementById('loaderImage'))
+			document.getElementById('loaderImage').style.backgroundPosition=(-cXpos)+'px 0';
+		
+		cPreloaderTimeout=setTimeout('continueAnimation()', SECONDS_BETWEEN_FRAMES*1000);
+	}
+	
+	function stopAnimation(){//stops animation
+		clearTimeout(cPreloaderTimeout);
+		cPreloaderTimeout=false;
+	}
+	
+	function imageLoader(s, fun)//Pre-loads the sprites image
+	{
+		clearTimeout(cImageTimeout);
+		cImageTimeout=0;
+		genImage = new Image();
+		genImage.onload=function (){cImageTimeout=setTimeout(fun, 0)};
+		genImage.onerror=new Function('alert(\'Could not load the image\')');
+		genImage.src=s;
+	}
+	
+	//The following code starts the animation
+	new imageLoader(cImageSrc, 'startAnimation()');
+</script></div>
 {% endblock %}

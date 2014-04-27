@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from account.privilege_tests import *
 
 from DataEntry.models import patient
-from models import notification
+from models import notification, DispenserError, CompartmentEmpty
 from account.models import IonUser
 from helper import RxNorm, helper
 from notify import runNotify
@@ -88,7 +88,7 @@ def mark_notification_read(request):
     
     return HttpResponse('{"success":"success"}',content_type='application/json')
   except ValueError:
-    return HttpResponse('{"error":"Malformed JSON"}',mimetype='application/json')
+    return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
 
 @is_in_group(ALL)
 def list_all_notifications(request):
@@ -97,6 +97,62 @@ def list_all_notifications(request):
   notifications = notification.objects(target=user).order_by('-creation_date')[:20]
   return render(request, 'list_all_notifications.html', {'notifications_json':json.dumps(create_json_notifications(notifications))})
 
+@is_in_group(ALL) 
+def notify_group(request):
+  user = IonUser.objects(user=request.user)[0]
+  if user.group == 'dispenser':
+    return notify_group_dispenser(request)
+  else:
+    return HttpResponse("unimplemented")
+
+def notify_group_dispenser(request):
+  """Notifies an entire group of an issue.
+  Expects JSON request in form
+  {
+    group:string,
+    messages:[message,...]
+  }
+  where message is in the form
+  {
+    type:error|empty-compartment,
+    arbitrary data
+  }
+  
+  for error, message is in form
+  {
+    type:error,
+    error:string,
+    compartment:int
+  }
+  
+  for empty-compartment, message is in form
+  {
+    type:empty-compartment,
+    compartment:int
+  }
+  """
+  dispenser = IonUser.objects(user=request.user)[0]
+  try:
+    obj = json.loads(request.body)
+    group = obj['group']
+    targets = IonUser.objects(group=group)
+    for message in obj['messages']:
+      if message['type'] == 'error':
+        for target in targets:
+          notification = DispenserError(target=target,dispenser=dispenser,generator="notify_group_dispenser", 
+            type="DispenserError",error=message['error'],compartment=message['compartment'])
+          notification.save()
+      elif message['type'] == 'empty-compartment':
+        for target in targets:
+          notification = CompartmentEmpty(target=target,dispenser=dispenser,generator="notify_group_dispenser",
+            type="CompartmentEmpty",compartment=message['compartment'])
+          notification.save()
+    return HttpResponse('{"error":"success"}',content_type='application/json')
+  except KeyError:
+    return HttpResponse('{"error":"malformed request"}',content_type='application/json')
+  except ValueError:
+    return HttpResponse('{"error":"Malformed JSON"}',content_type='application/json')
+    
 def pack_check(request):
   if 'id' not in request.GET:
     return redirect('/')

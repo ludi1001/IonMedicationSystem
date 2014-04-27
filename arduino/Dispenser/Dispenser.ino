@@ -80,7 +80,7 @@ void dispense() {
    int num_pills = Serial.parseInt();
    if(num_pills <= 0 || num_pills >= MAX_PILLS) {
      Serial.println("!error");
-     Serial.println("Bad number of pills");
+     Serial.println("Invalid number of pills requested");
      return;
    }
 
@@ -88,7 +88,7 @@ void dispense() {
    int pill_weight = Serial.parseInt();
    if(pill_weight <= 0 || pill_weight >= MAX_PILL_WEIGHT) {
      Serial.println("!error");
-     Serial.println("Bad pill weight");
+     Serial.println("Invalid pill weight");
    }
         
    //read ambient noise for phototransistor

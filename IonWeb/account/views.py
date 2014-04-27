@@ -18,10 +18,10 @@ def index(request):
       
 @is_in_group('admin')      
 def create(request):
-  user = User.create_user('iveel', 'password', 'solix@trewq.com')
+  user = User.create_user('dispenser', 'password', 'solix@trewq.com')
   #user.groups = ['patient']
   user.save()
-  ion_user = IonUser(user=user, group='admin', birthdate=datetime.datetime.now())
+  ion_user = IonUser(user=user, group='dispenser', birthdate=datetime.datetime.now())
   ion_user.save()
   return HttpResponse("Account create successful")
 
