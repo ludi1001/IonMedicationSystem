@@ -36,7 +36,7 @@ def management(request):
 
          Dispenser.delete()
 
-   return render(request, 'dispenser.html', {'dispensers': dispenser.objects, 'compartments': compartment.objects})
+   return render(request, 'dispenser.html', {'dispensers': dispenser.objects.order_by('location'), 'compartments': compartment.objects})
 
 def compartments(request):
    params = {}
@@ -51,13 +51,14 @@ def compartments(request):
          elif request.POST['lot'] == "":
             params['message'] = "Error: Please enter a lot number"
          elif not helper.validate(request.POST['expiration']): 
-            message = 'Error: Expiration date must be mm-dd-yyy'
+           params['message'] = 'Error: Expiration date must be mm-dd-yyy'
          else:   
             toEdit.rxuid = int(request.POST['rxuid'])
             toEdit.medName = RxNorm.getName(request.POST['rxuid'])
             toEdit.lot = int(request.POST['lot'])
             toEdit.expiration = request.POST['expiration']
             toEdit.save()
+            params['message'] = 'Commpartment successfully updated!'
    return render(request, 'compartment.html', params)
 
 def loadcompartment(request):

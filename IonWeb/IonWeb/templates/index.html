@@ -6,9 +6,15 @@ Portal
 Portal
 {% endblock %}
 {% block content %}
-   <ul>
-      <li> <a href = "../patientinfo">Patient Info</a>
-      <li> <a href = "../medinfo">Medication Info Lookup</a>
-      <li> <a href = "../dispenser">Dispenser Admin</a>
-    </ul>
+
+<div class="one-third column">
+     <h2>Tasks</h2>
+     <ul class="action-list">
+      <li><a href = "/users">User Management</a>
+      <li><a href = "/dispenser">Dispenser Management</a>
+      <li><a href = "/medication">Medication Tools</a>
+      <li><a href = "/account">Account Management</a>
+      <li><a href = "/account/logout">Logout</a>
+     </ul>
+   </div>
 {% endblock %} 

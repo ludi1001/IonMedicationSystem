@@ -19,7 +19,6 @@ def take_medication(Patient, rxuid, quantity, dispenserID, caretaker):
    medEntry['timestamp'] = datetime.now()
    medEntry['dispenserID'] = dispenserID;
    if caretaker == "True":
-      print "hi!"
       medEntry['caretaker'] = Patient.caretaker
       
    Patient.medHistory.append({ 'MedicationTaken' : medEntry })

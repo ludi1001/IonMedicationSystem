@@ -5,6 +5,14 @@ Compartment Manager
 {% block header_title %}
 Update Compartment Info
 {% endblock %}
+{% block head %}
+   <script type="text/javascript">
+    function loadrxuid(rxuid) {
+      document.getElementById('rxuid').value = rxuid;
+    }
+    </script>
+    
+{% endblock %}
 {% block content %}
     {% load dispenser_tags %}
     <form method="post">
@@ -14,19 +22,21 @@ Update Compartment Info
       Compartment ID: 
       <select name = "id">
          {% for compartment in compartments %}
-            {% if compartment.rxuid %}
-               {% with medName=compartment.rxuid|get_medName %}
-                  <option value="{{ compartment.id }}"> {{ compartment.id }} | {{ medName }}
-               {% endwith %}
-            {% else %}
-               <option value="{{ compartment.id }}"> {{ compartment.id }} | EMPTY
+            {% if not compartment.loaded %}
+               {% if compartment.rxuid %}
+                  {% with medName=compartment.rxuid|get_medName %}
+                     <option value="{{ compartment.id }}"> {{ compartment.id }} | {{ medName }}
+                  {% endwith %}
+               {% else %}
+                  <option value="{{ compartment.id }}"> {{ compartment.id }} | EMPTY
+               {% endif %}
             {% endif %}
          {% endfor %}
       </select>
-      <a href="/medinfo" target="_blank">RXUID LOOKUP</a><br>
-      RXUID: <input type = "number" name ="rxuid" value="rxuid"> <br>
-      LOT #: <input type = "number" name ="lot" value="lot"><br>
-      EXPIR: <input type = "date" name ="expiration" value="expiration"><br>
+      <a href = "../medinfo" onclick="javascript:void window.open('../medinfo','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">RXUID:</a>
+      <input type = "number" id="rxuid" name ="rxuid"> <br>
+      LOT #: <input type = "number" name ="lot"><br>
+      EXPIR: <input type = "date" name ="expiration"><br>
       <input type = "submit" value = "Update Compartment">
       <br><br>
       <!--<a href="/updatecompartment" onclick="javascript:void window.open('/updatecompartment','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Update Compartment with Barcodes</a>

@@ -28,14 +28,14 @@ def runNotify():
    NotificationPatients = helper.active_medications(timeset, 1);
    for Patient in NotificationPatients:
       for rxuid in Patient.activeMeds:
-         if any(True for x in medication['times'] if x in timeset):
+        # if any(True for x in medication['times'] if x in timeset):
             if Patient.user:
                newNotification = medNotification(target=Patient.user, type="reminder", generator = "CRON", rxuid = rxuid, patientName = Patient.firstName + Patient.lastName, time = now.strftime("%I:00%p"))
                newNotification.save()
             else:
                print Patient.firstName + " " + Patient.lastName + " doesn't have an Ion Account"
                
-            print "notify " + medication['rxuid']
+            print "notify " + rxuid
 
    timeset = [missed.strftime("%I:00%p").lower()]
    MissedPatients = helper.active_medications(timeset, 1) 

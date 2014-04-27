@@ -1,9 +1,9 @@
 {% extends "base_template.html" %}
 {% block page_title %}
-Search patients by name
+My Information
 {% endblock %}
 {% block header_title %}
-Search patients by name
+My Information
 {% endblock %}
 {% block head %}
    {% load dispenser_tags %}
@@ -53,7 +53,6 @@ Search patients by name
 {% endblock %}
 {% block content %}
 
-{% if requestType == 'patientInfo' %}
    <h2>{{ patient.lastName }}, {{ patient.firstName }} </h2>
    <h5>Profile Created</h5> {{ patient.id.generation_time }} <br><br>
 
@@ -232,21 +231,4 @@ Search patients by name
             </form>
             {% endif %}
       {% endfor %}
-{% else %}
-
-   <i>*Leave blank for entire patient list</i><br>
-   <form method="get" action="/search">
-      <input type="hidden" name="requestType" value="searchPatients">
-      <input type="text" name="search" placeholder="name">
-   </form>
-   {% if patientlist %}
-      {% for patient in patientlist %}
-            > <a href = ../search?requestType=patientInfo&id={{ patient.id }}>{{ patient.lastName }}, {{ patient.firstName }} - {{ patient.user.birthdate|date:"m/d/Y" }} </a><br>
-      {% endfor %}
-    {% else %}
-      No patients match query.
-    {% endif %}
-{% endif %}
-
-
 {% endblock %}

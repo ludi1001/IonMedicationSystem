@@ -6,6 +6,7 @@ Compartment Manager
 Load compartment into dispenser
 {% endblock %}
 {% block content %}
+   {% load dispenser_tags %}
    <form method="post">
       {% csrf_token %}
       <input type = "hidden" name ="requestType" value="loadCompartment">
@@ -13,7 +14,9 @@ Load compartment into dispenser
          <select name = "compID">
             {% for compartment in compartments %}
                {% if compartment.rxuid %}
-               <option value="{{ compartment.id }}"> {{ compartment.id }}
+                  {% with medName=compartment.rxuid|get_medName %}
+                     <option value="{{ compartment.id }}"> {{ compartment.id }} - {{ medName }}
+                  {% endwith %}
                {% endif %}
             {% endfor %}
          </select>

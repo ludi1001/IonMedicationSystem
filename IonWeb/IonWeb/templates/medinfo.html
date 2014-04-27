@@ -5,6 +5,16 @@ Medication Info
 {% block header_title %}
 Medication Info
 {% endblock %}
+{% block head %}
+<script type="text/javascript">
+$(document).ready(function() {
+   $("#rxuid").click(function() {
+      window.opener.loadrxuid({{ rxuid }});
+      window.close()
+   });
+});
+</script>
+{% endblock %}
 {% block content %}
     <form method="get" action="">
      <input type="hidden" name="requestType" value="getNameSuggestions">
@@ -35,7 +45,7 @@ Medication Info
       
    {% elif names %}
    <h3>Results for {{ name }} (RxNorm attributes)</h3>
-      RXUID: {{ rxuid }} <br>
+      RXUID: <a id="rxuid" href = "#">{{ rxuid }}</a><br>
       NDC: {{ ndc }}
       <pre>{{ attributes }}</pre>
    {% endif %}

@@ -21,9 +21,9 @@ Patient Management
     
     <h2> Remove Patient </h2>
     {% for patient in Patients %}
-      {{ patient.lastName }}, {{ patient.firstName }}  
+      {{ patient.lastName }}, {{ patient.firstName }} - {{ patient.user.birthdate|date:"m/d/Y" }}
 
-      <form method="post" action="./patientinfo" onSubmit="return confirm('Do you really want to delete this patient?');">
+      <form method="post" action="./patientinfo" onSubmit="return confirm('Do you really want to archive this patient?');">
         {% csrf_token %}
         <input type="hidden" name="requestType" value="deletePatient">
         <input type="hidden" name="id" value="{{patient.id}}">

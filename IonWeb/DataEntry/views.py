@@ -5,9 +5,11 @@ from account.models import IonUser
 from models import patient
 from dispenser.models import dispenser
 from helper import RxNorm, helper
+from itertools import chain
 import datetime
 import urllib2
 import json
+import re
 
 def patientinfo(request):
    message = ""
@@ -96,7 +98,16 @@ def search(request):
    params = {}
    message = ''
    if request.GET.get('requestType') == 'searchPatients':
-      patientlist = patient.objects(__raw__={ '$or' : [{'firstName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}, { 'lastName':{'$regex': '^' + request.GET.get('search'), '$options' : 'i'}}]})
+      searchTerms = re.split('\W+', request.GET.get('search'))
+      patientlist = []
+      searchlist = []
+      
+      for searchTerm in searchTerms:
+         searchlist.append({'firstName':{'$regex': '^' + searchTerm, '$options' : 'i'}})
+         searchlist.append({ 'lastName':{'$regex': '^' + searchTerm, '$options' : 'i'}})
+         
+      patientlist = list(chain(patientlist, patient.objects(__raw__={ '$or' : searchlist})))
+         
       params = { 'patientlist' : patientlist }
       
    if request.GET.get('requestType') == 'patientInfo':
@@ -198,4 +209,108 @@ def search(request):
    params['message'] = message
    
    return render(request, "search.html", params)
+ 
+def patienthome(request):
+   params = {}
+   message = ""
    
+   if request.GET.get('requestType') == 'patientInfo':
+      id = request.GET.get('id')
+      Patient = patient.objects(id=id)[0]
+      caretakers = IonUser.objects(group__in=["caretaker", "admin"])
+      params = {'requestType' : 'patientInfo', 'patient': Patient, 'dispensers': dispenser.objects, 'caretakers': caretakers}
+      
+      params['rxuid'] = 0
+      params['numPills'] = 1
+      params['dispensed'] = "checked"
+      params['startDate'] = datetime.datetime.now().strftime("%Y-%m-%d")
+      params['times'] = "09:00am"
+      params['repeatDays'] = 1
+      params['repeat'] = "checked"
+      params['display'] = 'none'
+            
+      if request.method == 'POST':
+         if request.POST.get('requestType') == 'updateDisp':
+            newDispenser = dispenser.objects(id=request.POST.get('newDisp'))[0]
+            Patient.dispenser = newDispenser
+            Patient.save()
+         
+         if request.POST.get('requestType') == 'updateCaretaker':
+            newCaretaker = IonUser.objects(id=request.POST.get('newCaretaker'))[0]
+            Patient.caretaker = newCaretaker
+            Patient.save()
+         
+         if request.POST.get('requestType') == 'deactivateMed':
+            rxuid = request.POST['rxuid']
+            for index, medication in enumerate(Patient.medications):
+               if medication['rxuid'] == rxuid:
+                  medication['active'] = False
+                  medication['deactivated'] = datetime.datetime.now()
+            Patient.save()
+            
+            params['rxuid'] = medication['rxuid']
+            params['numPills'] = medication['quantity']
+            params['dispensed'] = "checked" if medication['dispensed'] else ""
+            params['startDate'] = medication['startDate']
+            params['times'] = medication['times'][0]
+            params['repeatDays'] = medication['repeatDays']
+            params['repeat'] = "checked" if medication['repeatDays'] > -1 else ""
+            params['display'] = 'block'
+            
+         if request.POST['requestType'] == 'addMedication':
+            rxuid = request.POST['rxuid']
+            quantity = request.POST['numPills'] 
+            dispensed = 'dispensable' in request.POST
+            startDate = request.POST['startDate']
+            times = request.POST.getlist('times')
+            repeat = 'repeat' in request.POST
+            repeatDays = request.POST.get('repeatDays', -1)
+   
+            rxuidRepeat = False
+            
+            for medication in Patient.medications:
+               if medication['rxuid'] == rxuid and medication['active'] == True:
+                  rxuidRepeat = True
+                  
+            if not repeat:
+               repeatDays = -1
+            
+            if rxuid == "":
+               message = "Error: Please enter a rxuid"
+               rxuid = 0
+            elif quantity == "":
+               message = "Error: Please enter an quantity"
+               quantity = 1
+            elif RxNorm.getName(rxuid) == None:
+               message = "Error: Invalid rxuid"
+            elif rxuidRepeat:
+               message = "Patient already has an entry for this medication"
+            elif int(quantity) < 0 or int(quantity) > 50:
+               message = 'Error: Quantity must be between 0 and 50'
+            elif not helper.validate(startDate): 
+               message = 'Error: Medication start date must be mm-dd-yyy'
+               startDate = datetime.datetime.now().strftime("%Y-%m-%d")
+            elif datetime.datetime.strptime(startDate, "%Y-%m-%d").date() < datetime.date.today():
+               message = 'Error: Start date can not be in the past'
+            elif len(times) == 0:
+               message = 'Error: No medication times specified'
+               times.append("09:00am")
+            elif repeat and repeatDays == "":
+               message = 'Error: Repeat every how many days?'
+               repeatDays = 1
+            else:
+               Patient.medications.append({'rxuid': rxuid, 'quantity': quantity, 'dispensed': dispensed, 'startDate': startDate, 'times': times, 'repeatDays': repeatDays, 'active': True})
+               Patient.save()
+            
+            params['rxuid'] = rxuid
+            params['numPills'] = quantity
+            params['dispensed'] = "checked" if dispensed else ""
+            params['startDate'] = startDate
+            params['times'] = times[0]
+            params['repeatDays'] = repeatDays
+            params['repeat'] = "checked" if repeat else ""
+            params['display'] = 'block'
+   params['message'] = message
+   
+   return render(request, "patient_home.html", params)
+
