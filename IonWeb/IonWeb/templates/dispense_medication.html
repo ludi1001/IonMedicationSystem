@@ -25,7 +25,7 @@ function processResponse(resp) {
   $("#additional-status-text").text("");
   if(resp.status == 0) {
     displayMessage("Dispenser is idle.");
-    $("#spinning-wheel").hide();
+    $("#spinning-wheel").fadeOut();
   }
   else if(resp.status == 1) {
     $("#spinning-wheel").show();
@@ -34,7 +34,7 @@ function processResponse(resp) {
   else if(resp.status == 2) {
     clearInterval(statusCheckInterval);
     displayMessage("Uh oh! Dispenser error encountered.", "The admin have been notified.", resp.message);
-    $("#spinning-wheel").hide();
+    $("#spinning-wheel").fadeOut();
     reportToAdmin([{"message":resp.message,compartment:-1}]);
   }
   else if(resp.status == 4) {
@@ -71,7 +71,7 @@ function processResponse(resp) {
       displayMessage("Dispensing complete!", "Please take your cup.");
     else
       displayMessage("Dispensing is complete, but...", "Unfortunately, not all of your medication was dispensed. Go ahead and take the cup. Your caretaker has been notified.", html.join(""));
-    $("#spinning-wheel").hide();
+    $("#spinning-wheel").fadeOut();
     
     if(errors.length > 0)
       reportToAdmin(errors);
@@ -132,45 +132,11 @@ function displayMessage(msg, additional_status, additional ) {
   }
 }
 
-function setupAjax() {
-  //setup ajax
-  function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-  }
-  var csrftoken = getCookie('csrftoken');
-  function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-  }
-  $.ajaxSetup({
-      crossDomain: false, // obviates need for sameOrigin test
-      beforeSend: function(xhr, settings) {
-          if (!csrfSafeMethod(settings.type)) {
-              xhr.setRequestHeader("X-CSRFToken", csrftoken);
-          }
-      }
-  });
-}
-
 $(document).ready(function() {
   $("#additional-info-link").hide();
   $("#additional-info-link").click(function() {
     $("#additional-info").fadeToggle();
   });
-  
-  setupAjax();
   
   setTimeout(function() {
     issueCommand("dispense", {"dispense": [{"compartment":1, "pills":1, "weight":100},{"compartment":2,"pills":4,"weight":10}]});
