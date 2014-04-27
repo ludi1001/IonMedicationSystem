@@ -104,6 +104,7 @@ var notification = (function() {
    }  
   
   var newlyUnread = false; //did we receive any new notifications
+  var firstCall = true; //on first call to append notifications, ignore new notifications
   function appendNotifications(list) {
     for(var i = 0; i < list.length; ++i) {
       //this is very inefficient but w/e
@@ -115,7 +116,7 @@ var notification = (function() {
       if(j == notification_list.length) {
         //notification does not exist
         notification_list.push(list[i]);
-        newlyUnread = true;
+        newlyUnread = true && !firstCall;
       }
       else {
         //replace old notification just in case
@@ -128,7 +129,7 @@ var notification = (function() {
       var y = b.creation_date;
       return (x > y ? -1 : (x < y ? 1 : 0));
     });
-    
+    firstCall = false;
   }
   
   function cleanNotifications(list) {

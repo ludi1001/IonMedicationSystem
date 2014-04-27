@@ -14,6 +14,7 @@ body {
   padding-right:5px;
   margin-bottom:0;
   margin-right:10px;
+  height:40px;
 }
 
 #search-box{
@@ -21,24 +22,25 @@ body {
 	background-position:right;
 	background-repeat:no-repeat;
 	background-size:20px;
-   border-radius:8px;
+  border-radius:8px;
+  position:relative;
+  top:-2px;
 }
 
 #notification-icon {
   float:right;
 	height:30px;
 	position:relative;
-	top:-2px;
+	top:-4px;
   padding-right:10px;
 }
 
 header {
-	padding-top:10px;
+	padding-top:12px;
 }
 
 header img, nav {
-	height: 48px;
-	margin-bottom:10px;
+	height: 40px
 }
 header nav {
 	position:relative;
