@@ -10,11 +10,19 @@ import datetime
 
 from models import IonUser
 from privilege_tests import is_in_group, ALL
+from shortcuts import choose_group_dependent_page
 
 @is_in_group(ALL)
 def index(request):
-  return render_to_response('index.html', {},
-    context_instance=RequestContext(request))
+  def index_patient(request, user):
+    return HttpResponse('patient page')
+  def index_dispenser(request, user):
+    return HttpResponse('dispenser page')#render(request, 'index.html')
+  def index_caretaker(request, user):
+    return render(request, 'index.html')
+  def index_admin(request, user):
+    return render(request, 'index.html')
+  return choose_group_dependent_page(request, patient=index_patient,dispenser=index_dispenser,caretaker=index_caretaker,admin=index_admin)
       
 @is_in_group('admin')      
 def create(request):
