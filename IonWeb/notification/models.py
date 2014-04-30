@@ -41,3 +41,8 @@ class DispenserError(notification):
   dispenser = ReferenceField('IonUser', required=True)
   error = StringField()
   compartment = IntField(default=-1)
+ 
+class MedExpiration(notification):
+   dispenser = ReferenceField('IonUser', required=True)
+   slotNum = IntField()
+   expirationDate = DateTimeField()

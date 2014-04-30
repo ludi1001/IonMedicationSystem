@@ -2,6 +2,7 @@ from DataEntry.models import patient
 from datetime import datetime, timedelta, date
 from account.shortcuts import *
 import RxNorm
+from dispenser.models import dispenser, compartment
 
 # can't import from notifications.views...
 def active_medications(timeset, mode): 
@@ -35,4 +36,13 @@ def validate(date_text):
       return True
    except ValueError:
       return False
+      
+def findCompartment(compID):
+   for Dispenser in dispenser.objects():
+      for index, Compartment in enumerate(Dispenser.slots):
+         if Compartment:
+            if Compartment.id == compID:
+               return Dispenser, index
+
+
    
