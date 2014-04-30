@@ -17,3 +17,9 @@ def get_medName(rxuid):
 @register.filter(name='get_range')
 def get_range(i):
    return range(i)
+   
+@register.filter(name='last_entries')
+def last_entries(queryset, entries):
+   index = int(entries) * -1
+   return queryset[index:]
+   

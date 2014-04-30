@@ -123,23 +123,23 @@ Search patients by name
    <br>
    <h5>Medication History</h5>
 
-   {% for medEntry in patient.medHistory %}
-         {% if medEntry.MedicationMissed %}
-            {% with medName=medEntry.MedicationMissed.rxuid|get_medName %}
-            {{ medEntry.MedicationMissed.timestamp }} - Patient missed taking {{ medEntry.MedicationMissed.quantity }} pills of {{ medName }} ({{ medEntry.MedicationMissed.time }})
-            {% endwith %}
-         {% elif medEntry.MedicationTaken %}
-            {% with medName=medEntry.MedicationTaken.rxuid|get_medName %}
-            {{ medEntry.MedicationTaken.timestamp }} - 
-            {% if medEntry.MedicationTaken.caretaker %}
+   {% for medEntry in patient.medHistory|last_entries:10 %}
+      {% if medEntry.MedicationMissed %}
+         {% with medName=medEntry.MedicationMissed.rxuid|get_medName %}
+         {{ medEntry.MedicationMissed.timestamp }} - Patient missed taking {{ medEntry.MedicationMissed.quantity }} pills of {{ medName }} ({{ medEntry.MedicationMissed.time }})
+         {% endwith %}
+      {% elif medEntry.MedicationTaken %}
+         {% with medName=medEntry.MedicationTaken.rxuid|get_medName %}
+         {{ medEntry.MedicationTaken.timestamp }} - 
+         {% if medEntry.MedicationTaken.caretaker %}
             Caretaker {{ medEntry.MedicationTaken.caretaker.user.first_name }} {{ medEntry.MedicationTaken.caretaker.user.last_name }} administered
-            {% else %}
+         {% else %}
             Patient took 
-            {% endif %}
-            {{ medEntry.MedicationTaken.quantity }} pills of {{ medName }}
-            {% endwith %}
          {% endif %}
-         <br>
+            {{ medEntry.MedicationTaken.quantity }} pills of {{ medName }}
+         {% endwith %}
+      {% endif %}
+      <br>
    {% endfor %}
    <br>
    <h5>Dispenser Location</h5>

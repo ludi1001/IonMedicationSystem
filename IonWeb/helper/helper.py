@@ -1,6 +1,7 @@
 from DataEntry.models import patient
 from datetime import datetime, timedelta, date
 from account.shortcuts import *
+import RxNorm
 
 # can't import from notifications.views...
 def active_medications(timeset, mode): 

@@ -7,8 +7,12 @@ urlpatterns = patterns('',
     url(r'^$', 'account.views.index'),
     url(r'^patientinfo$', 'DataEntry.views.patientinfo'),
     url(r'^medinfo$', 'DataEntry.views.medinfo'),
+#<<<<<<< HEAD
     url(r'^patienthome$', 'DataEntry.views.patienthome'),
     #url(r'^admin/', include(admin.site.urls)),
+#=======
+    url(r'^admin/', include(admin.site.urls)),
+#>>>>>>> 1dfc68c09febe3121fb59b66cab22cd7fc3741fa
     url(r'^account/', include('account.urls')),
     url(r'^notification/',include('notification.urls')),
     url(r'^dispenser/', include('dispenser.urls')),

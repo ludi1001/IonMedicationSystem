@@ -22,3 +22,10 @@ def getName(rxuid):
    else:
       return None
  
+def getStrength(rxuid):
+   names = getJSON(''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', str(rxuid), '/strength']))
+   #if names['propConceptGroup']:
+   strength = names['strengthGroup']['strength']
+   if strength == '':
+      return 20
+   return strength
