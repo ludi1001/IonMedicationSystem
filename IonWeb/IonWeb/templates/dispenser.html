@@ -19,7 +19,7 @@ Dispenser Management
         $(this).siblings("div.details").slideUp(200);
         $(this).removeClass("location-open");
       }
-    });
+    }).disableSelection();
     
     $("#dispenser-list div.actionLink > a").click(function() {
       //$.post("", $(this).siblings("form").serialize()); 
@@ -59,7 +59,21 @@ Dispenser Management
   border-bottom-right-radius:5px;
   border-bottom-left-radius:5px;
   border-top: none;
-  padding-top: 7px;
+  margin-bottom:0;
+  padding-top:0
+}
+#dispenser-list .details-menu {
+  background-color:#fff;
+  padding:10px;
+  padding-top:0;
+  padding-bottom:0;
+  border-bottom:thin dotted gray;
+}
+#dispenser-list .details-menu a {
+  font-size:11px;
+}
+#dispenser-list .details-menu a:last-child {
+  float:right;
 }
 #dispenser-list ul.compartment-list {
   margin:0;
@@ -69,13 +83,15 @@ Dispenser Management
 }
 #dispenser-list ul.compartment-list > li {
   border-top:dotted thin gray;
-  padding-top:6px;
+  padding-top:10px;
+  padding-bottom:10px;
   margin-left:10px;
   margin-right:10px;
 } 
+
 #dispenser-list ul.compartment-list > li:first-child {
   border-top:none;
-} 
+}
 #dispenser-list div.actionLink {
   float:right;
 }
@@ -101,6 +117,7 @@ div.compartment {
   font-weight:800;
   display:inline;
 }
+
 </style>
 {% endblock %}
 {% block content %}
@@ -113,21 +130,29 @@ div.compartment {
          <li>
          <div class="location"  id="{{ dispenser.id }}">
           <a href="#">{{ dispenser.location }}</a>
-          <div class="actionLink">
-            <a href="#" class="removeCompartment">Delete</a>
-            <form method="post" action="#{{ dispenser.id }}" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+          
+          <!--<div class="actionLink">
+            <a href="#" class="removeCompartment"><img src="/static/images/arrow.png" height=9 style="opacity:1;position:relative;top:-2px"></a>
+
+          </div>-->
+         </div>
+         <div class="details" style="">
+         <!--<a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
+                        
+         -->
+         <div class="details-menu" >
+           <a class="load-compartment" href="#">Load compartment</a>
+           <div class="actionLink">
+              <a href="#">Delete dispenser</a>  
+              <form method="post" onSubmit="return confirm('Do you really want to delete this dispenser?');">
                {% csrf_token %}
                <input type="hidden" name="requestType" value="deleteDispenser">
                <input type="hidden" name="id" value="{{dispenser.id}}">
                <input type="submit" value="delete dispenser">
              </form>
-          </div>
+           </div>
          </div>
-         <div class="details">
-         <!--<a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
-                        
-         -->
-  
+         
          <ul class="compartment-list">
            {% for compartment in dispenser.slots %}
               <li>
@@ -152,7 +177,7 @@ div.compartment {
                   {% endwith %}
                 {% else %}
                    <div class="actionLink">
-                    <a href="#">Load</a>
+                   <!-- <a href="#">Load</a>-->
                        <form method="post" action="#{{ dispenser.id }}" >
                         {% csrf_token %}
                         <input type="hidden" name="requestType" value="loadCompartment">

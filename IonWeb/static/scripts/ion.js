@@ -89,7 +89,18 @@ $(document).ready(function() {
     $("#content-container").fadeTo("fast",1);
     $("#notifications").hide();
   });
+  
+  dialog.initialize();
 });
+
+(function($){
+    $.fn.disableSelection = function() {
+        return this
+                 .attr('unselectable', 'on')
+                 .css('user-select', 'none')
+                 .on('selectstart', false);
+    };
+})(jQuery);
 
 //notification manager
 var notification = (function() {
@@ -271,5 +282,45 @@ var notification = (function() {
   my.printNotifications = function() {
     console.log(notification_list);
   }
+  return my;
+})();
+
+var dialog = (function() {
+  var my = {};
+  my.initialize = function() {
+  }
+  my.show = function(el, buttons) {
+    //first setup DOM
+    $("#dialog-content").empty().append(el);
+    
+    //add default buttons
+    if(typeof buttons == "undefined")
+      buttons = {
+        "OK": function() { my.close(); },
+        "Cancel": function() { my.close(); }
+      };
+    
+    //add the buttons in
+    $("#dialog-button-bar").empty();
+    for(var button in buttons) {
+      if(!buttons.hasOwnProperty(button)) continue;
+      my.addButton(button, buttons[button]);
+    }
+    
+    //then fade in
+    $("#dialog-cover").fadeIn(200);
+    $("#dialog-container").fadeIn(200);
+  };
+  my.addButton = function(text, action) {
+    var el = $('<span class="dialog-button"><a id="button-Yes" href="#">' + text + '</a></span>');
+    $(el).click(function() {
+      action();
+    });
+    $("#dialog-button-bar").append(el);
+  };
+  my.close = function() {
+    $("#dialog-cover").fadeOut(200);
+    $("#dialog-container").fadeOut(200);
+  };
   return my;
 })();
