@@ -7,7 +7,6 @@ urlpatterns = patterns('',
     url(r'^$', 'account.views.index'),
     url(r'^patientinfo$', 'DataEntry.views.patientinfo'),
     url(r'^medinfo$', 'DataEntry.views.medinfo'),
-    url(r'^admin/', include(admin.site.urls)),
     url(r'^account/', include('account.urls')),
     url(r'^notification/',include('notification.urls')),
     url(r'^dispenser/', include('dispenser.urls')),
@@ -18,8 +17,7 @@ urlpatterns = patterns('',
     url(r'^medication$', 'notification.views.medication'),
     url(r'^rfid$', 'dispenser.views.updateRFID'),  
     url(r'^search$', 'DataEntry.views.search'),    
-    url(r'^users$', 'DataEntry.views.users'),
-    url(r'^dispense-medication$', 'django.shortcuts.render', {'template_name': 'dispense_medication.html'})
+    url(r'^users$', 'DataEntry.views.users')
 ) 
 urlpatterns += staticfiles_urlpatterns()
 

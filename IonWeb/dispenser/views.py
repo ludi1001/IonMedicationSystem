@@ -5,9 +5,9 @@ from models import dispenser
 from models import compartment
 from DataEntry.models import patient
 from account.models import IonUser
+from account.privilege_tests import is_in_group, DISPENSER_GROUP
 from django.shortcuts import render
 import re
-from account.models import IonUser
 
 def management(request):
    if request.method == 'POST':
@@ -224,3 +224,7 @@ def dispenser_admin(request):
          compartment.objects(id=id)[0].delete()
 
    return render(request, 'dispenser_admin.html', {'compartments' : compartment.objects(), 'dispensers' : dispenser.objects(), 'newID' : newID})
+
+@is_in_group(DISPENSER_GROUP)   
+def dispense_medication(request):
+  return render(request, 'dispense_medication.html')

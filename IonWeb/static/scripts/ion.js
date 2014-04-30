@@ -67,6 +67,9 @@ $(document).ready(function() {
       $("#notifications").slideToggle("fast");
       event.stopPropagation();
     });
+    $("#notifications").click(function() {
+      event.stopPropagation();
+    });
     $(document).click(function() {
       if($("#notifications").is(":visible")) {
         $("#content-container").fadeTo("fast", 1);
