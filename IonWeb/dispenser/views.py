@@ -193,8 +193,6 @@ def dispenser_view(request):
                del params['validMedications'][rxuid]
                
                print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum + " of weight " + str(RxNorm.getStrength(rxuid))
-               # TODO: compartment, index, pills, weight
-               
          else:
             params['message'] = 'Invalid ID'
 
