@@ -6,55 +6,102 @@ Dispenser Management
 Dispenser Management
 {% endblock %}
 {% block head %}
-    <script type="text/javascript">
-<!--
-    function toggle_visibility(id) {
-       var e = document.getElementById(id);
-      e.style.display = ((e.style.display!='none') ? 'none' : 'block');
-    }
-//-->
-    </script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#dispenser-list div.location").click(function() {
+      $("#dispenser-list div.details").slideUp(200);
+      $(this).parent().children("div.details").slideToggle(200);
+      
+    });
+  });
+</script>
+<style class="text/css">
+#dispenser-list div.location {
+  font-size:16px;
+}
+#dispenser-list > li {
+  border:solid thin gray;
+  padding:8px;
+}
+#dispenser-list .details {
+  display:none;
+}
+#dispenser-list ul.compartment-list {
+  margin:0;
+}
+#dispenser-list form, #dispenser-list input[type=submit],#dispenser-list input[type=button] {
+  margin:0;
+}
+#dispenser-list ul.compartment-list > li {
+  border-top:dotted thin gray;
+  padding-top:6px;
+} 
+table.medinfo {
+  margin-top:1em;
+}
+table.medinfo td:first-child {
+  width:96px;
+  text-align:right;
+  padding-right:10px;
+}
+
+div.compartment {
+  font-weight:800;
+  display:inline;
+}
+</style>
 {% endblock %}
 {% block content %}
    {% load dispenser_tags %}
    <div class="two-thirds column">
-     <h2>My Dispensers</h2>
+     <h2>Dispensers</h2>
    {% if dispensers %}
+     <ul id="dispenser-list">
       {% for dispenser in dispensers %}
-         <h4><a href="#" onclick="toggle_visibility('{{ dispenser.id }}');">{{ dispenser.location }}</a></h4>
-         <div id = "{{ dispenser.id }}" style="display:none;">
-         <a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
+         <li>
+         <div class="location"><a href="#">{{ dispenser.location }}</a></div>
+         <div class="details" id = "{{ dispenser.id }}">
+         <!--<a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
                         
          <form method="post" onSubmit="return confirm('Do you really want to delete this dispenser?');">
            {% csrf_token %}
            <input type="hidden" name="requestType" value="deleteDispenser">
            <input type="hidden" name="id" value="{{dispenser.id}}">
            <input type="submit" value="delete dispenser">
-         </form>
+         </form>-->
   
-         <hr>
-         {% for compartment in dispenser.slots %}
-            Compartment {{ forloop.counter }}:
-            {% if compartment %}
-               {% with medName=compartment.rxuid|get_medName %}
-                  <br>
-                     Medication: {{ medName }} <br>
-                     Expiration: {{ compartment.expiration }} <br>
-                     Lot Number: {{ compartment.lot }}<br>
-                     <form method="post">
-                       {% csrf_token %}
-                       <input type="hidden" name="requestType" value="removeCompartment">
-                       <input type="hidden" name="dispID" value="{{dispenser.id}}">
-                       <input type="hidden" name="compID" value="{{compartment.id}}">
-                       <input type="submit" value="remove compartment">
-                     </form>
-               {% endwith %}
-            {% else %}
-               OPEN <br><br>
-            {% endif %}
-         {% endfor %}
+         <ul class="compartment-list">
+           {% for compartment in dispenser.slots %}
+              <li>
+              <div class="compartment">Compartment {{ forloop.counter }}</div>
+                {% if compartment %}
+                <a href="#" style="float:right">Remove</a>
+                   {% with medName=compartment.rxuid|get_medName %}
+                      <table class="medinfo">
+                         <tr><td>Medication:</td><td>{{ medName }}</td></tr>
+                         <tr><td>Expiration:</td><td>{{ compartment.expiration }}</td></tr>
+                         <tr><td>Lot Number:</td><td>{{ compartment.lot }}</td></tr>
+                         <!--<tr><td></td><td><a href="#">Remove</a></td></tr>-->
+                      </table>
+                         <!--<form method="post">
+                           {% csrf_token %}
+                           <input type="hidden" name="requestType" value="removeCompartment">
+                           <input type="hidden" name="dispID" value="{{dispenser.id}}">
+                           <input type="hidden" name="compID" value="{{compartment.id}}">
+                           <input type="submit" value="remove compartment">
+                         </form>-->
+                      
+                   {% endwith %}
+                {% else %}
+                   <a href="#" style="float:right">Load</a>
+                {% endif %}
+              </li>
+           {% endfor %}
+         </ul>
          </div>
+         </li>
        {% endfor %}
+       </ul>
     {% else %}
       No dispensers
     {% endif %}
