@@ -9,22 +9,57 @@ Dispenser Management
 <script type="text/javascript">
   $(document).ready(function() {
     $("#dispenser-list div.location").click(function() {
-      $("#dispenser-list div.details").slideUp(200);
-      $(this).parent().children("div.details").slideToggle(200);
-      
+      if(!$(this).siblings("div.details").is(":visible")) {
+        $("#dispenser-list div.details").slideUp(200);
+        $("#dispenser-list div.location").removeClass("location-open");
+        $(this).siblings("div.details").slideToggle(200);
+        $(this).addClass("location-open");
+      }
+      else {
+        $(this).siblings("div.details").slideUp(200);
+        $(this).removeClass("location-open");
+      }
     });
+    
+    $("#dispenser-list div.actionLink > a").click(function() {
+      //$.post("", $(this).siblings("form").serialize()); 
+      $(this).siblings("form").submit();
+    });
+    
+    if(location.hash.length > 1) {
+      $(location.hash).addClass("location-open").siblings("div.details").show();
+    }
   });
 </script>
 <style class="text/css">
 #dispenser-list div.location {
   font-size:16px;
+  background:#f3f3f3;
+  padding:10px;
+  border-radius:5px;
+}
+#dispenser-list div.location-open {
+  border-bottom-right-radius:0px;
+  border-bottom-left-radius:0px;
+}
+#dispenser-list div.location:hover {
+  cursor:pointer;
 }
 #dispenser-list > li {
-  border:solid thin gray;
   padding:8px;
+  border-radius:5px;
+  margin-bottom:10px;
+  margin-top:0;
+  padding-bottom:0;
+  padding-top:0;
 }
 #dispenser-list .details {
   display:none;
+  border: thin solid #f0f0f0;
+  border-bottom-right-radius:5px;
+  border-bottom-left-radius:5px;
+  border-top: none;
+  padding-top: 7px;
 }
 #dispenser-list ul.compartment-list {
   margin:0;
@@ -35,7 +70,24 @@ Dispenser Management
 #dispenser-list ul.compartment-list > li {
   border-top:dotted thin gray;
   padding-top:6px;
+  margin-left:10px;
+  margin-right:10px;
 } 
+#dispenser-list ul.compartment-list > li:first-child {
+  border-top:none;
+} 
+#dispenser-list div.actionLink {
+  float:right;
+}
+#dispenser-list div.actionLink form {
+  display:none;
+}
+#dispenser-list .removeCompartment {
+  font-size:13px;
+  color:#aaa;
+}
+
+
 table.medinfo {
   margin-top:1em;
 }
@@ -59,41 +111,56 @@ div.compartment {
      <ul id="dispenser-list">
       {% for dispenser in dispensers %}
          <li>
-         <div class="location"><a href="#">{{ dispenser.location }}</a></div>
-         <div class="details" id = "{{ dispenser.id }}">
+         <div class="location"  id="{{ dispenser.id }}">
+          <a href="#">{{ dispenser.location }}</a>
+          <div class="actionLink">
+            <a href="#" class="removeCompartment">Delete</a>
+            <form method="post" action="#{{ dispenser.id }}" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+               {% csrf_token %}
+               <input type="hidden" name="requestType" value="deleteDispenser">
+               <input type="hidden" name="id" value="{{dispenser.id}}">
+               <input type="submit" value="delete dispenser">
+             </form>
+          </div>
+         </div>
+         <div class="details">
          <!--<a href="/dispenser/view?dispenserID={{ dispenser.id }}">Touchscreen interface</a><br>
                         
-         <form method="post" onSubmit="return confirm('Do you really want to delete this dispenser?');">
-           {% csrf_token %}
-           <input type="hidden" name="requestType" value="deleteDispenser">
-           <input type="hidden" name="id" value="{{dispenser.id}}">
-           <input type="submit" value="delete dispenser">
-         </form>-->
+         -->
   
          <ul class="compartment-list">
            {% for compartment in dispenser.slots %}
               <li>
               <div class="compartment">Compartment {{ forloop.counter }}</div>
                 {% if compartment %}
-                <a href="#" style="float:right">Remove</a>
-                   {% with medName=compartment.rxuid|get_medName %}
-                      <table class="medinfo">
-                         <tr><td>Medication:</td><td>{{ medName }}</td></tr>
-                         <tr><td>Expiration:</td><td>{{ compartment.expiration }}</td></tr>
-                         <tr><td>Lot Number:</td><td>{{ compartment.lot }}</td></tr>
-                         <!--<tr><td></td><td><a href="#">Remove</a></td></tr>-->
-                      </table>
-                         <!--<form method="post">
-                           {% csrf_token %}
-                           <input type="hidden" name="requestType" value="removeCompartment">
-                           <input type="hidden" name="dispID" value="{{dispenser.id}}">
-                           <input type="hidden" name="compID" value="{{compartment.id}}">
-                           <input type="submit" value="remove compartment">
-                         </form>-->
-                      
-                   {% endwith %}
+                  <div class="actionLink">
+                    <a href="#">Remove</a>
+                    <form method="post" action="#{{ dispenser.id }}" >
+                     {% csrf_token %}
+                     <input type="hidden" name="requestType" value="removeCompartment">
+                     <input type="hidden" name="dispID" value="{{dispenser.id}}">
+                     <input type="hidden" name="compID" value="{{compartment.id}}">
+                     <input type="submit" value="Remove">
+                    </form>
+                  </div>
+                  {% with medName=compartment.rxuid|get_medName %}
+                    <table class="medinfo">
+                      <tr><td>Medication:</td><td>{{ medName }}</td></tr>
+                      <tr><td>Expiration:</td><td>{{ compartment.expiration }}</td></tr>
+                      <tr><td>Lot Number:</td><td>{{ compartment.lot }}</td></tr>
+                    </table>
+                  {% endwith %}
                 {% else %}
-                   <a href="#" style="float:right">Load</a>
+                   <div class="actionLink">
+                    <a href="#">Load</a>
+                       <form method="post" action="#{{ dispenser.id }}" >
+                        {% csrf_token %}
+                        <input type="hidden" name="requestType" value="loadCompartment">
+                        <input type="hidden" name="dispID" value="{{ dispenser.id }}">
+                        <input type="hidden" name="slot" value="{{ forloop.counter }}">
+                        <input type="submit" value="Load Compartment into Dispenser">
+                     </form>
+                  </div>
                 {% endif %}
               </li>
            {% endfor %}

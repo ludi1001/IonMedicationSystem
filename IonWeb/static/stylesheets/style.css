@@ -8,6 +8,28 @@ body {
   background-color:#eee;
 }
 
+#message {
+  width:100%; 
+  opacity:.6;
+}
+
+#message.success {
+  background-color:lightgreen;
+}
+
+#message.error {
+  background-color:pink;
+}
+
+#message.info {
+  background-color:yellow;
+}
+
+#message-text {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 #search {
 	float:right;
 	padding-bottom:0;

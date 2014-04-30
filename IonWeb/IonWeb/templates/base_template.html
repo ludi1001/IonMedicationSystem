@@ -17,7 +17,7 @@
 <body>
   <div id="header-wrapper">
 	<div id="menu-container" class="container">
-	<div class="row">
+	<div class="row" style="margin-bottom:0">
     {% block menubar %}
 		<header>
 			<nav>
@@ -49,16 +49,28 @@
 	</div>
   </div>
   </div>
+  <div id="message" 
+  {% if message_type %}
+    class="{{ message_type }}"
+  {% else %}
+    class="error"
+  {% endif %}
+  >
+    <div class="container">
+      <div class="row">
+        {% if message %}
+        <div id="message-text">
+          {{ message }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
   <div id="content-container" class="container">
   	<div class="row">
 		<h1>{% block header_title %}{% endblock %}</h1>
     </div>
     <hr>
-    {% if message %}
-      <font color = "red">{{ message }} </font><br><br>
-      <hr>
-      <!-- should actually CSSify this... -->
-    {% endif %}
     {% block content %}{% endblock %}
 	</div>
 	<div class="sixteen columns">
