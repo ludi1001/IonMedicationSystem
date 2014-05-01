@@ -152,7 +152,9 @@ div.compartment {
                   {% endwith %}
                 {% else %}
                    <div class="actionLink">
-                    <a href="#">Load</a>
+                    
+                     <a href = "/dispenser/loadcompartment" onclick="javascript:void window.open('/dispenser/loadcompartment','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Load</a>
+
                        <form method="post" action="#{{ dispenser.id }}" >
                         {% csrf_token %}
                         <input type="hidden" name="requestType" value="loadCompartment">

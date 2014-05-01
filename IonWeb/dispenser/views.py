@@ -279,7 +279,10 @@ def load_compartment(request):
       if len(free) == 0:
          params['message'] = "No free slots in this dispenser."
          params['hide'] = True
-         
+   else:
+      params['message'] = "need dispenser ID"
+      params['hide'] = True
+      
    if request.method == 'POST':
       if request.POST['requestType'] == 'compID':
          Dispenser = dispenser.objects(id=request.POST.get('dispID'))[0]
