@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from notification.models import medNotification
+from notification.models import medNotification, MedExpiration
 from account.models import IonUser
 from helper import helper
-
+from dispenser.models import compartment
 from datetime import datetime, timedelta, date
 
 def runNotify():
@@ -61,3 +61,19 @@ def runNotify():
              
                newNotification.save()
             print "patient missed  " + medication['rxuid']
+   
+   # daily checks for expiration
+   if now.strftime("%I:00%p").lower() == '01:00am':
+      for Compartment in compartment.objects():
+         # will expire soon or has already expired
+         if Compartment.expiration:
+            if Compartment.expiration < datetime.now()+timedelta(days=2):
+               CompartmentInfo = helper.findCompartment(Compartment.id)
+               Dispenser = CompartmentInfo[0]
+               SlotNum = CompartmentInfo[1] + 1
+               caretakers = IonUser.objects(group__in=["caretaker", "admin"])
+               for caretaker in caretakers:
+                  newNotification = MedExpiration(target=caretaker, type="expiration", generator = "CRON", rxuid = Compartment.rxuid, dispenser=Dispenser.user, slotNum = SlotNum, expirationDate = Compartment.expiration)
+          
+                  newNotification.save()
+               print "notified caretakers about expired medication in " + str(Dispenser.location) + " dispenser, compartment " + str(SlotNum)

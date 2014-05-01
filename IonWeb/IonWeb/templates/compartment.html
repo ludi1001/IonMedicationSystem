@@ -41,5 +41,26 @@ Update Compartment Info
       <br><br>
       <!--<a href="/updatecompartment" onclick="javascript:void window.open('/updatecompartment','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Update Compartment with Barcodes</a>
       -->
+    </form><hr>
+    
+    <h3> Clear Compartment </h3>
+    <form method="post">
+     {% csrf_token %}
+
+      <select name = "id">
+         {% for compartment in compartments %}
+            {% if not compartment.loaded %}
+               {% if compartment.rxuid %}
+                  {% with medName=compartment.rxuid|get_medName %}
+                     <option value="{{ compartment.id }}"> {{ compartment.id }} | {{ medName }}
+                  {% endwith %}
+               {% else %}
+                  <option value="{{ compartment.id }}"> {{ compartment.id }} | EMPTY
+               {% endif %}
+            {% endif %}
+         {% endfor %}
+      </select>
+      <input type = "hidden" name ="requestType" value="clearCompartment">
+      <input type = "submit" value = "Clear Compartment">
     </form>
 {% endblock %} 

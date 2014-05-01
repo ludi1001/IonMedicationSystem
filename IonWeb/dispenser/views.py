@@ -42,45 +42,67 @@ def compartments(request):
    params = {}
    params['compartments'] = compartment.objects()
    if request.method == 'POST':
+      # TODO: add quantity
       if request.POST['requestType'] == 'updateCompartment':
-         toEdit = compartment.objects(id=request.POST['id'])[0]
-         if request.POST['rxuid'] == "":
-            params['message'] = "Error: Please enter an rxuid"
+         if not request.POST.get('id'):
+            params['message'] = 'No valid compartments to update'
+         elif request.POST['rxuid'] == "":
+            params['message'] = "Please enter an rxuid"
          elif RxNorm.getName(request.POST['rxuid']) == None:
-            params['message'] = "Error: Invalid rxuid"
+            params['message'] = "Invalid rxuid"
          elif request.POST['lot'] == "":
-            params['message'] = "Error: Please enter a lot number"
+            params['message'] = "Please enter a lot number"
          elif not helper.validate(request.POST['expiration']): 
-           params['message'] = 'Error: Expiration date must be mm-dd-yyy'
-         else:   
+           params['message'] = 'Expiration date must be mm-dd-yyy'
+         else:  
+            toEdit = compartment.objects(id=request.POST['id'])[0]         
             toEdit.rxuid = int(request.POST['rxuid'])
-            toEdit.medName = RxNorm.getName(request.POST['rxuid'])
             toEdit.lot = int(request.POST['lot'])
             toEdit.expiration = request.POST['expiration']
             toEdit.save()
             params['message'] = 'Commpartment successfully updated!'
+            params['message_type'] = 'success'
+            
+      if request.POST['requestType'] == 'clearCompartment':
+         if not request.POST.get('id'):
+            params['message'] = 'No valid compartments to clear'
+         else:
+            toEdit = compartment.objects(id=request.POST['id'])        
+            toEdit.update_one(unset__rxuid='')
+            toEdit.update_one(unset__lot='')
+            toEdit.update_one(unset__expiration='')
+            toEdit.update_one(unset__quantity='')
+            toEdit[0].save()
+            
    return render(request, 'compartment.html', params)
 
 def loadcompartment(request):
    message = ''
+   message_type = 'error'
    if request.method == 'POST':
-      dispID = request.POST['dispID']
-      compID = request.POST['compID']
-      Compartment = compartment.objects(id=compID)[0]
-      slotNum = int(request.POST['slotNum'])
-      disp = dispenser.objects(id=dispID)[0]
-
-      if not Compartment.loaded and disp.slots[slotNum] == None:
-         Compartment.loaded = True
-         Compartment.save()
-         disp.slots[slotNum] = Compartment
-         disp.save()
-         message = "Loaded compartment into slot number " + str(slotNum + 1)
-
+      if not request.POST.get('dispID'):
+         message = "No valid dispensers"
+      elif not request.POST.get('compID'):
+         message = "No valid compartments to load"
       else:
-         message = "Invalid operation (compartment loaded in another slot or slot is filled already)"
+         dispID = request.POST['dispID']
+         compID = request.POST['compID']
+         Compartment = compartment.objects(id=compID)[0]
+         slotNum = int(request.POST['slotNum'])
+         disp = dispenser.objects(id=dispID)[0]
 
-   return render(request, 'loadcompartment.html', {'message' : message, 'compartments' : compartment.objects(loaded=False), 'dispensers' : dispenser.objects()})
+         if not Compartment.loaded and disp.slots[slotNum] == None:
+            Compartment.loaded = True
+            Compartment.save()
+            disp.slots[slotNum] = Compartment
+            disp.save()
+            message = "Loaded compartment into slot number " + str(slotNum + 1)
+            message_type = "success"
+
+         else:
+            message = "Invalid operation (compartment loaded in another slot or slot is filled already)"
+
+   return render(request, 'loadcompartment.html', {'message' : message, 'message_type': message_type, 'compartments' : compartment.objects(loaded=False), 'dispensers' :  dispenser.objects.order_by('location')})
 
 def updatecompartment(request):
    if request.method == 'POST':
@@ -141,68 +163,66 @@ def dispenser_view(request):
   else:
      params['message'] = 'Invalid dispenser ID'
 
-  if request.method == 'POST':
-     userID = request.POST['userID']
-     params['userID'] = userID
-     
-     if is_valid(userID) and IonUser.objects(id=userID):
-        ionuser = IonUser.objects(id=userID)[0]
-        if ionuser.group == "admin" or ionuser.group == "caretaker":
-           # caretaker/admin stuff
-           if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
-              validMedications = {}
-              myPatients = patient.objects(caretaker=ionuser.id)
-              for Patient in myPatients:
-                 for rxuid in Patient.activeMeds:
-                    for index, Compartment in enumerate(Dispenser.slots):
-                       if Compartment:
-                          if int(rxuid) == Compartment.rxuid:
-                             validMedications[rxuid] = index, Patient, True
-              params['validMedications'] = validMedications
-              
-        elif ionuser.group == "patient":
-           Patient = patient.objects(user=ionuser.id)[0]
+      if request.method == 'POST':
+         userID = request.POST['userID']
+         params['userID'] = userID
+         
+         if is_valid(userID) and IonUser.objects(id=userID):
+            ionuser = IonUser.objects(id=userID)[0]
+            if ionuser.group == "admin" or ionuser.group == "caretaker":
+               # caretaker/admin stuff
+               if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
+                  validMedications = {}
+                  myPatients = patient.objects(caretaker=ionuser.id)
+                  for Patient in myPatients:
+                     for rxuid in Patient.activeMeds:
+                        for index, Compartment in enumerate(Dispenser.slots):
+                           if Compartment:
+                              if int(rxuid) == Compartment.rxuid:
+                                 validMedications[rxuid] = index, Patient, True
+                  params['validMedications'] = validMedications
+                  
+            elif ionuser.group == "patient":
+               Patient = patient.objects(user=ionuser.id)[0]
+      
+               if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
+                  validMedications = {}
+                  for rxuid in Patient.activeMeds:
+                     for index, Compartment in enumerate(Dispenser.slots):
+                        if Compartment:
+                           if int(rxuid) == Compartment.rxuid:
+                              validMedications[rxuid] = index, Patient, False
+                     
+               if len(validMedications) == 0:
+                  params['message'] = "No valid medications at this time"
+               print validMedications
+               params['validMedications'] = validMedications
+               
+            if request.POST['requestType'] == 'takeMed':
+               rxuid = request.POST['rxuid']
+               caretaker = request.POST['caretaker']
+               
+               Patient = patient.objects(id=request.POST['patientID'])[0]
+   
+               for medication in Patient.medications:
+                  if medication['rxuid'] == rxuid and medication['active'] == True:
+                     toTake = medication
 
-           if request.POST['requestType'] == 'scannedID' or request.POST['requestType'] == 'takeMed':
-              validMedications = {}
-              for rxuid in Patient.activeMeds:
-                 for index, Compartment in enumerate(Dispenser.slots):
-                    if Compartment:
-                       if int(rxuid) == Compartment.rxuid:
-                          validMedications[rxuid] = index, Patient, False
-                 
-           if len(validMedications) == 0:
-              params['message'] = "No valid medications at this time"
-           print validMedications
-           params['validMedications'] = validMedications
-           
-        if request.POST['requestType'] == 'takeMed':
-           rxuid = request.POST['rxuid']
-           caretaker = request.POST['caretaker']
-           
-           Patient = patient.objects(id=request.POST['patientID'])[0]
+               helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID, caretaker)
 
-           for medication in Patient.medications:
-              if medication['rxuid'] == rxuid and medication['active'] == True:
-                 toTake = medication
+               compNum = str(request.POST['compartment'])
+               params['message'] = "Successfully took medication"
+               
+               del params['validMedications'][rxuid]
+               
+               print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum + " of weight " + str(RxNorm.getStrength(rxuid))
+               return render(request, 'dispense_medication.html', {"pills": toTake['quantity'], "compartment":compNum, "weight":RxNorm.getStrength(rxuid),
+                  '_patient': Patient.id, '_rxuid': toTake['rxuid'], '_caretaker': caretaker})
+         else:
+            params['message'] = 'Invalid ID'
 
-           helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID, caretaker)
-
-           compNum = str(request.POST['compartment'])
-           params['message'] = "Successfully took medication"
-           
-           del params['validMedications'][rxuid]
-           
-           print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum + " of weight " + str(RxNorm.getStrength(rxuid))
-           # TODO: compartment, index, pills, weight
-           return render(request, 'dispense_medication.html', {"pills": toTake['quantity'], "compartment":compNum, "weight":RxNorm.getStrength(rxuid),
-            '_patient': Patient.id, '_rxuid': toTake['rxuid'], '_caretaker': caretaker})
-     else:
-        params['message'] = 'Invalid ID'
-
-   #else:
-   #   params = {'message' : "Incorrect or no dispenser specified"}
-
+   else:
+      params = {'message' : "Incorrect or no dispenser specified"}
    return render(request, 'dispenser_view.html', params)
 
 def dispenser_admin(request):
