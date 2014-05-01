@@ -47,9 +47,9 @@ void setup() {
 }
 
 void setupCompartments() {
-  compartments[0].diode = 3;
-  compartments[0].servo = 7;
-  compartments[0].detector = A1;
+  compartments[0].diode = 2;
+  compartments[0].servo = 3;
+  compartments[0].detector = A2;
 }
 
 void loop() {
@@ -121,11 +121,6 @@ void dispense() {
      Serial.println("!error");
      Serial.println("Invalid pill weight");
    }
-   
-   /****TODO*/
-   Serial.println("!successful_dispense");
-   Serial.println(3);
-  /* return;
 
    DEBUG_OUT("Setting up phototransistor...");
    #ifdef _DEBUG
@@ -226,7 +221,7 @@ void dispense() {
    //output dispensing stats
    Serial.println("!successful_dispense");
    Serial.println(total_pills_dispensed);
-   delay(1000);*/
+   delay(500);
 }
 /*************************************/
 bool pill_passing_through = false;
@@ -311,5 +306,6 @@ int calculatePillsDispensed(int tray_before, int tray_after, int pill_weight) {
   double diff = tray_after - tray_before;
   //diff *= MG_PER_MV * 5000.0 / 1024;
   diff /= per_pill_weight;
-  return round(diff);
+  return 1;
+  //return round(diff);
 }

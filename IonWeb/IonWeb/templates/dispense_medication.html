@@ -175,20 +175,27 @@ $(document).ready(function() {
   $("#additional-info-link").click(function() {
     $("#additional-info").fadeToggle();
   });
-  
-  setTimeout(function() {
-    //issueCommand("dispense", {"dispense": [{"compartment":1, "pills":1, "weight":100},{"compartment":2,"pills":4,"weight":10}]});
-    issueCommand("dispense", {"dispense": [{"compartment":{{ compartment }}, "pills": {{ pills }}, "weight": {{ weight }} }]});
+  $("#next-button a").click(function() {
+    $("#next-button").hide();
+    displayMessage("Preparing to dispense...");
     
-    statusCheckInterval = setInterval(function() {
-      issueCommand("status", {});
-    }, 2000);
-  }, 1000);
+    $("#spinning-wheel").show();
+    
+    setTimeout(function() {
+      //issueCommand("dispense", {"dispense": [{"compartment":1, "pills":1, "weight":100},{"compartment":2,"pills":4,"weight":10}]});
+      issueCommand("dispense", {"dispense": [{"compartment":{{ compartment }}, "pills": {{ pills }}, "weight": {{ weight }} }]});
+      
+      statusCheckInterval = setInterval(function() {
+        issueCommand("status", {});
+      }, 1000);
+    }, 500);
+  });
 });
 </script>
 <style type="text/css">
 #spinning-wheel {
   position:relative;
+  display:none;
 }
 #loaderImage {
   width:128px;
@@ -198,19 +205,27 @@ $(document).ready(function() {
   margin-top:20px;
   display:none;
 }
+#next-button {
+  margin-top:20px;
+}
 </style>
 {% endblock %}
 {% block header_title %}
 Ion Medication Systems
 {% endblock %}
 {% block content %}
-<h2 id="status-text">Preparing to dispense...</h2>
+<h2 id="status-text">Please place your cup in the dispenser.</h2>
 <h4 id="additional-status-text"></h4>
 <a id="additional-info-link" href="#">Additional Information</a>
 <div id="additional-info"></div>
 <div id="done-button">
 <ul class="action-list">
 <li><a href="/dispenser/view">Done</a></li>
+</ul>
+</div>
+<div id="next-button">
+<ul class="action-list">
+<li><a href="#">Next</a></li>
 </ul>
 </div>
 <br>
