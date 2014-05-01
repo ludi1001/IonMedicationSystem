@@ -41,8 +41,11 @@ def findCompartment(compID):
    for Dispenser in dispenser.objects():
       for index, Compartment in enumerate(Dispenser.slots):
          if Compartment:
-            if Compartment.id == compID:
+            if str(Compartment.id) == compID:
+               print "match!"
                return Dispenser, index
 
+def decrement(dispenser_obj, compartmentIndex, decrement):
+   return
 
    

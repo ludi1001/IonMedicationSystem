@@ -154,7 +154,8 @@ div.compartment {
                         
          -->
          <div class="details-menu" >
-           <a class="load-compartment" href="#">Load compartment</a>
+           <a class="load-compartment" href = "/dispenser/loadcompartment?dispenserID={{dispenser.id}}" onclick="javascript:void window.open('/dispenser/loadcompartment?dispenserID={{dispenser.id}}','1392054828660','width=700,height=500,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1,left=0,top=0');return false;">Load compartment</a>
+           
            <div class="actionLink">
               <a href="#">Delete dispenser</a>  
               <form method="post" class="delete-dispenser-form">
@@ -190,7 +191,6 @@ div.compartment {
                   {% endwith %}
                 {% else %}
                    <div class="actionLink">
-                   <!-- <a href="#">Load</a>-->
                        <form method="post" action="#{{ dispenser.id }}" >
                         {% csrf_token %}
                         <input type="hidden" name="requestType" value="loadCompartment">

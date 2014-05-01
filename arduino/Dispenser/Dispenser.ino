@@ -16,7 +16,7 @@
 #define PIN_TRAY_SERVO 1
 #define PIN_TRAY       2
 
-#define _DEBUG
+//#define _DEBUG
 
 #ifdef _DEBUG
 #define DEBUG_OUT(x) Serial.println(x);
@@ -107,6 +107,11 @@ void dispense() {
      Serial.println("!error");
      Serial.println("Invalid pill weight");
    }
+   
+   /****TODO*/
+   Serial.println("!successful_dispense");
+   Serial.println(3);
+  /* return;
 
    DEBUG_OUT("Setting up phototransistor...");
    #ifdef _DEBUG
@@ -205,16 +210,18 @@ void dispense() {
    //output dispensing stats
    Serial.println("!successful_dispense");
    Serial.println(total_pills_dispensed);
-   delay(1000);
+   delay(1000);*/
 }
 /*************************************/
 bool pill_passing_through = false;
 int no_light_threshold = 0;
 int light_threshold = 0;
 void setNoLightThreshold(int pin) {
+  //TODO
   no_light_threshold = BLOCKED_LASER_THRESH;//readPhototransistor(pin);
 }
 void setLightThreshold(int pin) {
+  //TODO
   light_threshold = UNBLOCKED_LASER_THRESH;//readPhototransistor(pin);
 }
 //return false is there is no pill detected
@@ -261,6 +268,7 @@ void dumpTrayContentsIntoTrash() {
   tray.detach();
 }
 int calculatePillsDispensed(int tray_before, int tray_after, int pill_weight) {
+  //TODO
   /*double diff = tray_after - tray_before;
   diff *= MG_PER_MV * 5000.0 / 1024;
   diff /= pill_weight;
