@@ -26,6 +26,8 @@ def getStrength(rxuid):
    names = getJSON(''.join(['http://rxnav.nlm.nih.gov/REST/rxcui/', str(rxuid), '/strength']))
    #if names['propConceptGroup']:
    strength = names['strengthGroup']['strength']
+   
    if strength == '':
       return 20
-   return strength
+   # return correct value for tylenol
+   return strength.split()[0]

@@ -7,7 +7,14 @@ Ion Medication Systems
 {% endblock %}
 {% block content %}
    {% load dispenser_tags %}
+
+   {% if caretaker %}
+   <h2>Caretaker Tasks</h2>
+     <ul class="action-list">
+      <li><a href = "/dispenser/loadcompartment?dispenserID={{dispenser.id}}">Load Compartment</a>
+     </ul><br>
    
+   {% endif %}
    {% if validMedications %}
    <h2>Valid Medications</h2>
       {% for rxuid, medData in validMedications.items %}
@@ -24,6 +31,10 @@ Ion Medication Systems
              </form>
          {% endwith %}
       {% endfor %}
+   <ul class="action-list">
+      <li><a href = "/dispenser/view?dispenserID={{ dispenser.id }}">Cancel</a>
+   </ul>
+   
    {% elif dispenser %}
    <h2>Scan your badge</h2>  
    <form method="post">

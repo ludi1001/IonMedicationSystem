@@ -1,43 +1,36 @@
-{% extends "base_template.html" %}
+{% extends "touch_template.html" %}
 {% block page_title %}
 Compartment Manager
 {% endblock %}
 {% block header_title %}
-Update Compartment
+Load Compartment
 {% endblock %}
 {% block content %}
-    <form method="post" action = "../updatecompartment/">
-      {% csrf_token %}
-      <input type = "hidden" name = "compID" value = {{ compID }}>
-      <input type = "hidden" name = "ndc" value = {{ ndc }}>
-      <input type = "hidden" name = "lot" value = {{ lot }}>
-      <input type = "hidden" name = "expiration" value = {{ expiration }}>
+    <form method="post">
+    {% csrf_token %}
       
-      <b> {{ message }} </b><br><br>
-      {% if nextType == 'ndc' %}
-         <input type = "hidden" name ="requestType" value="ndc">
-         <input type = "textbox" name="ndc" autofocus="autofocus">
-      {% elif nextType == 'lot' %}      
-         <input type = "hidden" name ="requestType" value="lot">
-         <input type = "textbox" name="lot" autofocus="autofocus">
-      {% elif nextType == 'expiration' %}
-         <input type = "hidden" name ="requestType" value="expiration">
-         <input type = "date" name="expiration" autofocus="autofocus">
-      {% elif nextType == 'save' %}
-         <input type = "hidden" name ="requestType" value="save">   
-         Compartment ID: {{ compID }}<br>
-         NDC: {{ ndc }}<br>
-         Lot: {{ lot }}<br>
-         Expiration: {{ expiration }}
-         
-      {% else %}
-         <b> Scan compartment ID </b><br><br>
-         <input type = "hidden" name ="requestType" value="compID">
-         <input type = "textbox" name="compID" autofocus="autofocus">
+    <input type = "hidden" name = "dispID" value="{{ dispenser.id }}">
+      {% if compID %}
+      
+         <input type = "hidden" name = "requestType" value= "slotNum">
+         <input type = "hidden" name = "compID" value = "{{compID}}">
+         <h3>SLOT #</h3>
+         <select name = "slotNum">
+            {% for slot in free %}
+               <option value="{{slot}}"> Slot {{ slot|add:"1" }}
+            {% endfor %}
+         </select>
+         <input type = "submit" value = "load">
+      {% else %}   
+         {% if not hide %}
+            <input type = "hidden" name = "requestType" value="compID">
+            <input type = "hidden" name = "dispID" value="{{ dispenser.id }}">
+
+            <b>Scan compartment ID</b><br><br>
+            <input type = "textbox" name="compID" autofocus="autofocus">
+            
+         {% endif %}
       {% endif %}
-      
-      <br><br>
-      <input type = "submit" value = "next">
     </form>
 {% endblock %} 
 
