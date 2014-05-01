@@ -299,8 +299,8 @@ var dialog = (function() {
     //add default buttons
     if(typeof buttons == "undefined")
       buttons = {
-        "OK": function() { my.close(); },
-        "Cancel": function() { my.close(); }
+        "OK": function() { my.close(); }//,
+        //"Cancel": function() { my.close(); }
       };
     
     //add the buttons in
@@ -314,6 +314,9 @@ var dialog = (function() {
     $("#dialog-cover").fadeIn(200);
     $("#dialog-container").fadeIn(200);
   };
+  my.error = function(el) {
+    my.show(el);
+  }
   my.addButton = function(text, action) {
     var el = $('<span class="dialog-button"><a id="button-Yes" href="#">' + text + '</a></span>');
     $(el).click(function() {

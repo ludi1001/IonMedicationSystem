@@ -1,0 +1,85 @@
+#dispenser-list div.location {
+  font-size:16px;
+  background:#f3f3f3;
+  padding:10px;
+  border-radius:5px;
+}
+#dispenser-list div.location-open {
+  border-bottom-right-radius:0px;
+  border-bottom-left-radius:0px;
+}
+#dispenser-list div.location:hover {
+  cursor:pointer;
+}
+#dispenser-list > li {
+  padding:8px;
+  border-radius:5px;
+  margin-bottom:10px;
+  margin-top:0;
+  padding-bottom:0;
+  padding-top:0;
+}
+#dispenser-list .details {
+  display:none;
+  border: thin solid #f0f0f0;
+  border-bottom-right-radius:5px;
+  border-bottom-left-radius:5px;
+  border-top: none;
+  margin-bottom:0;
+  padding-top:0
+}
+#dispenser-list .details-menu {
+  background-color:#fff;
+  padding:10px;
+  padding-top:0;
+  padding-bottom:0;
+  border-bottom:thin dotted gray;
+}
+#dispenser-list .details-menu a {
+  font-size:11px;
+}
+#dispenser-list .details-menu a:last-child {
+  float:right;
+}
+#dispenser-list ul.compartment-list {
+  margin:0;
+}
+#dispenser-list form, #dispenser-list input[type=submit],#dispenser-list input[type=button] {
+  margin:0;
+}
+#dispenser-list ul.compartment-list > li {
+  border-top:dotted thin gray;
+  padding-top:10px;
+  padding-bottom:10px;
+  margin-left:10px;
+  margin-right:10px;
+} 
+
+#dispenser-list ul.compartment-list > li:first-child {
+  border-top:none;
+}
+#dispenser-list div.actionLink {
+  float:right;
+}
+#dispenser-list div.actionLink form {
+  display:none;
+}
+#dispenser-list .removeCompartment {
+  font-size:13px;
+  color:#aaa;
+}
+
+
+table.medinfo {
+  margin-top:1em;
+}
+table.medinfo td:first-child {
+  width:96px;
+  text-align:right;
+  padding-right:10px;
+}
+
+div.compartment {
+  font-weight:800;
+  display:inline;
+}

@@ -15,6 +15,7 @@ function issueCommand(command, dict_data, success_func, error_func) {
       type: "POST"
   }).error(function() {
     displayMessage("An internal error has been encountered.", "The admin have been notified.", "AJAX request failed");
+    clearInterval(statusCheckInterval);
     //inform admin of problem!
     reportToAdmin([{"message":"AJAX request failed","compartment":-1}]);
     
@@ -70,10 +71,15 @@ function processResponse(resp) {
           html.push(": " + entry.value);
         html.push("</li>");
       }
+      else {
+        sendPillsDecrement(entry.compartment, entry.total_pills_dispensed);
+      }
     }
     html.push("</ul>");
-    if(success)
+    if(success) {
       displayMessage("Dispensing complete!", "Please take your cup.");
+      confirmTakeMedication();
+    }
     else
       displayMessage("Dispensing is complete, but...", "Unfortunately, not all of your medication was dispensed. Go ahead and take the cup. Your caretaker has been notified.", html.join(""));
     $("#spinning-wheel").fadeOut();
@@ -84,6 +90,32 @@ function processResponse(resp) {
     if(emptyCompartments.length > 0)
       reportEmptyCompartments(emptyCompartments);
   }
+}
+
+function confirmTakeMedication() {
+  $.ajax({
+    url:"/dispenser/take-medication",
+    type: 'POST',
+    data: {
+      'h_patient':'{{ h_patient }}',
+      'h_rxuid': '{{ h_rxuid }}',
+      'h_caretaker': '{{ h_caretaker }}',
+      'h_quantity': {{ h_quantity }}
+    },
+    success: function(data){console.log(data)}
+  });
+}
+
+function sendPillsDecrement(compartment, quantity) {
+  $.ajax({
+    url:"/dispenser/decrement-pills",
+    type: 'POST',
+    data: {
+      'compartment': compartment,
+      'pills': quantity
+    },
+    success: function(data){console.log(data)}
+  });
 }
 
 function reportToAdmin(errors) {
@@ -152,7 +184,6 @@ $(document).ready(function() {
       issueCommand("status", {});
     }, 2000);
   }, 1000);
-  
 });
 </script>
 <style type="text/css">

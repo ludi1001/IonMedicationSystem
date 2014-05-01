@@ -1,12 +1,14 @@
 import datetime
 from mongoengine.django.auth import User
 from helper import RxNorm, helper
+from account.shortcuts import get_ion_user
 from models import dispenser
 from models import compartment
 from DataEntry.models import patient
 from account.models import IonUser
 from account.privilege_tests import is_in_group, DISPENSER_GROUP
 from django.shortcuts import render
+from django.http import HttpResponse
 import re
 
 def management(request):
@@ -45,6 +47,18 @@ def management(request):
          
    return render(request, 'dispenser.html', params)
 
+def remove_compartment_ajax(request):
+  Dispenser = dispenser.objects(user=get_ion_user(request))[1]
+  compID = request.POST['compID']
+  for index, Compartment in enumerate(Dispenser.slots):
+    if Compartment:
+       if str(Compartment.id) == compID:
+          Dispenser.slots[index] = None
+          Dispenser.save()
+          Compartment.loaded = False
+          Compartment.save()
+  return HttpResponse("ok")
+   
 def compartments(request):
    params = {}
    params['compartments'] = compartment.objects()
@@ -166,7 +180,9 @@ def is_valid(str):
 def dispenser_view(request):
    params = {}
    #if 'dispenserID' in request.GET:
-   dispID = dispenser.objects(user=request.user)[0].id #request.GET['dispenserID']
+   user = get_ion_user(request)
+   
+   dispID = str(dispenser.objects(user=user)[0].id) #request.GET['dispenserID']
    if is_valid(dispID) and dispenser.objects(id=dispID):
       Dispenser = dispenser.objects(id=dispID)[0]
       params['dispenser'] = Dispenser
@@ -215,7 +231,7 @@ def dispenser_view(request):
                   if medication['rxuid'] == rxuid and medication['active'] == True:
                      toTake = medication
 
-               helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID, caretaker)
+               #helper.take_medication(Patient, toTake['rxuid'], toTake['quantity'], dispID, caretaker)
 
                compNum = str(request.POST['compartment'])
                params['message'] = "Successfully took medication"
@@ -224,7 +240,7 @@ def dispenser_view(request):
                
                print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum + " of weight " + str(RxNorm.getStrength(rxuid))
                return render(request, 'dispense_medication.html', {"pills": toTake['quantity'], "compartment":compNum, "weight":RxNorm.getStrength(rxuid),
-                  '_patient': Patient.id, '_rxuid': toTake['rxuid'], '_caretaker': caretaker})
+                  'h_patient': Patient.id, 'h_rxuid': toTake['rxuid'], 'h_caretaker': caretaker, 'h_quantity': toTake['quantity']})
          else:
             params['message'] = 'Invalid ID'
 
@@ -260,6 +276,28 @@ def dispenser_admin(request):
 def dispense_medication(request):
   return render(request, 'dispense_medication.html', {'compartment':0,'pills':2,'weight':100})
   
+@is_in_group(DISPENSER_GROUP)
+def take_medication(request):
+  if 'h_patient' not in request.POST or 'h_rxuid' not in request.POST or 'h_caretaker' not in request.POST or 'h_quantity' not in request.POST:
+    return HttpResponse('bad request')
+  
+  user = get_ion_user(request)
+  dispID = dispenser.objects(user=user)[0].id
+  Patient = patient.objects(id=request.POST['h_patient'])[0]
+  rxuid = request.POST['h_rxuid']
+  caretaker = request.POST['h_caretaker']
+  quantity = request.POST['h_quantity']
+  
+  helper.take_medication(Patient, rxuid, quantity, dispID, caretaker)
+  return HttpResponse('done')
+  
+@is_in_group(DISPENSER_GROUP)
+def decrement_pills(request):
+  user = get_ion_user(request)
+  disp = dispenser.objects(user=user)[0]
+  helper.decrement(disp, request.POST['compartment'], request.POST['pills'])
+  return HttpResponse('done')
+
 def load_compartment(request):
    params = {}
    # get dispenserID from user ID
