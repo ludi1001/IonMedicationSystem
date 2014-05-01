@@ -189,16 +189,6 @@ div.compartment {
                       <tr><td>Lot Number:</td><td>{{ compartment.lot }}</td></tr>
                     </table>
                   {% endwith %}
-                {% else %}
-                   <div class="actionLink">
-                       <form method="post" action="#{{ dispenser.id }}" >
-                        {% csrf_token %}
-                        <input type="hidden" name="requestType" value="loadCompartment">
-                        <input type="hidden" name="dispID" value="{{ dispenser.id }}">
-                        <input type="hidden" name="slot" value="{{ forloop.counter }}">
-                        <input type="submit" value="Load Compartment into Dispenser">
-                     </form>
-                  </div>
                 {% endif %}
               </li>
            {% endfor %}
@@ -226,7 +216,6 @@ div.compartment {
       <li class="dialogLink"><a href="#">Add Compartment</a></li>
     {% endif %}
       <li><a href = "/compartment">Update Compartments</a>
-      <li><a href = "/loadcompartment">Load Compartment</a>
      </ul>
    </div>
 
