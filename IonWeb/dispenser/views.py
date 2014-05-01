@@ -161,15 +161,12 @@ def is_valid(str):
 
 @is_in_group(DISPENSER_GROUP) 
 def dispenser_view(request):
-  params = {}
-  #if 'dispenserID' in request.GET:
-  dispID = dispenser.objects(user=request.user)[0].id #request.GET['dispenserID']
-  if is_valid(dispID) and dispenser.objects(id=dispID):
-     Dispenser = dispenser.objects(id=dispID)[0]
-     params['dispenser'] = Dispenser
-  else:
-     params['message'] = 'Invalid dispenser ID'
-
+   params = {}
+   #if 'dispenserID' in request.GET:
+   dispID = dispenser.objects(user=request.user)[0].id #request.GET['dispenserID']
+   if is_valid(dispID) and dispenser.objects(id=dispID):
+      Dispenser = dispenser.objects(id=dispID)[0]
+      params['dispenser'] = Dispenser
       if request.method == 'POST':
          userID = request.POST['userID']
          params['userID'] = userID
