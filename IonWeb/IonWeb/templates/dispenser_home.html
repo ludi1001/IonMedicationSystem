@@ -1,0 +1,84 @@
+{% extends "base_template.html" %}
+{% block page_title %}
+{{ dispenser.location}} Dispenser
+{% endblock %}
+{% block header_title %}
+{{ dispenser.location}} Dispenser
+{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="/static/stylesheets/dispenser.css">
+<style type="text/css">
+.compartment-details {
+  margin:0;
+  padding:0;
+  display:inline;
+}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+  var action_list = {
+    'Remove': {
+      'click': function(el) {
+        el.parent().parent().css('opacity',.5);
+      },
+      'success': function(data, el) {
+        el.parent().parent().empty();
+      },
+      'error': function(el) {
+        el.parent().parent().css('opacity', 1);
+        dialog.error('Unable to remove compartment');
+      }
+    }
+  }
+  $("#dispenser-list div.actionLink > a").click(function() {
+    var el = $(this);
+    var form = el.siblings("form");
+    var action = action_list[el.text()];
+    if('click' in action)
+      action['click'](el);
+    $.post(form.attr("action"), form.serialize(), function(data) { action['success'](data, el); })
+      .error(function() { action['error'](el); }); 
+  });
+});
+</script>
+{% endblock %}
+{% block content %}
+  {% load dispenser_tags %}
+  <div class="two-thirds column">
+    <h2>Compartments</h2>
+    <div id="dispenser-list">
+      <ul class="compartment-list">
+        {% for compartment in dispenser.slots %}
+          <li>
+          <div class="compartment">Compartment {{ forloop.counter }}</div>
+          {% if compartment %}
+            <div class="compartment-details">
+            <div class="actionLink">
+              <a href="#">Remove</a>
+              <form method="post" action="/dispenser/manage/remove-compartment">
+               {% csrf_token %}
+               <input type="hidden" name="compID" value="{{compartment.id}}">
+              </form>
+            </div>
+            {% with medName=compartment.rxuid|get_medName %}
+              <table class="medinfo">
+              <tr><td>Medication:</td><td>{{ medName }}</td></tr>
+              <tr><td>Expiration:</td><td>{{ compartment.expiration }}</td></tr>
+              <tr><td>Lot Number:</td><td>{{ compartment.lot }}</td></tr>
+              </table>
+            {% endwith %}
+            </div>
+          {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="one-third column">
+    <h2>Tasks</h2>
+    <ul class="action-list">
+      <li><a href="/dispenser/view">Show Touchscreen Interface</a></li>
+      <li><a href="#">Load Compartment</a></li>
+    </ul>
+  </div>
+{% endblock %}

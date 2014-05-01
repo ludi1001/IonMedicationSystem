@@ -47,6 +47,18 @@ def management(request):
          
    return render(request, 'dispenser.html', params)
 
+def remove_compartment_ajax(request):
+  Dispenser = dispenser.objects(user=get_ion_user(request))[1]
+  compID = request.POST['compID']
+  for index, Compartment in enumerate(Dispenser.slots):
+    if Compartment:
+       if str(Compartment.id) == compID:
+          Dispenser.slots[index] = None
+          Dispenser.save()
+          Compartment.loaded = False
+          Compartment.save()
+  return HttpResponse("ok")
+   
 def compartments(request):
    params = {}
    params['compartments'] = compartment.objects()

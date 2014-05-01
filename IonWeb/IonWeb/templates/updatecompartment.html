@@ -20,13 +20,13 @@ Load Compartment
                <option value="{{slot}}"> Slot {{ slot|add:"1" }}
             {% endfor %}
          </select>
-         <input type = "submit" value = "load">
+         <input type = "submit" value = "Load">
       {% else %}   
          {% if not hide %}
             <input type = "hidden" name = "requestType" value="compID">
             <input type = "hidden" name = "dispID" value="{{ dispenser.id }}">
 
-            <b>Scan compartment ID</b><br><br>
+            <h2>Scan compartment ID</h2>
             <input type = "textbox" name="compID" autofocus="autofocus">
             
          {% endif %}

@@ -11,8 +11,9 @@ from mongoengine import django
 import datetime
 
 from models import IonUser
+from dispenser.models import dispenser
 from privilege_tests import is_in_group, ALL
-from shortcuts import choose_group_dependent_page
+from shortcuts import choose_group_dependent_page, get_ion_user
 
 @is_in_group(ALL)
 def index(request):
@@ -25,13 +26,15 @@ def index(request):
       Patient = patient.objects(user=IonUser)[0]
       params['patient'] = Patient
    else:
-         message = "Not a patient"
+      message = "Not a patient"
    params['message'] = message
    
    return render(request, "patient_home.html", params)
 
   def index_dispenser(request, user):
-    return HttpResponse('dispenser page')#render(request, 'index.html')
+    user = get_ion_user(request)
+    disp = dispenser.objects(user=user)[0]
+    return render(request, 'dispenser_home.html', {'dispenser': disp})
   def index_caretaker(request, user):
     return render(request, 'index.html')
   def index_admin(request, user):
