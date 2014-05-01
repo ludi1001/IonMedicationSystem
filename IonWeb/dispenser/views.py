@@ -288,14 +288,14 @@ def take_medication(request):
   caretaker = request.POST['h_caretaker']
   quantity = request.POST['h_quantity']
   
-  helper.take_medication(Patient, rxuid, quantity, dispID, caretaker)
+  #helper.take_medication(Patient, rxuid, quantity, dispID, caretaker)
   return HttpResponse('done')
   
 @is_in_group(DISPENSER_GROUP)
 def decrement_pills(request):
   user = get_ion_user(request)
   disp = dispenser.objects(user=user)[0]
-  helper.decrement(disp, request.POST['compartment'], request.POST['pills'])
+  helper.decrement(disp, int(request.POST['compartment']), int(request.POST['pills']))
   return HttpResponse('done')
 
 def load_compartment(request):
