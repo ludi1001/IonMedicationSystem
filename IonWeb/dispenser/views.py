@@ -217,7 +217,7 @@ def dispenser_view(request):
                
                print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum + " of weight " + str(RxNorm.getStrength(rxuid))
                return render(request, 'dispense_medication.html', {"pills": toTake['quantity'], "compartment":compNum, "weight":RxNorm.getStrength(rxuid),
-                  '_patient': Patient.id, '_rxuid': toTake['rxuid'], '_caretaker': caretaker})
+                  '_patient': Patient.id, '_rxuid': toTake['rxuid'], '_caretaker': caretaker, '_quantity':quantity})
          else:
             params['message'] = 'Invalid ID'
 
@@ -252,3 +252,11 @@ def dispenser_admin(request):
 @is_in_group(DISPENSER_GROUP)   
 def dispense_medication(request):
   return render(request, 'dispense_medication.html', {'compartment':0,'pills':2,'weight':100})
+  
+@is_in_group(DISPENSER_GROUP)
+def take_medication(request):
+  if '_patient' not in request.POST or '_rxuid' not in request.POST or '_caretaker' not in request.POST or '_quantity' not in request.POST:
+    return HttpResponse('bad request')
+  
+  patient = patient.objects(id=request.POST['_patient'])[0]
+  rxuid = 
