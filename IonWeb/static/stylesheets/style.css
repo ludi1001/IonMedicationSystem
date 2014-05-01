@@ -325,3 +325,7 @@ form .error {
   opacity:.5;
   display:none;
 }
+
+.dialogLink > div {
+  display:none;
+}

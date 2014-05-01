@@ -26,6 +26,19 @@ Dispenser Management
       $(this).siblings("form").submit();
     });
     
+    $(".delete-dispenser-form").submit(function(evt, verified) {
+      if(!verified) {
+        var el = $(this);
+        dialog.show("Are you sure you want to delete the dispenser?", {
+          "Yes": function() { el.trigger("submit", true); dialog.close(); },
+          "No": function() { dialog.close(); }
+        });
+        return false;
+      }
+      else
+        return true;
+    });
+    
     if(location.hash.length > 1) {
       $(location.hash).addClass("location-open").siblings("div.details").show();
     }
@@ -144,7 +157,7 @@ div.compartment {
            <a class="load-compartment" href="#">Load compartment</a>
            <div class="actionLink">
               <a href="#">Delete dispenser</a>  
-              <form method="post" onSubmit="return confirm('Do you really want to delete this dispenser?');">
+              <form method="post" class="delete-dispenser-form">
                {% csrf_token %}
                <input type="hidden" name="requestType" value="deleteDispenser">
                <input type="hidden" name="id" value="{{dispenser.id}}">
@@ -201,7 +214,17 @@ div.compartment {
    <div class="one-third column">
      <h2>Tasks</h2>
      <ul class="action-list">
-      <li><a href = "/dispenser/admin">Dispenser/Compartment Manufacturer</a>
+    {% if user_group == 'admin' %}
+      <li style="color:red"><a href = "/dispenser/admin">Dispenser/Compartment Manufacturer</a>
+      
+      <li class="dialogLink">
+        <a href="#">Add Dispenser</a>
+        <div>
+          test
+        </div>
+      </li>
+      <li class="dialogLink"><a href="#">Add Compartment</a></li>
+    {% endif %}
       <li><a href = "/compartment">Update Compartments</a>
       <li><a href = "/loadcompartment">Load Compartment</a>
      </ul>

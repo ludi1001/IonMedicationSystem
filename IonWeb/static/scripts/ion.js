@@ -288,6 +288,9 @@ var notification = (function() {
 var dialog = (function() {
   var my = {};
   my.initialize = function() {
+    $(".dialogLink > a").click(function() {
+      my.show($(this).siblings("div").clone(), $(this).parent().data("dialog"));
+    });
   }
   my.show = function(el, buttons) {
     //first setup DOM
