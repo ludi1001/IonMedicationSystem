@@ -159,15 +159,16 @@ def updateRFID(request):
 def is_valid(str):
    return re.match("^[0-9a-fA-F]{24}$", str)
 
+@is_in_group(DISPENSER_GROUP) 
 def dispenser_view(request):
-   params = {}
-   if 'dispenserID' in request.GET:
-      dispID = request.GET['dispenserID']
-      if is_valid(dispID) and dispenser.objects(id=dispID):
-         Dispenser = dispenser.objects(id=dispID)[0]
-         params['dispenser'] = Dispenser
-      else:
-         params['message'] = 'Invalid dispenser ID'
+  params = {}
+  #if 'dispenserID' in request.GET:
+  dispID = dispenser.objects(user=request.user)[0].id #request.GET['dispenserID']
+  if is_valid(dispID) and dispenser.objects(id=dispID):
+     Dispenser = dispenser.objects(id=dispID)[0]
+     params['dispenser'] = Dispenser
+  else:
+     params['message'] = 'Invalid dispenser ID'
 
       if request.method == 'POST':
          userID = request.POST['userID']
@@ -222,12 +223,13 @@ def dispenser_view(request):
                del params['validMedications'][rxuid]
                
                print "Arduino needs to dispense " + toTake['quantity'] + " pills from compartment " + compNum + " of weight " + str(RxNorm.getStrength(rxuid))
+               return render(request, 'dispense_medication.html', {"pills": toTake['quantity'], "compartment":compNum, "weight":RxNorm.getStrength(rxuid),
+                  '_patient': Patient.id, '_rxuid': toTake['rxuid'], '_caretaker': caretaker})
          else:
             params['message'] = 'Invalid ID'
 
    else:
       params = {'message' : "Incorrect or no dispenser specified"}
-
    return render(request, 'dispenser_view.html', params)
 
 def dispenser_admin(request):
@@ -256,8 +258,8 @@ def dispenser_admin(request):
 
 @is_in_group(DISPENSER_GROUP)   
 def dispense_medication(request):
-  return render(request, 'dispense_medication.html')
-
+  return render(request, 'dispense_medication.html', {'compartment':0,'pills':2,'weight':100})
+  
 def load_compartment(request):
    params = {}
    # get dispenserID from user ID

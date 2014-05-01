@@ -256,3 +256,76 @@ footer nav li {
 form .error {
   color:red;
 }
+
+#dialog-container {
+  z-index:11;
+  position:absolute;
+  top:0;
+  left:0;
+  height:100%;
+  width:100%;
+  text-align:center;
+  display:none;
+}
+#dialog-container:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -0.25em; /* Adjusts for spacing */
+}
+#dialog {
+  /*display:none;*/
+  text-align:center;
+  border-radius:5px;
+  background-color:white;
+  width:400px;
+  padding:10px;
+  
+  display: inline-block;
+  vertical-align: middle;
+}
+#dialog .dialog-button {
+	padding:6px 5px 6px 5px;
+	font-size:13px;
+	border: solid #393 1px;
+	text-align:center;
+	border-radius:8px;
+	width:130px;
+  margin-left:10px;
+  margin-right:10px;
+  display:inline-block;
+}
+#dialog .dialog-button a {
+	color:#666;
+  display:inline-block;
+  width:100%;
+  text-align:center;
+}
+#dialog .dialog-button a:hover {
+	text-decoration:none;
+}
+#dialog .dialog-button:hover {
+	background:#efe;
+	cursor:pointer;
+}
+#dialog-button-bar {
+  text-align:center;
+  margin-top:20px;
+}
+
+#dialog-cover {
+  z-index:10;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background-color:black;
+  opacity:.5;
+  display:none;
+}
+
+.dialogLink > div {
+  display:none;
+}

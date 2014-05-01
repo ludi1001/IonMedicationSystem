@@ -36,8 +36,8 @@
           {% if user_group == 'caretaker' or user_group == 'admin' %}
 					<li><a href="/users">Users</a></li>
 					<li><a href="/dispenser">Dispensers</a></li>
-          {% endif %}
 					<li><a href="/medication">Medication</a></li>
+          {% endif %}
 					<li><a href="/account">Account</a></li>
 					<li><a href="/account/logout">Logout</a></li>
 				</ul>
@@ -78,5 +78,15 @@
 			&copy; 2014 Team Ion
 		</footer>
 	</div>
+  <div id="dialog-container">
+    <div id="dialog">
+      <div id="dialog-content">
+      </div>
+      <div id="dialog-button-bar">
+      </div>
+    </div>
+  </div>
+  <div id="dialog-cover">
+  </div>
 </body>
 </html>
