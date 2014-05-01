@@ -14,7 +14,7 @@
 #define SERVO_REVERSE_TIME     750000 //time to reverse servo after each dispense
 
 #define PIN_TRAY_SERVO 1
-#define PIN_TRAY       2
+#define PIN_TRAY       A0
 
 //#define _DEBUG
 
@@ -66,6 +66,8 @@ void loop() {
         ping();
       else if(strcmp(buffer+1, "dispense") == 0)
         dispense();
+      else if(strcmp(buffer+1, "scale") == 0)
+        scale();
     }
     else {
       //Serial.println(buffer); //echo back
@@ -76,7 +78,19 @@ void loop() {
 void ping() {
   Serial.println("ping successful");
 }
-
+void scale() {
+  int weight = Serial.parseInt();
+  Serial.println(weight);
+  Serial.println("Weighing...");
+  int before = weighTray();
+  Serial.println(before);
+  Serial.println("Pause");
+  delay(5000);
+  Serial.println("Weighing...");
+  int after = weighTray();
+  Serial.println(after);
+  Serial.println(calculatePillsDispensed(before, after, weight));
+}
 void dispense() {
    //check that cup is present
    if(!isCupPresent()) {
@@ -177,6 +191,8 @@ void dispense() {
      }
      servo.detach();
      
+     //pause to let pills drop
+     delay(1000);
      DEBUG_OUT("\nWeighing...");
      //weigh tray
      int tray_after = weighTray();
@@ -253,9 +269,32 @@ bool isCupPresent() {
 /*************************************/
 Servo tray;
 int weighTray() {
-  int val = analogRead(PIN_TRAY);
-  return val;
+  int res = -1;
+  //keep reading until tray is stable
+  while((res = trueRead()) == -1)
+    ;
+  return res;
 }
+
+#define LEN 1000
+int trueRead() {
+  long s = 0;
+  int last_read = analogRead(PIN_TRAY);
+  for(int i = 0; i < LEN; ++i) {
+    int this_read = analogRead(PIN_TRAY);
+    //if tray is unstable, cancel the read
+    if(abs(this_read - last_read) > 5) {
+      DEBUG_OUT("jitter");
+      delay(100);
+      return -1;
+    }
+    last_read = this_read;
+    s += this_read;
+  }
+  return s/LEN;
+}
+#undef LEN
+
 void dumpTrayContentsIntoCup() {
   tray.attach(PIN_TRAY_SERVO);
   delay(1000);
@@ -268,10 +307,9 @@ void dumpTrayContentsIntoTrash() {
   tray.detach();
 }
 int calculatePillsDispensed(int tray_before, int tray_after, int pill_weight) {
-  //TODO
-  /*double diff = tray_after - tray_before;
-  diff *= MG_PER_MV * 5000.0 / 1024;
-  diff /= pill_weight;
-  return round(diff);*/
-  return 1;
+  double per_pill_weight = .03 * pill_weight;
+  double diff = tray_after - tray_before;
+  //diff *= MG_PER_MV * 5000.0 / 1024;
+  diff /= per_pill_weight;
+  return round(diff);
 }
