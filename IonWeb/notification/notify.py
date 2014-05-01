@@ -71,7 +71,7 @@ def runNotify():
                CompartmentInfo = helper.findCompartment(Compartment.id)
                Dispenser = CompartmentInfo[0]
                SlotNum = CompartmentInfo[1] + 1
-               caretakers = IonUser.objects(group__in=["caretaker", "admin"])
+               caretakers = helper.getCaretakers()
                for caretaker in caretakers:
                   newNotification = MedExpiration(target=caretaker, type="expiration", generator = "CRON", rxuid = Compartment.rxuid, dispenser=Dispenser.user, slotNum = SlotNum, expirationDate = Compartment.expiration)
           

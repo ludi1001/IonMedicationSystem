@@ -46,3 +46,10 @@ class MedExpiration(notification):
    dispenser = ReferenceField('IonUser', required=True)
    slotNum = IntField()
    expirationDate = DateTimeField()
+   rxuid = IntField()
+   
+class MedQuantity(notification):
+   dispenser = ReferenceField('IonUser', required=True)
+   slotNum = IntField()
+   quantity = IntField()
+   rxuid = IntField()

@@ -255,8 +255,17 @@ def notificationMessage(notein):
     dispenser_unit = dispenser.objects(user=notein.dispenser)[0]
    
     string = "Medication in " + dispenser_unit.location + " dispenser, compartment " + str(notein.slotNum) + ", has expiration date: " + notein.expirationDate.strftime("%Y-%m-%d")
-    
+  
     return string
+  elif notein.type == 'quantity':
+    dispenser_unit = dispenser.objects(user=notein.dispenser)[0]
+    string = "Dispenser " + dispenser_unit.location + " encountered error"
+    if notein.compartment != -1:
+      string += " associated with compartment " + notein.compartment
+    string = "Medication in " + dispenser_unit.location + " dispenser, compartment " + str(notein.slotNum) + ", is low. Quantity: " + str(notein.quantity)
+   
+    return string
+    
   return "unknown notification type"
    
 def medication(request):

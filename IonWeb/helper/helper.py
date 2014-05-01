@@ -2,6 +2,7 @@ from DataEntry.models import patient
 from datetime import datetime, timedelta, date
 from account.shortcuts import *
 import RxNorm
+from account.models import IonUser
 from dispenser.models import dispenser, compartment
 
 # can't import from notifications.views...
@@ -44,7 +45,16 @@ def findCompartment(compID):
             if str(Compartment.id) == compID:
                return Dispenser, index
 
-def decrement(compID, decrement):
-   return
+def decrement(Dispenser, compNum, decrement):
+   Compartment = Dispenser.slots[compNum]
+   Compartment.quantity -= decrement
+   Compartment.save()
+   if Compartment.quantity < 5:
+      for caretaker in getCaretakers():
+         newNotification = MedQuantity(target=caretaker, type="quantity", generator = "DISPENSER", rxuid = Compartment.rxuid, dispenser=Dispenser.user, slotNum = compNum, quantity = Compartment.quantity)
+         newNotification.save()
 
+def getCaretakers():
+   return IonUser.objects(group__in=["caretaker", "admin"])
+               
    

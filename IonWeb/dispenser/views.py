@@ -61,11 +61,14 @@ def compartments(request):
             params['message'] = "Please enter a lot number"
          elif not helper.validate(request.POST['expiration']): 
            params['message'] = 'Expiration date must be mm-dd-yyy'
+         elif request.POST['quantity'] == "":
+           params['message'] = "Please enter a quantity"
          else:  
             toEdit = compartment.objects(id=request.POST['id'])[0]         
             toEdit.rxuid = int(request.POST['rxuid'])
             toEdit.lot = int(request.POST['lot'])
             toEdit.expiration = request.POST['expiration']
+            toEdit.quantity = request.POST['quantity']
             toEdit.save()
             params['message'] = 'Commpartment successfully updated!'
             params['message_type'] = 'success'
