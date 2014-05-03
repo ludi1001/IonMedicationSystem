@@ -6,14 +6,14 @@
 #define MAX_WAITING_TIME       10000 //max time (in milliseconds) to wait for pill to dispense before concluding it is empty 
 #define MG_PER_MV              2 //mg per mv for tray
 #define NUM_PHOTO_SAMPLES      1 //number of samples to take for phototransistor readings
-#define BLOCKED_LASER_THRESH   10 //threshold for blocked laser
+#define BLOCKED_LASER_THRESH   20 //threshold for blocked laser
 #define UNBLOCKED_LASER_THRESH 80 //threshold for laser to be considered unblocked
 #define SERVO_FORWARD          88 //value to send to servo to move it forward
 #define SERVO_BACKWARD         91 //value to send to servo to move it backward
 #define SERVO_STOP             90 //value to send to servo to stop it
 #define SERVO_REVERSE_TIME     750000 //time to reverse servo after each dispense
 
-#define PIN_TRAY_SERVO 1
+#define PIN_TRAY_SERVO 2
 #define PIN_TRAY       A0
 
 //#define _DEBUG
@@ -47,9 +47,13 @@ void setup() {
 }
 
 void setupCompartments() {
-  compartments[0].diode = 2;
-  compartments[0].servo = 3;
-  compartments[0].detector = A2;
+  compartments[0].diode = 4;
+  compartments[0].servo = 5;
+  compartments[0].detector = A3;
+  
+  compartments[1].diode = 2;
+  compartments[1].servo = 3;
+  compartments[1].detector = A2;
 }
 
 void loop() {
@@ -78,6 +82,7 @@ void loop() {
 void ping() {
   Serial.println("ping successful");
 }
+
 void scale() {
   int weight = Serial.parseInt();
   Serial.println(weight);
@@ -89,7 +94,15 @@ void scale() {
   Serial.println("Weighing...");
   int after = weighTray();
   Serial.println(after);
-  Serial.println(calculatePillsDispensed(before, after, weight));
+  int pills = calculatePillsDispensed(before, after, weight);
+  Serial.println(pills);
+  
+  if(pills == 2) {
+    dumpTrayContentsIntoCup();
+  }
+  else {
+    dumpTrayContentsIntoTrash();
+  }
 }
 void dispense() {
    //check that cup is present
@@ -192,7 +205,7 @@ void dispense() {
      //weigh tray
      int tray_after = weighTray();
      
-     int actual_pills_dispensed = calculatePillsDispensed(tray_before, tray_after, pill_weight); //calculate correct number of pills dispensed
+     int actual_pills_dispensed = pills_dispensed;//calculatePillsDispensed(tray_before, tray_after, pill_weight); //calculate correct number of pills dispensed
      pills_in_tray += actual_pills_dispensed;
      total_pills_dispensed += actual_pills_dispensed;
 
@@ -292,14 +305,22 @@ int trueRead() {
 
 void dumpTrayContentsIntoCup() {
   tray.attach(PIN_TRAY_SERVO);
+  tray.write(0);
   delay(1000);
+  restoreTray();
   tray.detach();
 
 }
 void dumpTrayContentsIntoTrash() {
   tray.attach(PIN_TRAY_SERVO);
+  tray.write(130);
   delay(1000);
+  restoreTray();
   tray.detach();
+}
+void restoreTray() {
+  tray.write(66);
+  delay(1000);
 }
 int calculatePillsDispensed(int tray_before, int tray_after, int pill_weight) {
   double per_pill_weight = .03 * pill_weight;

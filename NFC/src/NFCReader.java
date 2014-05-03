@@ -58,14 +58,14 @@ public class NFCReader {
 	 * @throws CardException
 	 */
 	private void readIntoBuffer(CardChannel channel) throws CardException {
-        byte[]command = new byte[4];
+        byte[]command = new byte[5];
         command[0] = 0x30;
         for(int offset = 0; offset <= 41; offset += 4) { //read every 16 bytes (4 words)
         	command[1] = (byte)offset;
         	ResponseAPDU r = channel.transmit(new CommandAPDU(command));
         	byte[]response = r.getBytes();
         	//copy into buffer
-        	for(int i = 0; i < 16; ++i) {
+        	for(int i = 0; i < response.length; ++i) {
         		data[offset*4 + i] = response[i];
         	}
         }
